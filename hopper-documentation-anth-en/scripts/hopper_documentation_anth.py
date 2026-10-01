@@ -35,6 +35,7 @@ EFFORT = "medium"
 PART_LIMIT = 400_000          # characters of messages per model call
 SUMMARY_LIMIT = 60
 RUN_FLAG = "HOPPER_DOCUMENTATION_ANTH_RUN"
+REEXEC_FLAG = "HOPPER_DOCUMENTATION_ANTH_REEXEC"
 SKILL_DIR = Path(__file__).resolve().parent.parent / "skills" / "hopper-documentation-anth"
 
 TEXTS = {
@@ -761,7 +762,21 @@ def command_hook():
         return 2
 
 
+def newest_python():
+    """Run on a Python 3.10 or newer when one exists, so an older system Python is not used."""
+    if sys.version_info >= (3, 10) or os.environ.get(REEXEC_FLAG):
+        return
+    try:
+        python = sdk_python()
+    except Failure:
+        return
+    os.environ[REEXEC_FLAG] = "1"
+    os.execv(python, [python, os.path.abspath(__file__)] + sys.argv[1:])
+
+
 def main(argv=None):
+    if argv is None:
+        newest_python()
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("hook")

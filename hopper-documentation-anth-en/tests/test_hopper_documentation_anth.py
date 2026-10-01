@@ -350,6 +350,26 @@ class Python(unittest.TestCase):
         self.assertIn("3.10", str(error.exception))
 
 
+class Restart(unittest.TestCase):
+    def test_old_python_restarts_on_a_newer_one(self):
+        with mock.patch.object(hd.sys, "version_info", (3, 9, 0)), \
+                mock.patch.dict(os.environ, {}, clear=False), \
+                mock.patch.object(hd, "sdk_python", return_value="/opt/python3.14"), \
+                mock.patch.object(hd.os, "execv") as execv:
+            os.environ.pop(hd.REEXEC_FLAG, None)
+            hd.newest_python()
+        self.assertEqual(execv.call_args[0][0], "/opt/python3.14")
+
+    def test_new_python_or_second_start_does_not_restart(self):
+        with mock.patch.object(hd.os, "execv") as execv:
+            with mock.patch.object(hd.sys, "version_info", (3, 13, 0)):
+                hd.newest_python()
+            with mock.patch.object(hd.sys, "version_info", (3, 9, 0)), \
+                    mock.patch.dict(os.environ, {hd.REEXEC_FLAG: "1"}):
+                hd.newest_python()
+        execv.assert_not_called()
+
+
 class Hook(unittest.TestCase):
     def test_child_run_does_nothing(self):
         with mock.patch.dict(os.environ, {hd.RUN_FLAG: "1"}):

@@ -1,7 +1,7 @@
 {
   "name": "hopper-documentation-anth",
   "displayName": "hopper-documentation-anth",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Registra a conversa em handoffs Markdown, a pedido e antes da compactação, para outra pessoa ou sessão continuar o trabalho.",
   "author": {
     "name": "Jonathan Honorio",
