@@ -1,0 +1,42 @@
+name: "Relato de bug"
+description: "Relate um problema reproduzível na skill ou em sua documentação."
+title: "Bug: "
+body:
+  - type: markdown
+    attributes:
+      value: "Para suspeitas de vulnerabilidade, siga a [Política de Segurança](https://github.com/jonathanpah/hopper-documentation-anth/security/policy) e [relate de forma privada](https://github.com/jonathanpah/hopper-documentation-anth/security/advisories/new). Não publique detalhes sensíveis de segurança aqui."
+  - type: input
+    id: skill-version
+    attributes:
+      label: "Versão da skill"
+      description: "Informe a tag da release ou o commit, ou diga que a versão é desconhecida."
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: "Ambiente"
+      description: "Identifique a versão do Claude Code (CLI ou aplicativo), o sistema operacional, o modo de permissão e o redator que aparece no cabeçalho do handoff. Omita caminhos privados e detalhes de contas."
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: "Passos para reproduzir"
+      description: "Forneça um exemplo mínimo, com informações sensíveis removidas. Identifique a regra da skill ou a seção documental pertinente."
+    validations:
+      required: true
+  - type: textarea
+    id: expected-observed
+    attributes:
+      label: "Comportamento esperado e observado"
+      description: "Separe o que deveria ter acontecido do que você observou."
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: "Evidências e limitações"
+      description: "Inclua um trecho curto com informações sensíveis removidas ou uma reprodução sintética. Informe o que não foi observável ou verificado. Não envie credenciais nem históricos privados de conversas."
+    validations:
+      required: true

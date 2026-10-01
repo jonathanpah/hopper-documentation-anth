@@ -1,0 +1,16 @@
+{
+  "name": "hopper-documentation-anth",
+  "owner": {
+    "name": "Jonathan Honorio",
+    "url": "https://github.com/jonathanpah"
+  },
+  "description": "hopper-documentation-anth",
+  "plugins": [
+    {
+      "name": "hopper-documentation-anth",
+      "displayName": "hopper-documentation-anth",
+      "source": "./",
+      "description": "Records the conversation in Markdown handoffs, on request and before compaction, so another person or session can continue the work."
+    }
+  ]
+}

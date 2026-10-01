@@ -1,0 +1,13 @@
+{
+  "name": "hopper-documentation-anth",
+  "displayName": "hopper-documentation-anth",
+  "version": "0.1.2",
+  "description": "Registra a conversa em handoffs Markdown, a pedido e antes da compactação, para outra pessoa ou sessão continuar o trabalho.",
+  "author": {
+    "name": "Jonathan Honorio",
+    "url": "https://github.com/jonathanpah"
+  },
+  "homepage": "https://github.com/jonathanpah/hopper-documentation-anth",
+  "repository": "https://github.com/jonathanpah/hopper-documentation-anth",
+  "license": "MIT"
+}
