@@ -370,6 +370,14 @@ class Restart(unittest.TestCase):
         execv.assert_not_called()
 
 
+class DataDir(unittest.TestCase):
+    def test_single_directory_ignores_plugin_data(self):
+        env = {k: v for k, v in os.environ.items() if k != hd.DATA_FLAG}
+        env["CLAUDE_PLUGIN_DATA"] = "/tmp/other-plugin-data"
+        with mock.patch.dict(os.environ, env, clear=True):
+            self.assertEqual(hd.data_dir(), str(Path.home() / ".claude" / "plugins" / "data" / "hopper-documentation-anth"))
+
+
 class Hook(unittest.TestCase):
     def test_child_run_does_nothing(self):
         with mock.patch.dict(os.environ, {hd.RUN_FLAG: "1"}):
@@ -378,7 +386,7 @@ class Hook(unittest.TestCase):
     def test_failure_wakes_the_conversation(self):
         event = json.dumps({"session_id": SESSION, "cwd": "/tmp", "trigger": "auto"})
         with tempfile.TemporaryDirectory() as data, \
-                mock.patch.dict(os.environ, {"CLAUDE_PLUGIN_DATA": data}), \
+                mock.patch.dict(os.environ, {hd.DATA_FLAG: data}), \
                 mock.patch("sys.stdin", io.StringIO(event)), \
                 mock.patch.object(hd, "document", side_effect=hd.Failure("model unavailable")), \
                 mock.patch("sys.stderr", new_callable=io.StringIO) as err:

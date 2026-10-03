@@ -34,8 +34,8 @@ Cada handoff tem um cabeçalho (data com fuso, conversa, diretório, handoff ant
 
 - **Roda:** `python3` com o programa do plugin; o executável do próprio Claude Code, em modo não interativo, sem ferramentas e sem carregar plugins, para escrever o conteúdo; `git` só para ler o estado do diretório.
 - **Envia:** as mensagens novas da conversa, com segredos ocultados, ao Claude Sonnet 5.5, pela sua conta do Claude.
-- **Busca:** na primeira execução, instala o Agent SDK (`claude-agent-sdk`, versão fixa) do PyPI num ambiente Python próprio, na pasta de dados do plugin (`${CLAUDE_PLUGIN_DATA}`), com cerca de 55 MB.
-- **Grava:** só na pasta de handoffs e na pasta de dados do plugin, onde ficam o ambiente Python, as travas e um registro de execuções.
+- **Busca:** na primeira execução, instala o Agent SDK (`claude-agent-sdk`, versão fixa) do PyPI num ambiente Python próprio, numa pasta de dados única, `~/.claude/plugins/data/hopper-documentation-anth`, compartilhada pelo terminal e pelo aplicativo, com cerca de 55 MB.
+- **Grava:** só na pasta de handoffs e nessa pasta de dados, onde ficam o ambiente Python, as travas e um registro de execuções.
 
 ## Requisitos
 

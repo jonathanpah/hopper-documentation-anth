@@ -18,7 +18,7 @@ Neste acionamento, faça só o que esta seção diz.
 2. Rode este comando em segundo plano, a partir de qualquer diretório:
 
    ```
-   python3 "${CLAUDE_PLUGIN_ROOT}/scripts/hopper_documentation_anth.py" run --session "${CLAUDE_SESSION_ID}" --cwd "${CLAUDE_PROJECT_DIR}" --data "${CLAUDE_PLUGIN_DATA}"
+   python3 "${CLAUDE_PLUGIN_ROOT}/scripts/hopper_documentation_anth.py" run --session "${CLAUDE_SESSION_ID}" --cwd "${CLAUDE_PROJECT_DIR}"
    ```
 
 3. Avise o usuário numa frase que o registro começou e continue atendendo normalmente. Não espere o fim.

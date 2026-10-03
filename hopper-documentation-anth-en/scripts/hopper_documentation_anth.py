@@ -3,7 +3,10 @@
 
 Usage:
   hopper_documentation_anth.py hook                         (PreCompact hook; reads the event from stdin)
-  hopper_documentation_anth.py run --session ID --cwd DIR --data DIR
+  hopper_documentation_anth.py run --session ID --cwd DIR
+
+The data directory (Python environment, locks, run log) is always ~/.claude/plugins/data/hopper-documentation-anth,
+shared by the terminal and the desktop app, whatever way Claude Code loaded the plugin.
 
 The writer is always Claude Sonnet 5.5 with medium effort.
 
@@ -36,6 +39,7 @@ PART_LIMIT = 400_000          # characters of messages per model call
 SUMMARY_LIMIT = 60
 RUN_FLAG = "HOPPER_DOCUMENTATION_ANTH_RUN"
 REEXEC_FLAG = "HOPPER_DOCUMENTATION_ANTH_REEXEC"
+DATA_FLAG = "HOPPER_DOCUMENTATION_ANTH_DATA"     # override, used by the tests
 SKILL_DIR = Path(__file__).resolve().parent.parent / "skills" / "hopper-documentation-anth"
 
 TEXTS = {
@@ -731,10 +735,10 @@ def document(session, cwd, data, trigger, model=MODEL, effort=EFFORT):
 
 def command_run(args):
     try:
-        print(document(args.session, os.path.abspath(args.cwd), args.data, T["on_request"]))
+        print(document(args.session, os.path.abspath(args.cwd), data_dir(), T["on_request"]))
         return 0
     except (Failure, OSError, ValueError, subprocess.SubprocessError) as error:
-        log(args.data, {"conversation": args.session, "error": str(error)})
+        log(data_dir(), {"conversation": args.session, "error": str(error)})
         print(T["not_written"] + str(error))
         return 1
 
@@ -746,8 +750,7 @@ def command_hook():
         event = json.load(sys.stdin)
     except ValueError:
         return 0
-    data = os.environ.get("CLAUDE_PLUGIN_DATA") or str(Path.home() / ".claude" / "plugins" / "data" /
-                                                       "hopper-documentation-anth")
+    data = data_dir()
     session = event.get("session_id") or os.environ.get("CLAUDE_CODE_SESSION_ID")
     cwd = event.get("cwd") or os.getcwd()
     trigger = T["before_compact"].format(T["auto"] if event.get("trigger") == "auto" else T["manual"])
@@ -760,6 +763,11 @@ def command_hook():
         log(data, {"conversation": session, "error": str(error), "trigger": trigger})
         sys.stderr.write(T["hook_failed"].format(error))
         return 2
+
+
+def data_dir():
+    """One data directory per user, so the CLI and the app share the environment, the locks and the log."""
+    return os.environ.get(DATA_FLAG) or str(Path.home() / ".claude" / "plugins" / "data" / "hopper-documentation-anth")
 
 
 def newest_python():
@@ -783,7 +791,6 @@ def main(argv=None):
     run = sub.add_parser("run")
     run.add_argument("--session", required=True)
     run.add_argument("--cwd", required=True)
-    run.add_argument("--data", required=True)
     args = parser.parse_args(argv)
     return command_hook() if args.command == "hook" else command_run(args)
 

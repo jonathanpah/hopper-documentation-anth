@@ -18,7 +18,7 @@ In this invocation, do only what this section says.
 2. Run this command in the background, from any directory:
 
    ```
-   python3 "${CLAUDE_PLUGIN_ROOT}/scripts/hopper_documentation_anth.py" run --session "${CLAUDE_SESSION_ID}" --cwd "${CLAUDE_PROJECT_DIR}" --data "${CLAUDE_PLUGIN_DATA}"
+   python3 "${CLAUDE_PLUGIN_ROOT}/scripts/hopper_documentation_anth.py" run --session "${CLAUDE_SESSION_ID}" --cwd "${CLAUDE_PROJECT_DIR}"
    ```
 
 3. Tell the user in one sentence that the record has started, and keep helping as usual. Do not wait for it to finish.

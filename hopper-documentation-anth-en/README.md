@@ -34,8 +34,8 @@ Each handoff has a header (date with the UTC offset, conversation, directory, pr
 
 - **Runs:** `python3` with the plugin's program; Claude Code's own executable, in non-interactive mode, with no tools and without loading plugins, to write the content; `git` only to read the directory's state.
 - **Sends:** the conversation's new messages, with secrets hidden, to Claude Sonnet 5.5, through your Claude account.
-- **Fetches:** on the first run, it installs the Agent SDK (`claude-agent-sdk`, pinned version) from PyPI into its own Python environment, in the plugin's data directory (`${CLAUDE_PLUGIN_DATA}`), about 55 MB.
-- **Writes:** only in the handoff folder and in the plugin's data directory, which holds the Python environment, the locks, and a run log.
+- **Fetches:** on the first run, it installs the Agent SDK (`claude-agent-sdk`, pinned version) from PyPI into its own Python environment, in a single data directory, `~/.claude/plugins/data/hopper-documentation-anth`, shared by the terminal and the desktop app, about 55 MB.
+- **Writes:** only in the handoff folder and in that data directory, which holds the Python environment, the locks, and a run log.
 
 ## Requirements
 
