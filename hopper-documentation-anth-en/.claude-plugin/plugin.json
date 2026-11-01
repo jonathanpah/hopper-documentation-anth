@@ -1,7 +1,7 @@
 {
   "name": "hopper-documentation-anth",
   "displayName": "hopper-documentation-anth",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Records the conversation in Markdown handoffs, on request and before compaction, so another person or session can continue the work.",
   "author": {
     "name": "Jonathan Honorio",

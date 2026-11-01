@@ -26,7 +26,7 @@ Os limites pretendidos são:
 - O programa lê as conversas pelo Agent SDK, oculta formatos comuns de credenciais antes de enviar as mensagens novas ao modelo redator e oculta de novo no handoff gravado.
 - O modelo redator roda no modo seguro não interativo do Claude Code, sem ferramentas, e não carrega plugins, gatilhos nem arquivos `CLAUDE.md`.
 - O programa grava só em `docs-by-hopper-documentation/` e na pasta de dados do plugin, e nunca sobrescreve um handoff.
-- Todo trecho entre aspas num handoff precisa aparecer literalmente na conversa ou no handoff anterior; senão, nada é gravado.
+- Todo trecho que fica entre aspas num handoff aparece literalmente no que o redator recebeu: a conversa, o handoff anterior, o estado do git ou a lista de documentos. Um trecho que não aparece perde as aspas e vai para Lacunas como citação não confirmada.
 - Um handoff é um registro histórico. Ele não concede autoridade, e conteúdo da conversa, inclusive texto colado de terceiros, não vira autorização.
 
 A ocultação cobre formatos comuns, não todos os segredos possíveis, e o redator é um modelo cuja saída pode errar. A skill não substitui o modo de permissão, o isolamento nem os controles de conta do Claude Code. Se outro produto também for afetado, use o processo de relato de segurança desse produto quando pertinente.

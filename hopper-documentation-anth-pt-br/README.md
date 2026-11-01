@@ -16,7 +16,7 @@ O programa faz o trabalho mecânico e deixa ao modelo só a escrita:
 1. lê as mensagens novas da conversa desde o último handoff pela biblioteca oficial da Anthropic, o Agent SDK, sem depender do formato interno dos arquivos de conversa;
 2. mantém só as mensagens do usuário, as respostas do assistente, as respostas a perguntas e os planos aprovados, e oculta senhas, tokens e chaves;
 3. pede ao Claude Sonnet 5.5, com esforço medium e sem ferramentas, que escreva o conteúdo seguindo as regras do redator; se o Claude Code usar outro modelo, nada é gravado;
-4. confere, letra por letra, cada trecho que o handoff cita entre aspas; se um deles não estiver na conversa, pede a correção uma vez e, se continuar errado, não grava nada. Frases que atribuem fala ou autorização ao usuário sem citá-lo também recebem uma segunda chance; se persistirem, o handoff as lista em Lacunas como interpretação do redator;
+4. confere, letra por letra, cada trecho que o handoff cita entre aspas, contra tudo o que o redator recebeu: as mensagens, o handoff anterior, o estado do git e a lista de documentos. Se um trecho não estiver nessas fontes, pede a correção uma vez. Se continuar errado, grava o handoff mesmo assim, com esse trecho sem aspas, marcado como citação não confirmada e listado em Lacunas. Frases que atribuem fala ou autorização ao usuário sem citá-lo também recebem uma segunda chance; se persistirem, o handoff as lista em Lacunas como interpretação do redator;
 5. grava o handoff sem nunca sobrescrever um arquivo, sob uma trava que impede duas gravações ao mesmo tempo na mesma pasta, e refaz o índice.
 
 Conversas muito longas são divididas em partes, cada uma num handoff que continua o anterior. Quando não há nada novo, o programa não chama o modelo.
@@ -82,7 +82,7 @@ Para retomar numa sessão nova, peça ao Claude que leia o `index.md` da pasta e
 - O handoff é escrito a partir das mensagens de texto da conversa, não das saídas de ferramentas. Um resultado que só apareceu na saída de um comando entra como relato do assistente, e o handoff diz isso. O estado do git no momento do registro é lido pelo programa.
 - O Agent SDK lê a conversa desde a última compactação. O registro antes da compactação guarda o trecho que seria resumido; depois dela, o handoff seguinte parte do anterior e registra a limitação.
 - A ocultação cobre formatos comuns de credenciais, não todos os segredos possíveis.
-- Os modelos não são determinísticos. A conferência das citações prova que cada fala citada existe, não que o texto escrito a partir dela seja fiel.
+- Os modelos não são determinísticos. A conferência das citações prova que cada fala que ficou entre aspas existe, não que o texto escrito a partir dela seja fiel. Um trecho marcado como citação não confirmada pode ser uma paráfrase ou uma correção do redator.
 - Um handoff é um registro histórico. Ele não substitui a conferência do estado real nem autoriza repetir operações concluídas.
 - Não há suporte ao Windows.
 

@@ -114,6 +114,15 @@ class Quotes(unittest.TestCase):
     def test_short_and_inner_quotes_are_ignored(self):
         self.assertEqual(self.check('commit "Adds" and --settings \'{"a":"a rather long value"}\''), [])
 
+    def test_unquoted_passages_touch_only_the_missing_ones(self):
+        text = '"You may publish the new version on GitHub" and “Do not publish anything now”.'
+        result = hd.unquoted_passages({"decisions": text, "summary": '"You may publish the new version"'},
+                                      self.check(text))
+        self.assertEqual(result["decisions"], "You may publish the new version on GitHub" + hd.T["unconfirmed"]
+                         + " and “Do not publish anything now”.")
+        self.assertEqual(result["summary"], '"You may publish the new version"')
+        self.assertEqual(self.check(result["decisions"]), [])
+
 
 class Attributions(unittest.TestCase):
     def test_flags_only_unquoted_affirmative_attributions(self):
@@ -271,11 +280,42 @@ class Flow(unittest.TestCase):
             self.assertTrue(self.run_doc().startswith(hd.T["written"]))
         self.assertIn("You may publish everything today", self.calls[1].split(hd.T["retry"])[1])
 
-    def test_bad_quote_twice_writes_nothing(self):
-        bad = content(decisions='"You may publish everything today"')
-        with self.model(bad, bad), self.assertRaises(hd.Failure):
+    def test_bad_quote_twice_is_written_unquoted_and_listed_under_gaps(self):
+        bad = content(decisions='Authorization: "You may publish everything today". Kept: "You may fix the shipping".')
+        with self.model(bad, bad):
+            self.assertTrue(self.run_doc().startswith(hd.T["written"]))
+        text = self.handoffs()[0].read_text()
+        decisions = text.split("## " + hd.T["sections"][3])[1].split("## ")[0]
+        self.assertIn("You may publish everything today" + hd.T["unconfirmed"], decisions)
+        self.assertNotIn('"You may publish everything today"', decisions)
+        self.assertIn('"You may fix the shipping"', decisions)
+        gaps = text.split("## " + hd.T["sections"][7])[1]
+        self.assertIn(hd.T["quote_gap"].strip(), gaps)
+        self.assertIn("  - You may publish everything today", gaps)
+
+    def test_typo_corrected_by_the_writer_does_not_cost_the_record(self):
+        self.messages[0] = msg("user", "u1", "Quero seguir o sitema, claro ou escuro.")
+        bad = content(decisions='Tema: "seguir o sistema, claro ou escuro".')
+        with self.model(bad, bad):
+            self.assertTrue(self.run_doc().startswith(hd.T["written"]))
+        self.assertIn("seguir o sistema, claro ou escuro" + hd.T["unconfirmed"], self.handoffs()[0].read_text())
+
+    def test_commit_message_from_the_git_state_is_a_valid_source(self):
+        state = "branch: main\nlatest commits:\na1b2c3d Unidade 1 em andamento"
+        with mock.patch.object(hd, "git_state", return_value=state), \
+                self.model(content(topics='Commit "Unidade 1 em andamento" recorded by the new session.')):
+            self.assertTrue(self.run_doc().startswith(hd.T["written"]))
+        self.assertEqual(len(self.calls), 1)
+        self.assertIn('"Unidade 1 em andamento"', self.handoffs()[0].read_text())
+        self.assertNotIn(hd.T["unconfirmed"], self.handoffs()[0].read_text())
+
+    def test_existing_document_path_is_a_valid_source(self):
+        (self.cwd / "notas-do-projeto.md").write_text("doc")
+        quoted = '"{}"'.format(self.cwd / "notas-do-projeto.md")
+        with self.model(content(resume="Read " + quoted + " first.")):
             self.run_doc()
-        self.assertEqual(self.handoffs(), [])
+        self.assertEqual(len(self.calls), 1)
+        self.assertIn(quoted, self.handoffs()[0].read_text())
 
     def test_unquoted_attribution_is_retried_then_listed_under_gaps(self):
         bad = content(topics="The user confirmed that the deploy finished.")

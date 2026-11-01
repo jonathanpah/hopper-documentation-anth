@@ -79,12 +79,15 @@ TEXTS = {
         "task": ("Escreva o handoff seguindo as regras. Responda com um objeto JSON com os campos nothing_new, summary "
                  "e um campo de texto Markdown para cada seção, sem o título da seção:"),
         "retry": "\n\nNa resposta anterior, ", "retry_more": "\n\nAlém disso, ",
-        "retry_quotes": ("estes trechos entre aspas não aparecem literalmente nas mensagens nem no handoff anterior; "
-                         "copie as palavras exatas ou tire as aspas:\n- "),
+        "retry_quotes": ("estes trechos entre aspas não aparecem literalmente nas mensagens, no handoff anterior, no "
+                         "estado do git nem na lista de documentos; copie as palavras exatas ou tire as aspas:\n- "),
         "retry_attr": ("estas frases atribuem fala, pedido ou autorização ao usuário sem a fala entre aspas; cite as "
                        "palavras exatas dele ou reescreva sem atribuir a ele:\n- "),
         "attr_gap": ("- O programa não encontrou fala citada para estas atribuições ao usuário; trate-as como "
                      "interpretação do redator:\n"),
+        "quote_gap": ("- Estes trechos estavam entre aspas, mas não aparecem literalmente nas fontes. O programa tirou "
+                      "as aspas e os marcou como citação não confirmada:\n"),
+        "unconfirmed": " (citação não confirmada)",
         "hook_failed": ("O registro automático da conversa (hopper-documentation-anth) antes da compactação falhou: "
                         "{}. A compactação não foi afetada. Avise o usuário; não repita pedidos antigos.\n"),
         "errors": {
@@ -94,7 +97,6 @@ TEXTS = {
             "no_answer": "o modelo não respondeu: {}",
             "model_error": "o modelo {} não pôde ser usado: {}",
             "other_model": "o Claude Code usou {} em vez de {}; nada foi gravado",
-            "quotes": "citações sem fonte literal na conversa ({}): {}",
             "exists": "já existe um handoff com o nome {}",
             "old_python": ("o Agent SDK exige Python 3.10 ou mais novo, com o módulo venv; este é o {} e nenhum "
                            "outro foi encontrado"),
@@ -137,12 +139,15 @@ TEXTS = {
         "task": ("Write the handoff following the rules. Answer with a JSON object with the fields nothing_new, "
                  "summary, and one Markdown text field for each section, without the section title:"),
         "retry": "\n\nIn the previous answer, ", "retry_more": "\n\nAlso, ",
-        "retry_quotes": ("these quoted passages do not appear literally in the messages or in the previous handoff; "
-                         "copy the exact words or remove the quotation marks:\n- "),
+        "retry_quotes": ("these quoted passages do not appear literally in the messages, the previous handoff, the git "
+                         "state, or the list of documents; copy the exact words or remove the quotation marks:\n- "),
         "retry_attr": ("these sentences attribute words, a request, or an authorization to the user without quoting "
                        "them; quote the user's exact words or rewrite without attributing them:\n- "),
         "attr_gap": ("- The program found no quoted words for these attributions to the user; treat them as the "
                      "writer's interpretation:\n"),
+        "quote_gap": ("- These passages were in quotation marks but do not appear literally in the sources. The "
+                      "program removed the quotation marks and marked them as unconfirmed quotes:\n"),
+        "unconfirmed": " (unconfirmed quote)",
         "hook_failed": ("The automatic conversation record (hopper-documentation-anth) before compaction failed: {}. "
                         "Compaction was not affected. Tell the user; do not repeat earlier requests.\n"),
         "errors": {
@@ -152,7 +157,6 @@ TEXTS = {
             "no_answer": "the model did not answer: {}",
             "model_error": "the model {} could not be used: {}",
             "other_model": "Claude Code used {} instead of {}; nothing was written",
-            "quotes": "quotes without a literal source in the conversation ({}): {}",
             "exists": "a handoff named {} already exists",
             "old_python": ("the Agent SDK requires Python 3.10 or newer, with the venv module; this one is {} and no "
                            "other was found"),
@@ -565,6 +569,16 @@ def unverified_quotes(content, sources):
     return missing
 
 
+def unquoted_passages(content, missing):
+    """The content with the quotation marks of the given passages removed and each one marked as unconfirmed."""
+    wanted = set(missing)
+
+    def plain(match):
+        return match.group(1) + T["unconfirmed"] if match.group(1) in wanted else match.group(0)
+    return {key: QUOTE.sub(plain, value) if key in SECTION_KEYS and isinstance(value, str) else value
+            for key, value in content.items()}
+
+
 ATTRIBUTION = re.compile(
     r"(?i)\b(o usuário|a usuária|o proprietário|a proprietária|the user|the owner)\b[^.\n]{0,60}?"
     r"\b(disse|relatou|afirmou|confirmou|autorizou|pediu|mandou|escreveu|said|reported|confirmed|authorized|asked|wrote)\b")
@@ -679,11 +693,16 @@ def checked(claude, prompt, sources, model, effort, cwd):
     content, used, second = call_model(claude, prompt + T["retry"] + T["retry_more"].join(notes), model, effort, cwd)
     cost = (cost or 0) + (second or 0)
     missing, unquoted = unverified_quotes(content, sources), unquoted_attributions(content)
+    # One unconfirmed passage must not cost the whole record: it loses its quotation marks, so it no longer reads as
+    # literal words, and it is listed under Gaps with the attributions that still lack quoted words.
+    gaps = []
     if missing:
-        raise Failure(E["quotes"].format(len(missing), "; ".join(m[:80] for m in missing[:3])))
+        content = unquoted_passages(content, missing)
+        gaps.append(T["quote_gap"] + "\n".join("  - " + m for m in missing))
     if unquoted:
-        content["gaps"] = (content.get("gaps", "").strip() + "\n\n" + T["attr_gap"]
-                           + "\n".join("  - " + u for u in unquoted)).strip()
+        gaps.append(T["attr_gap"] + "\n".join("  - " + u for u in unquoted))
+    if gaps:
+        content["gaps"] = (content.get("gaps", "").strip() + "\n\n" + "\n".join(gaps)).strip()
     return content, used, cost
 
 
@@ -708,9 +727,13 @@ def document(session, cwd, data, trigger, model=MODEL, effort=EFFORT):
         for number, pairs in enumerate(parts, start=1):
             part = [block for block, _ in pairs]
             previous_text = mask(previous.read_text(encoding="utf-8", errors="replace")) if previous else ""
-            prompt = build_prompt(part, len(parts), number, previous_text, docs, git_state(cwd), trigger,
+            git = git_state(cwd)
+            prompt = build_prompt(part, len(parts), number, previous_text, docs, git, trigger,
                                   gap and number == 1, rules, example)
-            content, used, cost = checked(claude, prompt, part + [previous_text], model, effort, cwd)
+            # Everything the writer receives as data can be quoted: the messages, the previous handoff, the git state
+            # (commit messages, file names) and the list of existing documents.
+            sources = part + [previous_text, git or "", "\n".join(docs or [])]
+            content, used, cost = checked(claude, prompt, sources, model, effort, cwd)
             if content.get("nothing_new") and number == len(parts) and not written:
                 return T["nothing_new"] + str(previous or T["none"])
             moment = now_local()

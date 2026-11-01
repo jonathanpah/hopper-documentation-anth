@@ -16,7 +16,7 @@ The program does the mechanical work and leaves only the writing to the model:
 1. it reads the conversation's new messages since the last handoff through Anthropic's official library, the Agent SDK, without depending on the internal format of conversation files;
 2. it keeps only the user's messages, the assistant's replies, the answers to questions, and the approved plans, and it hides passwords, tokens, and keys;
 3. it asks Claude Sonnet 5.5, with medium effort and no tools, to write the content following the writer rules; if Claude Code uses another model, nothing is written;
-4. it checks, letter by letter, every passage the handoff quotes; if one of them is not in the conversation, it asks for a correction once and, if it is still wrong, writes nothing. Sentences that attribute words or authorizations to the user without quoting them also get a second chance; if they remain, the handoff lists them under Gaps as the writer's interpretation;
+4. it checks, letter by letter, every passage the handoff quotes against everything the writer received: the messages, the previous handoff, the git state, and the list of documents. If a passage is not in these sources, it asks for a correction once. If it is still wrong, it writes the handoff anyway, with that passage out of quotation marks, marked as an unconfirmed quote, and listed under Gaps. Sentences that attribute words or authorizations to the user without quoting them also get a second chance; if they remain, the handoff lists them under Gaps as the writer's interpretation;
 5. it writes the handoff without ever overwriting a file, under a lock that prevents two writes at the same time in the same folder, and rebuilds the index.
 
 Very long conversations are split into parts, each in a handoff that continues the previous one. When there is nothing new, the program does not call the model.
@@ -82,7 +82,7 @@ To resume in a new session, ask Claude to read the folder's `index.md` and the c
 - The handoff is written from the conversation's text messages, not from tool output. A result that only appeared in a command's output goes in as the assistant's report, and the handoff says so. The program reads the git state at the time of the record.
 - The Agent SDK reads the conversation since the last compaction. The record before compaction keeps the part that would be summarized; after it, the next handoff starts from the previous one and records the limitation.
 - Hiding covers common credential formats, not every possible secret.
-- Models are not deterministic. The quote check proves that each quoted passage exists, not that the text written from it is faithful.
+- Models are not deterministic. The quote check proves that each passage left in quotation marks exists, not that the text written from it is faithful. A passage marked as an unconfirmed quote may be a paraphrase or a correction by the writer.
 - A handoff is a historical record. It does not replace checking the real state, and it does not authorize repeating completed operations.
 - Windows is not supported.
 

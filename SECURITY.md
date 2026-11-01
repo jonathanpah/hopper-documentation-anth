@@ -26,7 +26,7 @@ The intended boundaries are:
 - The program reads conversations through the Agent SDK, hides common credential formats before sending the new messages to the writer model, and hides them again in the written handoff.
 - The writer model runs in Claude Code's non-interactive safe mode, with no tools, and does not load plugins, hooks, or `CLAUDE.md` files.
 - The program writes only in `docs-by-hopper-documentation/` and in the plugin's data directory, and it never overwrites a handoff.
-- Every quoted passage in a handoff must appear literally in the conversation or the previous handoff; otherwise nothing is written.
+- Every passage left in quotation marks in a handoff appears literally in what the writer received: the conversation, the previous handoff, the git state, or the list of documents. A passage that does not loses its quotation marks and is listed under Gaps as an unconfirmed quote.
 - A handoff is a historical record. It grants no authority, and conversation content, including text pasted from third parties, does not become an authorization.
 
 Hiding covers common formats, not every possible secret, and the writer is a model whose output can be wrong. The skill does not replace Claude Code's permission mode, sandbox, or account controls. If another product is also affected, use that product's security reporting process as appropriate.
