@@ -2,6 +2,7 @@
 name: hopper-documentation-anth
 description: Documenta a conversa atual do Claude Code em 7 documentos (índice, conversa integral, conversa simplificada, decisões, funções implementadas, pendências e handoff) na pasta docs-by-hopper-documentation do projeto. Use quando o usuário pedir para documentar ou registrar a conversa, salvar o progresso ou fazer um handoff. Não use para explicar, revisar ou editar esta skill.
 compatibility: Requer Claude Code 2.1.284 ou mais novo, na CLI ou no aplicativo, com o plugin hopper-documentation-anth e Python 3.9 ou mais novo.
+allowed-tools: Bash(python3 *)
 ---
 
 # hopper-documentation-anth
@@ -35,17 +36,17 @@ A mesma rodada roda sozinha antes de toda compactação, por um gatilho do plugi
 
 ## Como a skill roda
 
-Quando o usuário pedir para documentar ou registrar a conversa, salvar o progresso ou fazer um handoff:
+Quando o usuário pedir para documentar ou registrar a conversa, salvar o progresso ou fazer um handoff, siga estes passos.
 
-1. Rode o programa em segundo plano, com a ferramenta Bash, sem esperar:
+1. Rode o comando abaixo agora, nesta mesma resposta, com a ferramenta Bash em segundo plano.
 
    ```sh
    python3 "${CLAUDE_PLUGIN_ROOT}/scripts/hopper_documentation_anth.py" rodada --sessao "${CLAUDE_SESSION_ID}"
    ```
 
-2. Quando o programa terminar, informe ao usuário a última linha da saída dele, sem mudar o sentido. Ela diz "Documentação concluída: …", "Documentação: nada novo …" ou "Documentação falhou: …".
-3. Não escreva nem edite você mesmo nenhum arquivo de `docs-by-hopper-documentation/`. Não tente outro modelo nem outro caminho se o programa falhar: informe a falha.
+2. Diga em 1 frase que a documentação começou em segundo plano.
+3. Quando o programa terminar, repita para o usuário a última linha da saída, sem mudar o texto.
 
-Se o programa ainda estiver rodando quando você responder, diga que a documentação começou em segundo plano e informe o resultado quando ele chegar.
+Não escreva nem edite você mesmo nenhum arquivo de `docs-by-hopper-documentation/`. Se o programa falhar, informe a falha. Não tente outro modelo nem outro caminho.
 
 Não rode a skill quando o pedido for explicar, revisar ou editar a skill, ou quando a pergunta for sobre o que é um handoff.

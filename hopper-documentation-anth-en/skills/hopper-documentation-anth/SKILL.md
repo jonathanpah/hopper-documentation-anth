@@ -2,6 +2,7 @@
 name: hopper-documentation-anth
 description: Documents the current Claude Code conversation in 7 documents (index, full conversation, simplified conversation, decisions, implemented functions, pending items and handoff) in the project's docs-by-hopper-documentation folder. Use when the user asks to document or record the conversation, save progress or write a handoff. Do not use to explain, review or edit this skill.
 compatibility: Requires Claude Code 2.1.284 or newer, in the CLI or in the app, with the hopper-documentation-anth plugin and Python 3.9 or newer.
+allowed-tools: Bash(python3 *)
 ---
 
 # hopper-documentation-anth
@@ -35,17 +36,17 @@ The same run happens by itself before every compaction, through a plugin hook. T
 
 ## How the skill runs
 
-When the user asks to document or record the conversation, save progress or write a handoff:
+When the user asks to document or record the conversation, save progress or write a handoff, follow these steps.
 
-1. Run the program in the background, with the Bash tool, without waiting:
+1. Run the command below now, in this same response, with the Bash tool in the background.
 
    ```sh
    python3 "${CLAUDE_PLUGIN_ROOT}/scripts/hopper_documentation_anth.py" rodada --sessao "${CLAUDE_SESSION_ID}"
    ```
 
-2. When the program finishes, tell the user the last line of its output, without changing its meaning. It says "Documentation done: …", "Documentation: nothing new …" or "Documentation failed: …".
-3. Do not write or edit any file of `docs-by-hopper-documentation/` yourself. Do not try another model or another path if the program fails: report the failure.
+2. Say in 1 sentence that the documentation started in the background.
+3. When the program finishes, repeat the last line of its output to the user, without changing the text.
 
-If the program is still running when you answer, say that the documentation started in the background and report the result when it arrives.
+Do not write or edit any file of `docs-by-hopper-documentation/` yourself. If the program fails, report the failure. Do not try another model or another path.
 
 Do not run the skill when the request is to explain, review or edit the skill, or when the question is about what a handoff is.
