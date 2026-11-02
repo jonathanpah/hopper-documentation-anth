@@ -1,0 +1,40 @@
+Installed plugins:
+
+  ❯ hopper-documentation-anth@hopper-documentation-anth
+    Version: 2.0.0
+    Read from: /opt/hopper-documentation-anth/releases/2.0.0/pt-br
+    Scope: user
+    Status: ✔ enabled
+
+  ❯ hopper-orchestration-anth@hopper-orchestration-anth
+    Version: 0.3.3
+    Read from: /opt/hopper-orchestration-anth/releases/0.3.3/pt-br
+    Scope: user
+    Status: ✔ enabled
+
+  ❯ hopper-spec-anth@hopper-spec-anth
+    Version: 0.1.0
+    Read from: /opt/hopper-spec-anth/releases/0.1.0/pt-br
+    Scope: user
+    Status: ✔ enabled
+
+  ❯ mattpocock-skills@claude-plugins-official
+    Version: 1.3.1
+    Scope: user
+    Status: ✔ enabled
+
+  ❯ sonda-precompact@hopper-sonda
+    Version: 0.0.1
+    Read from: /home/jpah/hopper-sonda/catalogo/sonda-precompact
+    Scope: user
+    Status: ✔ enabled
+
+Synced from claude.ai:
+
+  ⚠ "mattpocock-skills@synced" from claude.ai not loaded — "mattpocock-skills@claude-plugins-official" on this machine has the same name and takes precedence
+
+  ❯ pdf-viewer@synced
+    Version: 0.2.0
+    Path: /home/jpah/.claude/plugins/synced/c55ef791-4b55-4378-b005-c1e82e4e0a9b_6a7de9b8-8591-499d-b62c-15ba74be961a/aab3308b-3931-463e-937c-1a804f3853e0
+    Status: ✔ loaded
+

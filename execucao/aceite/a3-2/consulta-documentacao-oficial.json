@@ -1,0 +1,31 @@
+{
+  "fontes": [
+    {
+      "url": "https://code.claude.com/docs/en/env-vars.md",
+      "sha256": "c6af9335007280dfe50572702d0025e0d4bb8dc28554f607cb739614b7b5c096",
+      "bytes": 187070,
+      "consulta_concluida": true,
+      "data_consulta_utc": "2026-11-02"
+    },
+    {
+      "url": "https://code.claude.com/docs/en/model-config.md",
+      "sha256": "7180ba5975ee6529caebbd3a7847e4bcb5851d0a795efaba3a6f558d226b5842",
+      "bytes": 129830,
+      "consulta_concluida": true,
+      "data_consulta_utc": "2026-11-02"
+    }
+  ],
+  "variaveis_usadas": {
+    "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "100000",
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "85"
+  },
+  "escopo": "Somente os processos das sessões de teste",
+  "limites_documentados": {
+    "janela_minima_tokens": 100000,
+    "janela_maxima_tokens": 1000000,
+    "percentual_minimo": 1,
+    "percentual_maximo": 100,
+    "percentual_so_reduz_o_limiar": true
+  },
+  "observacao": "Acesso inicial por web.run falhou por content-type markdown. urllib falhou ao verificar o certificado local. curl obteve ambos os documentos com TLS verificado."
+}
