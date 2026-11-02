@@ -172,6 +172,7 @@ class Ambiente:
         texto = origem.read_text(encoding="utf-8")
         for pt, en in SITUACOES_PT_EN.items():
             texto = texto.replace(f'"situacao": "{pt}', f'"situacao": "{en}')
+        texto = texto.replace("**Assunto: ", "**Subject: ")
         destino = self.respostas / f"{nome}.json"
         destino.write_text(texto, encoding="utf-8")
         return destino

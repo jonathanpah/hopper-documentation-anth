@@ -224,11 +224,18 @@ def pasta_de_dados():
 
 def configuracao():
     arquivo = pasta_de_dados() / "config.json"
+    if not arquivo.exists():
+        return {"migracao_automatica": True}
     try:
-        dados = json.loads(arquivo.read_text(encoding="utf-8")) if arquivo.exists() else {}
-    except ValueError:
-        dados = {}
-    return {"migracao_automatica": bool(dados.get("migracao_automatica", True))}
+        dados = json.loads(arquivo.read_text(encoding="utf-8"))
+        if isinstance(dados, dict) and isinstance(dados.get("migracao_automatica"), bool):
+            return {"migracao_automatica": dados["migracao_automatica"]}
+    except (ValueError, OSError):
+        pass
+    motivo = ("config.json inválido; migração automática desligada" if LANGUAGE == "pt-br" else
+              "invalid config.json; automatic migration disabled")
+    registrar("", "", "migrar", "migracao", "falhou", motivo)
+    return {"migracao_automatica": False}
 
 
 def raiz_do_plugin():
@@ -259,10 +266,12 @@ def ler(caminho):
 # ---------------------------------------------------------------------------------------------------------------------
 # Registro de rodadas, saída bruta e travas.
 # ---------------------------------------------------------------------------------------------------------------------
-def registrar(conversa, pasta_do_projeto, acionamento, etapa, resultado, motivo="", intervalo="", modelos=None, trigger=None):
+def registrar(conversa, pasta_do_projeto, acionamento, etapa, resultado, motivo="", intervalo="", modelos=None, trigger=None, resumo=""):
     linha = {"data": iso(agora()), "conversa": conversa or "", "pasta_do_projeto": str(pasta_do_projeto or ""),
              "acionamento": acionamento, "etapa": etapa, "resultado": resultado, "motivo": motivo or "",
              "intervalo": intervalo or "", "modelos": modelos or {}}
+    if resumo:
+        linha["resumo"] = resumo
     if trigger is not None:
         linha["trigger"] = trigger
     with (pasta_de_dados() / "rodadas.jsonl").open("a", encoding="utf-8") as f:
@@ -697,7 +706,11 @@ def codigo_de(sessao, pasta_doc):
                 cabecalho = ler(pasta / T["d2"]) or ler(pasta / T["d7"])
                 m = re.search(rf"^- {re.escape(T['conversa'])}: (\S+)$", cabecalho, re.M)
                 if m and m.group(1) != sessao:
-                    return sessao.replace("-", "")[:12]
+                    codigo = sessao.replace("-", "")[:12]
+                    motivo = (f"colisão do código {curto}; esta conversa usa {codigo}" if LANGUAGE == "pt-br" else
+                              f"code collision for {curto}; this conversation uses {codigo}")
+                    registrar(sessao, pasta_doc.parent, "pedido", "copia", "em andamento", motivo)
+                    return codigo
     return curto
 
 
@@ -728,7 +741,13 @@ class Documento2:
         Um cabeçalho de mensagem é uma linha `## M<n>-<código> · …` seguida da linha do comentário de registros.
         Uma linha que começa com `## ` dentro do texto de uma mensagem não é cabeçalho."""
         linhas = self.texto.split("\n")
-        inicios = [i for i in range(len(linhas) - 1) if self.CABECALHO.match(linhas[i]) and self.REGISTROS.match(linhas[i + 1])]
+        cabecalho = re.match(r"^# .* · ([A-Za-z0-9-]+)$", linhas[0])
+        codigo = cabecalho.group(1) if cabecalho else None
+        inicios = []
+        for i in range(len(linhas) - 1):
+            m = self.CABECALHO.match(linhas[i])
+            if m and int(m.group(2)) == len(inicios) + 1 and m.group(3) == codigo and self.REGISTROS.match(linhas[i + 1]):
+                inicios.append(i)
         saida = []
         for k, i in enumerate(inicios):
             fim = inicios[k + 1] if k + 1 < len(inicios) else len(linhas)
@@ -756,37 +775,35 @@ def copiar(sessao, caminho_historico, pasta_do_projeto=None, acionamento="pedido
     conferir_identidade(registros, sessao)
     projeto = Path(pasta_do_projeto) if pasta_do_projeto else pasta_do_projeto_de(registros)
     pasta_doc = projeto / PASTA_DOC
-    mensagens = extrair_mensagens(registros)
     codigo = codigo_de(sessao, pasta_doc)
     aviso = ""
-    if not mensagens:
-        return pasta_doc, pasta_da_conversa(pasta_doc, codigo), codigo, [], aviso
-    data = hora_local(mensagens[0]["hora"]).strftime("%Y-%m-%d")
-    pasta = pasta_da_conversa(pasta_doc, codigo, data)
-    doc2 = Documento2(pasta / T["d2"])
-    gravadas = doc2.mensagens()
-    inicio = 0
+    pasta = pasta_da_conversa(pasta_doc, codigo)
+    doc2 = Documento2(pasta / T["d2"]) if pasta else None
+    gravadas = doc2.mensagens() if doc2 else []
+    novos_registros = registros
     if gravadas:
         ultimo = gravadas[-1]["ultimo"]
-        posicoes = [i for i, m in enumerate(mensagens) if m["ultimo"] == ultimo or m["primeiro"] == ultimo]
-        if posicoes:
-            inicio = posicoes[-1] + 1
+        posicao = next((i for i, r in enumerate(registros) if r.get("uuid") == ultimo), None)
+        if posicao is not None:
+            novos_registros = registros[posicao + 1:]
         else:
-            aviso = T["aviso_ponto"]
-            limite = gravadas[-1]["hora"]
-            inicio = len(mensagens)
-            for i, m in enumerate(mensagens):
-                momento = hora_local(m["hora"])
-                if f"{momento.strftime('%Y-%m-%d %H:%M')} {fuso(momento)}" > limite:
-                    inicio = i
-                    break
-    novas = mensagens[inicio:]
+            # O Anexo E fixa o comentário com 2 identificadores, sem campo de data.
+            # Na ausência da âncora, só o minuto do cabeçalho está disponível.
+            aviso = T["aviso_ponto"] + ("; precisão limitada ao minuto do cabeçalho" if LANGUAGE == "pt-br" else
+                                       "; precision limited to the header minute")
+            limite = hora_local(gravadas[-1]["hora"])
+            novos_registros = [r for r in registros if r.get("timestamp") and hora_local(r["timestamp"]) > limite]
+    novas = extrair_mensagens(novos_registros)
     interromper("meio-da-copia")
-    if not novas and gravadas:
+    if not novas:
         return pasta_doc, pasta, codigo, [], aviso
+    if pasta is None:
+        data = hora_local(novas[0]["hora"]).strftime("%Y-%m-%d")
+        pasta = pasta_da_conversa(pasta_doc, codigo, data)
+        doc2 = Documento2(pasta / T["d2"])
     with Trava(f"pasta-{nome_curto(pasta_doc)}", 25 if acionamento == "gatilho-copia" else 60):
         if not doc2.texto:
-            primeiro = hora_local(mensagens[0]["hora"])
+            primeiro = hora_local(novas[0]["hora"])
             doc2.texto = (f"# {T['titulo_d2']} · {codigo}\n\n- {T['conversa']}: {sessao}\n- {T['pasta_do_projeto']}: {projeto}\n"
                           f"- {T['fuso']}: {fuso(primeiro)}\n\n")
         n = doc2.ultimo_numero()
@@ -874,53 +891,78 @@ def substituir_refs(texto, mapa):
     return RE_REF.sub(lambda m: mapa.get("N" + m.group(1), m.group(0)), texto)
 
 
-def validar_resposta(resposta, esquema, mensagens_validas, itens_existentes, migracao=False):
-    """Confere a resposta contra o esquema e as regras do Anexo D. Devolve a resposta normalizada ou levanta Falha."""
-    if not isinstance(resposta, dict):
+def validar_esquema(valor, esquema):
+    """Valida recursivamente o subconjunto do JSON Schema usado no Anexo D."""
+    tipo = esquema.get("type")
+    correto = {"object": isinstance(valor, dict), "array": isinstance(valor, list),
+               "string": isinstance(valor, str), "boolean": isinstance(valor, bool)}
+    if tipo and not correto.get(tipo, False):
         raise Falha(T["motivo_esquema"])
-    for chave in esquema["required"]:
-        if chave not in resposta:
-            raise Falha(T["motivo_esquema"] + f" ({chave})")
-    for chave in resposta:
-        if chave not in esquema["properties"]:
-            raise Falha(T["motivo_esquema"] + f" ({chave})")
-    if not isinstance(resposta["nada_relevante"], bool) or not isinstance(resposta["resumo"], str) \
-            or not isinstance(resposta["itens_novos"], list) or not isinstance(resposta["mudancas"], list):
+    if "enum" in esquema and valor not in esquema["enum"]:
         raise Falha(T["motivo_esquema"])
-    if not migracao and (not isinstance(resposta["conversa_simplificada"], str) or not isinstance(resposta["handoff"], dict)
-                         or sorted(resposta["handoff"]) != sorted(ESQUEMA_HANDOFF)
-                         or not all(isinstance(v, str) for v in resposta["handoff"].values())):
-        raise Falha(T["motivo_esquema"] + " (handoff)")
-    refs = set()
+    if tipo == "object":
+        propriedades = esquema.get("properties", {})
+        if any(c not in valor for c in esquema.get("required", [])) or (esquema.get("additionalProperties") is False
+                and any(c not in propriedades for c in valor)):
+            raise Falha(T["motivo_esquema"])
+        for c, v in valor.items():
+            if c in propriedades:
+                validar_esquema(v, propriedades[c])
+    elif tipo == "array":
+        if len(valor) < esquema.get("minItems", 0):
+            raise Falha(T["motivo_esquema"])
+        for v in valor:
+            validar_esquema(v, esquema["items"])
+    elif tipo == "string":
+        if not esquema.get("minLength", 0) <= len(valor) <= esquema.get("maxLength", float("inf")) \
+                or ("pattern" in esquema and not re.search(esquema["pattern"], valor)):
+            raise Falha(T["motivo_esquema"])
+
+
+def validar_resposta(resposta, esquema, mensagens_validas, itens_existentes, migracao=False, arquivos_validos=None):
+    """Confere o esquema completo e as regras do Anexo D antes do diário e da gravação."""
+    validar_esquema(resposta, esquema)
+    refs = {i["ref"] for i in resposta["itens_novos"]}
+    if len(refs) != len(resposta["itens_novos"]):
+        raise Falha(T["motivo_esquema"])
+    tipos = {i["ref"]: i["tipo"] for i in resposta["itens_novos"]}
     for item in resposta["itens_novos"]:
-        if not isinstance(item, dict) or not re.fullmatch(r"N[0-9]+", str(item.get("ref", ""))) or item.get("tipo") not in ("D", "F", "PD") \
-                or not isinstance(item.get("texto"), str) or not item["texto"].strip() or not isinstance(item.get("origem"), list) \
-                or not item["origem"] or not all(isinstance(o, str) for o in item["origem"]) \
-                or not all(isinstance(item.get(c), str) for c in ("situacao", "recomendacao", "depende_de")):
-            raise Falha(T["motivo_esquema"] + " (itens_novos)")
-        if migracao and not isinstance(item.get("conversa"), str):
-            raise Falha(T["motivo_esquema"] + " (conversa)")
+        if not item["texto"].strip():
+            raise Falha(T["motivo_esquema"])
         if not situacao_permitida(item["tipo"], item["situacao"]):
             raise Falha(T["motivo_situacao"].format(situacao=item["situacao"]))
         if item["tipo"] != "PD":
             item["recomendacao"], item["depende_de"] = "", ""
-        refs.add(item["ref"])
     for mudanca in resposta["mudancas"]:
-        if not isinstance(mudanca, dict) or not isinstance(mudanca.get("id"), str) or not isinstance(mudanca.get("situacao"), str) \
-                or not isinstance(mudanca.get("origem"), list) or not mudanca["origem"]:
-            raise Falha(T["motivo_esquema"] + " (mudancas)")
+        alvo = mudanca["id"].strip()
+        tipo = tipos.get(alvo)
+        if alvo in itens_existentes:
+            m = re.match(r"^(PD|D|F)\d+-", alvo)
+            tipo = m.group(1) if m else None
+        # Identificadores inexistentes continuam para a lista de mudanças não aplicadas.
+        if tipo and not situacao_permitida(tipo, mudanca["situacao"]):
+            raise Falha(T["motivo_situacao"].format(situacao=mudanca["situacao"]))
     if migracao:
-        if not isinstance(resposta.get("handoffs_antigos"), list) or not isinstance(resposta.get("sem_conteudo"), list):
-            raise Falha(T["motivo_esquema"] + " (migracao)")
+        for item in resposta["itens_novos"] + resposta["handoffs_antigos"]:
+            if not re.fullmatch(r"[A-Za-z0-9-]+", item["conversa"]):
+                raise Falha(T["motivo_esquema"] + " (conversa)")
         for h in resposta["handoffs_antigos"]:
-            if not isinstance(h, dict) or not all(isinstance(h.get(c), str) for c in ("conversa", "data", "resumo")) \
-                    or not isinstance(h.get("handoff"), dict) or sorted(h["handoff"]) != sorted(ESQUEMA_HANDOFF):
-                raise Falha(T["motivo_esquema"] + " (handoffs_antigos)")
-    else:
-        for item in resposta["itens_novos"]:
-            for origem in item["origem"]:
-                if not origem_valida(origem, mensagens_validas, itens_existentes, refs):
-                    raise Falha(T["motivo_origem"].format(origem=origem))
+            try:
+                if not re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", h["data"]):
+                    raise ValueError()
+                dt.date.fromisoformat(h["data"])
+            except ValueError:
+                raise Falha(T["motivo_esquema"] + " (data)")
+        if any(n not in (arquivos_validos or set()) for n in resposta["sem_conteudo"]):
+            raise Falha(T["motivo_origem"].format(origem="sem_conteudo"))
+    elif not resposta["nada_relevante"] and not resposta["conversa_simplificada"].startswith(T["assunto"]):
+        raise Falha(T["motivo_esquema"] + " (conversa_simplificada)")
+    for item in resposta["itens_novos"] + resposta["mudancas"]:
+        for origem in item["origem"]:
+            valida = origem.strip() in (arquivos_validos or set()) if migracao else origem_valida(
+                origem, mensagens_validas, itens_existentes, refs)
+            if not valida:
+                raise Falha(T["motivo_origem"].format(origem=origem))
     return resposta
 
 
@@ -929,25 +971,26 @@ def origem_valida(origem, mensagens_validas, itens_existentes, refs):
     if origem in mensagens_validas or origem in itens_existentes or origem in refs:
         return True
     m = RE_INTERVALO.match(origem)
-    if m and m.group(2) == m.group(4):
+    if m and m.group(2) == m.group(4) and int(m.group(1)) <= int(m.group(3)):
         return all(f"M{n}-{m.group(2)}" in mensagens_validas for n in range(int(m.group(1)), int(m.group(3)) + 1))
     return False
 
 
 def conferir_modelos(uso):
-    """Regra de modelo (C04): o Sonnet 5.5 responde por no mínimo 90% dos tokens de saída."""
+    """Regra de modelo (C04): Sonnet 5.5 produz no mínimo 90% dos tokens de saída."""
+    motivo = T["motivo_modelo"].format(modelo=MODELO)
     if not isinstance(uso, dict) or MODELO not in uso:
-        raise Falha(T["motivo_modelo"].format(modelo=MODELO))
-    saidas = {m: int((v or {}).get("outputTokens") or 0) for m, v in uso.items() if isinstance(v, dict)}
+        raise Falha(motivo)
+    try:
+        saidas = {m: int(v.get("outputTokens", v.get("output_tokens", 0))) for m, v in uso.items() if isinstance(v, dict)}
+    except (ValueError, TypeError):
+        raise Falha(motivo)
     total = sum(saidas.values())
-    if total and saidas.get(MODELO, 0) / total < 0.9:
-        raise Falha(T["motivo_modelo"].format(modelo=MODELO))
+    if total <= 0 or any(v < 0 for v in saidas.values()) or saidas.get(MODELO, 0) / total < 0.9:
+        raise Falha(motivo)
     return saidas
 
 
-# ---------------------------------------------------------------------------------------------------------------------
-# Redator (C03, C04, C12).
-# ---------------------------------------------------------------------------------------------------------------------
 def executavel_do_claude():
     indicado = os.environ.get("HOPPER_DOCUMENTATION_ANTH_CLAUDE")
     if indicado:
@@ -1034,33 +1077,39 @@ def bloco_do_documento_3(resposta, codigo, a, b):
         corpo = f"{T['assunto']}{T['sem_conteudo_assunto']}.**\n\n{T['sem_conteudo']} ({intervalo_de(codigo, a, b)})"
     else:
         corpo = resposta["conversa_simplificada"].strip()
-        if not corpo.startswith(T["assunto"]):
-            corpo = f"{T['assunto']}{resposta['resumo'].strip().rstrip('.')}.**\n\n{corpo}"
     return f"## {intervalo_de(codigo, a, b)}\n\n{corpo}\n\n"
 
 
-def gravar_documento_3(pasta, codigo, resposta, a, b):
+def gravar_documento_3(pasta, codigo, resposta, a, b, mapa=None):
     caminho = pasta / T["d3"]
     texto = ler(caminho) or f"# {T['titulo_d3']} · {codigo}\n\n"
     if f"## {intervalo_de(codigo, a, b)}\n" in texto:
         return
-    gravar_atomico(caminho, texto + bloco_do_documento_3(resposta, codigo, a, b))
+    gravar_atomico(caminho, texto + substituir_refs(bloco_do_documento_3(resposta, codigo, a, b), mapa or {}))
 
 
-def gravar_itens(pasta_doc, codigo, resposta, intervalo, mapa):
-    """Grava os itens novos com o próximo número livre (C06) e devolve o mapa N → identificador."""
-    docs = documentos_da_pasta(pasta_doc)
+def reservar_itens(pasta_doc, codigo, resposta, mapa=None):
+    """Reserva números consecutivos por tipo e código; o chamador segura a trava da pasta."""
+    mapa = dict(mapa or {})
+    proximos = {}
     for item in resposta["itens_novos"]:
         if item["ref"] in mapa:
             continue
         tipo = item["tipo"]
-        codigo_do_item = codigo_do_identificador(item.get("conversa"), pasta_doc) if item.get("conversa") else codigo
-        existente = next((i for i in itens_de(ler(docs[tipo])) if i["texto"] == item["texto"].strip()
-                          and i["campos"].get(T["intervalo"]) == intervalo and i["codigo"] == codigo_do_item), None)
-        if existente:
-            mapa[item["ref"]] = existente["id"]
-            continue
-        mapa[item["ref"]] = f"{tipo}{proximo_numero(pasta_doc, tipo, codigo_do_item)}-{codigo_do_item}"
+        cod = codigo_do_identificador(item["conversa"], pasta_doc) if item.get("conversa") else codigo
+        chave = (tipo, cod)
+        if chave not in proximos:
+            proximos[chave] = proximo_numero(pasta_doc, tipo, cod)
+        n = proximos[chave]
+        mapa[item["ref"]] = f"{tipo}{n}-{cod}"
+        proximos[chave] = n + 1
+    return mapa
+
+
+def gravar_itens(pasta_doc, codigo, resposta, intervalo, mapa):
+    """Pula os identificadores já gravados; o mapa do diário torna a reaplicação repetível."""
+    docs = documentos_da_pasta(pasta_doc)
+    mapa = reservar_itens(pasta_doc, codigo, resposta, mapa)
     for item in resposta["itens_novos"]:
         tipo = item["tipo"]
         item_id = mapa[item["ref"]]
@@ -1166,16 +1215,7 @@ def gravar_documento_1(pasta_doc, projeto):
 
 
 def registrar_escrita(sessao, projeto, acionamento, resultado, motivo="", intervalo="", modelos=None, resumo=""):
-    linha = registrar(sessao, projeto, acionamento, "escrita", resultado, motivo, intervalo, modelos)
-    if resumo:
-        # o resumo da rodada fica no registro, para o documento 1
-        arquivo = pasta_de_dados() / "rodadas.jsonl"
-        texto = arquivo.read_text(encoding="utf-8").splitlines()
-        ultimo = json.loads(texto[-1])
-        ultimo["resumo"] = resumo
-        texto[-1] = json.dumps(ultimo, ensure_ascii=False)
-        arquivo.write_text("\n".join(texto) + "\n", encoding="utf-8")
-    return linha
+    return registrar(sessao, projeto, acionamento, "escrita", resultado, motivo, intervalo, modelos, resumo=resumo)
 
 
 def partes_do_trecho(mensagens, inicio):
@@ -1193,13 +1233,18 @@ def partes_do_trecho(mensagens, inicio):
     return partes
 
 
-def gravar_rodada(pasta_doc, pasta, codigo, sessao, projeto, resposta, a, b):
+def gravar_rodada(pasta_doc, pasta, codigo, sessao, projeto, resposta, a, b, mapa=None, diario=None, modelos=None):
     """Grava uma resposta validada nos documentos 3 a 7. Repetível sem efeito duplo (R29)."""
     intervalo = intervalo_de(codigo, a, b)
     with Trava(f"pasta-{nome_curto(pasta_doc)}", 60):
-        gravar_documento_3(pasta, codigo, resposta, a, b)
+        mapa = reservar_itens(pasta_doc, codigo, resposta, mapa)
+        if diario is not None and not diario.exists():
+            gravar_atomico(diario, json.dumps({"resposta": resposta, "mapa": mapa, "modelos": modelos or {}}, ensure_ascii=False))
+        interromper("depois-do-diario")
+        garantir_documentos_compartilhados(pasta_doc)
+        gravar_documento_3(pasta, codigo, resposta, a, b, mapa)
         interromper("meio-da-gravacao")
-        mapa = gravar_itens(pasta_doc, codigo, resposta, intervalo, {})
+        mapa = gravar_itens(pasta_doc, codigo, resposta, intervalo, mapa)
         inexistentes = aplicar_mudancas(pasta_doc, resposta, mapa)
         if not resposta["nada_relevante"] or not (pasta / T["d7"]).exists():
             gravar_documento_7(pasta, codigo, sessao, projeto, f"M{b}-{codigo}", resposta["handoff"], mapa)
@@ -1215,13 +1260,12 @@ def reaplicar_diarios(pasta_doc, pasta, codigo, sessao, projeto, acionamento):
         if not m:
             continue
         try:
-            resposta = json.loads(diario.read_text(encoding="utf-8"))
+            dados = json.loads(diario.read_text(encoding="utf-8"))
         except ValueError:
-            diario.unlink(missing_ok=True)
-            continue
-        modelos = resposta.pop("_modelos", {})
+            raise Falha(T["motivo_esquema"] + " (diario)")
+        resposta, mapa, modelos = dados["resposta"], dados["mapa"], dados["modelos"]
         a, b = int(m.group(1)), int(m.group(2))
-        inexistentes = gravar_rodada(pasta_doc, pasta, codigo, sessao, projeto, resposta, a, b)
+        inexistentes = gravar_rodada(pasta_doc, pasta, codigo, sessao, projeto, resposta, a, b, mapa)
         if inexistentes:
             registrar(sessao, projeto, acionamento, "escrita", "em andamento", "mudança não aplicada: " + ", ".join(inexistentes),
                       intervalo_de(codigo, a, b))
@@ -1234,7 +1278,6 @@ def reaplicar_diarios(pasta_doc, pasta, codigo, sessao, projeto, acionamento):
 
 def escrever(sessao, projeto, pasta_doc, pasta, codigo, acionamento):
     """Escreve os documentos 3 a 7 e 1 para o trecho novo. Devolve a linha final."""
-    garantir_documentos_compartilhados(pasta_doc)
     diarios = pasta_de_dados() / "diarios"
     diarios.mkdir(exist_ok=True)
     concluidos = reaplicar_diarios(pasta_doc, pasta, codigo, sessao, projeto, acionamento)
@@ -1255,22 +1298,16 @@ def escrever(sessao, projeto, pasta_doc, pasta, codigo, acionamento):
         a, b = parte[0]["n"], parte[-1]["n"]
         intervalo = intervalo_de(codigo, a, b)
         diario = diarios / f"{codigo}-M{a}-M{b}.json"
-        mensagens_validas = {f"M{m['n']}-{codigo}" for m in gravadas}
+        mensagens_validas = {f"M{m['n']}-{codigo}" for m in parte}
         itens_existentes = {i["id"] for i in todos_os_itens(pasta_doc)}
-        if diario.exists():
-            resposta = json.loads(diario.read_text(encoding="utf-8"))
-            modelos = resposta.pop("_modelos", {})
-        else:
-            trecho = "\n\n".join(bloco_de_mensagem_gravada(m) for m in parte)
-            with Trava(f"pasta-{nome_curto(pasta_doc)}", 60):
-                entrada = entrada_do_redator(sessao, codigo, intervalo, pasta_doc, pasta, trecho)
-            bruto, modelos = chamar_redator(entrada, ESQUEMA_RODADA)
-            resposta = validar_resposta(bruto, ESQUEMA_RODADA, mensagens_validas, itens_existentes)
-            gravar_atomico(diario, json.dumps(dict(resposta, _modelos=modelos), ensure_ascii=False))
-        interromper("depois-do-diario")
+        trecho = "\n\n".join(bloco_de_mensagem_gravada(m) for m in parte)
+        with Trava(f"pasta-{nome_curto(pasta_doc)}", 60):
+            entrada = entrada_do_redator(sessao, codigo, intervalo, pasta_doc, pasta, trecho)
+        bruto, modelos = chamar_redator(entrada, ESQUEMA_RODADA)
+        resposta = validar_resposta(bruto, ESQUEMA_RODADA, mensagens_validas, itens_existentes)
         for m, v in modelos.items():
             modelos_total[m] = modelos_total.get(m, 0) + v
-        inexistentes = gravar_rodada(pasta_doc, pasta, codigo, sessao, projeto, resposta, a, b)
+        inexistentes = gravar_rodada(pasta_doc, pasta, codigo, sessao, projeto, resposta, a, b, diario=diario, modelos=modelos)
         diario.unlink(missing_ok=True)
         resumo = resposta["resumo"].strip() or resumo
         if inexistentes:
@@ -1317,7 +1354,7 @@ def entrada_da_migracao(pasta_doc, arquivos):
     for arquivo in arquivos:
         ident = identificador_antigo(arquivo) if arquivo.name != "index.md" else ""
         rotulo = f"### {arquivo.name}" + (f" ({T['conversa']}: {ident})" if ident else "")
-        partes.append(f"{rotulo}\n{ler(arquivo).strip()}")
+        partes.append(f"{rotulo}\n{ocultar(ler(arquivo).strip())}")
     return (f"Conversa: {T['migracao']}.\n"
             f"<regras_de_escrita>\n{arquivo_da_skill(T['regras'])}\n</regras_de_escrita>\n"
             f"<modelos>\n{arquivo_da_skill(T['modelos'])}\n</modelos>\n"
@@ -1327,19 +1364,9 @@ def entrada_da_migracao(pasta_doc, arquivos):
 
 
 def verificacao_interna(pasta_doc, arquivos, resposta):
-    """As 3 condições do Anexo E antes de apagar os arquivos antigos (R31)."""
+    """Confere as 3 condições do Anexo E nos documentos gravados no disco (R31)."""
     nomes = {a.name for a in arquivos}
     citados = set(resposta["sem_conteudo"])
-    for item in resposta["itens_novos"]:
-        citados.update(o.strip() for o in item["origem"])
-    for h in resposta["handoffs_antigos"]:
-        for valor in h["handoff"].values():
-            for nome in nomes:
-                if nome in valor:
-                    citados.add(nome)
-    faltam = sorted(nomes - citados)
-    if faltam:
-        return f"arquivos sem destino: {', '.join(faltam)}"
     ids = set()
     for tipo, caminho in documentos_da_pasta(pasta_doc).items():
         for item in itens_de(ler(caminho)):
@@ -1347,64 +1374,79 @@ def verificacao_interna(pasta_doc, arquivos, resposta):
                     or not item["campos"].get(T["origem"]) or not item["campos"].get(T["intervalo"]):
                 return f"item fora do formato: {item['id']}"
             ids.add(item["id"])
+            citados.update(o.strip() for o in item["campos"][T["origem"]].split(","))
     for h in resposta["handoffs_antigos"]:
         codigo = codigo_do_identificador(h["conversa"], pasta_doc)
         pasta = pasta_da_conversa(pasta_doc, codigo)
         if not pasta or not (pasta / T["d7"]).exists():
             return f"documento 7 ausente: {h['conversa']}"
-    return ""
+        texto = ler(pasta / T["d7"])
+        citados.update(nome for nome in nomes if nome in texto)
+    faltam = sorted(nomes - citados)
+    return f"arquivos sem destino: {', '.join(faltam)}" if faltam else ""
+
+
+def ocultar_campos(valor):
+    if isinstance(valor, str):
+        return ocultar(valor)
+    if isinstance(valor, list):
+        return [ocultar_campos(v) for v in valor]
+    if isinstance(valor, dict):
+        return {k: ocultar_campos(v) for k, v in valor.items()}
+    return valor
 
 
 def migrar(projeto, acionamento="migrar"):
     projeto = Path(projeto)
     pasta_doc = projeto / PASTA_DOC
-    arquivos = arquivos_antigos(pasta_doc)
-    if not arquivos:
-        return 0
-    with Trava(f"pasta-{nome_curto(pasta_doc)}", 15 * 60):
-        garantir_documentos_compartilhados(pasta_doc)
-        itens_existentes = {i["id"] for i in todos_os_itens(pasta_doc)}
-        bruto, modelos = chamar_redator(entrada_da_migracao(pasta_doc, arquivos), esquema_de_migracao())
-        resposta = validar_resposta(bruto, esquema_de_migracao(), set(), itens_existentes, migracao=True)
-        mapa = {}
-        for item in resposta["itens_novos"]:
-            item["origem"] = [o.strip() for o in item["origem"]]
-        mapa = gravar_itens(pasta_doc, "", resposta, T["migracao"], mapa)
-        aplicar_mudancas(pasta_doc, resposta, mapa)
-        momento = agora()
-        for h in resposta["handoffs_antigos"]:
-            codigo = codigo_do_identificador(h["conversa"], pasta_doc)
-            pasta = pasta_da_conversa(pasta_doc, codigo, h["data"][:10] if re.match(r"\d{4}-\d{2}-\d{2}", h["data"]) else momento.strftime("%Y-%m-%d"))
-            pasta.mkdir(parents=True, exist_ok=True)
-            gravar_documento_7(pasta, codigo, h["conversa"], projeto, T["sem_integral"], h["handoff"], mapa, momento)
-            registrar("", projeto, acionamento, "migracao", "concluída", "", codigo, modelos)
-            registrar_resumo(h["resumo"])
-        detalhe = verificacao_interna(pasta_doc, arquivos, resposta)
-        if detalhe:
-            registrar("", projeto, acionamento, "migracao", "falhou", T["motivo_verificacao"].format(detalhe=detalhe))
+    diario = pasta_de_dados() / "diarios" / f"migracao-{nome_curto(pasta_doc)}.json"
+    # Serializa migrações da pasta sem prender a cópia durante a chamada ao redator.
+    with Trava(f"migracao-{nome_curto(pasta_doc)}", 15 * 60):
+        if diario.exists():
+            dados = json.loads(ler(diario))
+            resposta, mapa, modelos = dados["resposta"], dados["mapa"], dados["modelos"]
+            arquivos = [pasta_doc / nome for nome in dados["arquivos"]]
+        else:
+            arquivos = arquivos_antigos(pasta_doc)
+            if not arquivos:
+                return 0
+            with Trava(f"pasta-{nome_curto(pasta_doc)}", 60):
+                entrada = entrada_da_migracao(pasta_doc, arquivos)
+                itens_existentes = {i["id"] for i in todos_os_itens(pasta_doc)}
+            bruto, modelos = chamar_redator(entrada, esquema_de_migracao())
+            resposta = validar_resposta(bruto, esquema_de_migracao(), set(), itens_existentes, migracao=True,
+                                       arquivos_validos={a.name for a in arquivos})
+            resposta = ocultar_campos(resposta)
+            mapa = None
+        with Trava(f"pasta-{nome_curto(pasta_doc)}", 60):
+            mapa = reservar_itens(pasta_doc, "", resposta, mapa)
+            if not diario.exists():
+                gravar_atomico(diario, json.dumps({"resposta": resposta, "mapa": mapa, "modelos": modelos,
+                                                  "arquivos": [a.name for a in arquivos]}, ensure_ascii=False))
+            interromper("depois-do-diario")
+            garantir_documentos_compartilhados(pasta_doc)
+            gravar_itens(pasta_doc, "", resposta, T["migracao"], mapa)
+            aplicar_mudancas(pasta_doc, resposta, mapa)
+            for h in resposta["handoffs_antigos"]:
+                codigo = codigo_do_identificador(h["conversa"], pasta_doc)
+                pasta = pasta_da_conversa(pasta_doc, codigo, h["data"])
+                pasta.mkdir(parents=True, exist_ok=True)
+                gravar_documento_7(pasta, codigo, h["conversa"], projeto, T["sem_integral"], h["handoff"], mapa)
+                registrar("", projeto, acionamento, "migracao", "concluída", intervalo=codigo, modelos=modelos, resumo=h["resumo"])
+            detalhe = verificacao_interna(pasta_doc, arquivos, resposta)
+            if detalhe:
+                motivo = T["motivo_verificacao"].format(detalhe=detalhe)
+                registrar("", projeto, acionamento, "migracao", "falhou", motivo)
+                gravar_documento_1(pasta_doc, projeto)
+                raise Falha(motivo)
+            registrar("", projeto, acionamento, "migracao", "concluída", intervalo=f"{len(arquivos)} {T['migracao']}", modelos=modelos)
+            interromper("antes-da-exclusao")
+            for arquivo in arquivos:
+                arquivo.unlink(missing_ok=True)
+            registrar("", projeto, acionamento, "exclusao", "concluída", intervalo=f"{len(arquivos)} {T['migracao']}")
             gravar_documento_1(pasta_doc, projeto)
-            raise Falha(T["motivo_verificacao"].format(detalhe=detalhe))
-        registrar("", projeto, acionamento, "migracao", "concluída", "", f"{len(arquivos)} {T['migracao']}", modelos)
-        interromper("antes-da-exclusao")
-        for arquivo in arquivos:
-            arquivo.unlink()
-        registrar("", projeto, acionamento, "exclusao", "concluída", "", f"{len(arquivos)} {T['migracao']}")
-        gravar_documento_1(pasta_doc, projeto)
+            diario.unlink(missing_ok=True)
     return len(arquivos)
-
-
-def registrar_resumo(resumo):
-    arquivo = pasta_de_dados() / "rodadas.jsonl"
-    texto = arquivo.read_text(encoding="utf-8").splitlines()
-    ultimo = json.loads(texto[-1])
-    ultimo["resumo"] = resumo
-    texto[-1] = json.dumps(ultimo, ensure_ascii=False)
-    arquivo.write_text("\n".join(texto) + "\n", encoding="utf-8")
-
-
-def migracao_pendente(pasta_doc):
-    """A rodada seguinte refaz a verificação e apaga o que sobrou de uma migração interrompida (caso de borda de R31)."""
-    return bool(arquivos_antigos(pasta_doc))
 
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -1413,18 +1455,20 @@ def migracao_pendente(pasta_doc):
 def rodada(sessao, acionamento="pedido", caminho_historico=None, pasta_do_projeto=None):
     """Uma rodada completa: cópia, escrita e gravação. Devolve (código de saída, linha final)."""
     projeto = Path(pasta_do_projeto) if pasta_do_projeto else None
+    falha_migracao = ""
     try:
         with Trava(f"rodada-{sessao}", 15 * 60):
             caminho = Path(caminho_historico) if caminho_historico else localizar_historico(sessao)
             if projeto is None:
                 projeto = pasta_do_projeto_de(ler_registros(caminho))
             pasta_doc = projeto / PASTA_DOC
-            if configuracao()["migracao_automatica"] and arquivos_antigos(pasta_doc):
+            diario_migracao = pasta_de_dados() / "diarios" / f"migracao-{nome_curto(pasta_doc)}.json"
+            if configuracao()["migracao_automatica"] and (arquivos_antigos(pasta_doc) or diario_migracao.exists()):
                 try:
                     migrar(projeto, acionamento)
-                except Falha as erro:
-                    registrar_escrita(sessao, projeto, acionamento, "falhou", str(erro))
-                    return 1, T["linha_falhou"].format(motivo=erro)
+                except Exception as erro:  # noqa: BLE001
+                    falha_migracao = str(erro) if isinstance(erro, Falha) else repr(erro)
+                    registrar(sessao, projeto, acionamento, "migracao", "falhou", falha_migracao)
             with Trava(f"copia-{sessao}", 60):
                 pasta_doc, pasta, codigo, novas, aviso = copiar(sessao, caminho, projeto, acionamento)
             intervalo = intervalo_de(codigo, novas[0]["n"], novas[-1]["n"]) if novas else ""
@@ -1432,17 +1476,26 @@ def rodada(sessao, acionamento="pedido", caminho_historico=None, pasta_do_projet
             interromper("depois-da-copia")
             if pasta is None:
                 registrar_escrita(sessao, projeto, acionamento, "nada novo")
-                return 0, T["linha_sem_mensagens"]
-            linha = escrever(sessao, projeto, pasta_doc, pasta, codigo, acionamento)
+                linha = T["linha_sem_mensagens"]
+            else:
+                linha = escrever(sessao, projeto, pasta_doc, pasta, codigo, acionamento)
+            if falha_migracao:
+                registrar_escrita(sessao, projeto, acionamento, "falhou", falha_migracao)
+                with Trava(f"pasta-{nome_curto(pasta_doc)}", 60):
+                    gravar_documento_1(pasta_doc, projeto)
+                return 1, linha + " " + T["linha_falhou"].format(motivo=falha_migracao)
             return 0, linha
-    except Falha as erro:
-        registrar_escrita(sessao, projeto, acionamento, "falhou", str(erro))
+    except Exception as erro:  # noqa: BLE001
+        motivo = str(erro) if isinstance(erro, Falha) else repr(erro)
+        if falha_migracao:
+            motivo = falha_migracao + "; " + motivo
+        registrar_escrita(sessao, projeto, acionamento, "falhou", motivo)
         if projeto is not None and (projeto / PASTA_DOC).is_dir():
             try:
                 gravar_documento_1(projeto / PASTA_DOC, projeto)
             except OSError:
                 pass
-        return 1, T["linha_falhou"].format(motivo=erro)
+        return 1, T["linha_falhou"].format(motivo=motivo)
 
 
 def ler_evento():

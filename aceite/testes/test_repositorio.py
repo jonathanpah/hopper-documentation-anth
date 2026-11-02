@@ -106,15 +106,17 @@ class Localizacao(CasoDeAceite):
         self.assertTrue(self.amb.d(2).exists())
         casa = Path(tempfile.mkdtemp(prefix="casa-"))
         self.addCleanup(shutil.rmtree, casa, True)
-        shutil.copytree(self.amb.config, casa / ".claude")
+        shutil.copytree(self.amb.config / "projects", casa / ".claude" / "projects")
         shutil.rmtree(self.amb.doc)
-        env = self.amb.ambiente()
+        env = self.amb.ambiente(("rodada-b1",))
         env.pop("CLAUDE_CONFIG_DIR")
         env["HOME"] = str(casa)
-        r = subprocess.run([sys.executable, str(PROGRAMA), "copia"], input=self.amb.evento(), capture_output=True, text=True, env=env, cwd=str(self.amb.raiz))
+        r = subprocess.run([sys.executable, str(PROGRAMA), "rodada", "--sessao", SESSAO_B1], capture_output=True, text=True, env=env, cwd=str(self.amb.raiz))
         self.assertEqual(r.returncode, 0, r.stderr)
         self.assertTrue(self.amb.d(2).exists())
-        self.assertTrue((casa / ".claude" / "plugins" / "data" / "hopper-documentation-anth-hopper-documentation-anth" / "rodadas.jsonl").exists())
+        registro = casa / ".claude" / "plugins" / "data" / "hopper-documentation-anth-hopper-documentation-anth" / "rodadas.jsonl"
+        linhas = [json.loads(l) for l in le(registro).splitlines()]
+        self.assertTrue(any(l["conversa"] == SESSAO_B1 and l["etapa"] == "escrita" and l["resultado"] == "concluída" for l in linhas))
         # a skill localiza pelo identificador, sem transcript_path
         shutil.rmtree(self.amb.doc)
         r = self.amb.roda("rodada", "--sessao", SESSAO_B1, respostas=("rodada-b1",))
@@ -125,28 +127,43 @@ class Localizacao(CasoDeAceite):
         """T38: CLAUDE_PID aponta para o executável que iniciou o gatilho; depois o PATH; depois ~/.local/bin/claude."""
         pasta = Path(tempfile.mkdtemp(prefix="claude-falso-"))
         self.addCleanup(shutil.rmtree, pasta, True)
-        falso = pasta / "claude"
-        os.symlink(shutil.which("sleep") or "/bin/sleep", falso)  # uma cópia de binário do sistema é morta no macOS
+        falso = pasta / "claude-pid"
+        sleep = shutil.which("sleep") or "/bin/sleep"
+        outro = shutil.which("true") or "/usr/bin/true"
+        if sys.platform.startswith("linux"):
+            shutil.copy2(sleep, falso)  # /proc/<pid>/exe resolve links simbólicos.
+        else:
+            os.symlink(sleep, falso)  # cópias de binários do sistema são mortas no macOS.
         processo = subprocess.Popen([str(falso), "30"])
-        self.addCleanup(processo.kill)
+        def terminar():
+            if processo.poll() is None:
+                processo.kill()
+            processo.wait()
+        self.addCleanup(terminar)
+        candidato_path = pasta / "claude"
+        os.symlink(outro, candidato_path)
+        casa = pasta / "casa"
+        (casa / ".local" / "bin").mkdir(parents=True)
+        candidato_local = casa / ".local" / "bin" / "claude"
+        os.symlink(sleep, candidato_local)
         env = self.amb.ambiente()
         env.pop("HOPPER_DOCUMENTATION_ANTH_CLAUDE")
-        env["CLAUDE_PID"] = str(processo.pid)
-        r = subprocess.run([sys.executable, str(PROGRAMA), "executavel"], capture_output=True, text=True, env=env)
-        self.assertEqual(r.returncode, 0, r.stderr)
-        self.assertEqual(Path(r.stdout.strip()).resolve(), falso.resolve())
+        env.update(CLAUDE_PID=str(processo.pid), PATH=str(pasta) + os.pathsep + env.get("PATH", ""), HOME=str(casa))
+        with self.subTest(candidato="CLAUDE_PID antes do PATH"):
+            r = subprocess.run([sys.executable, str(PROGRAMA), "executavel"], capture_output=True, text=True, env=env)
+            self.assertEqual(r.returncode, 0, r.stderr)
+            self.assertNotEqual(falso.resolve(), candidato_path.resolve())
+            self.assertEqual(Path(r.stdout.strip()).resolve(), falso.resolve())
         env.pop("CLAUDE_PID")
-        env["PATH"] = str(pasta) + os.pathsep + env.get("PATH", "")
-        r = subprocess.run([sys.executable, str(PROGRAMA), "executavel"], capture_output=True, text=True, env=env)
-        self.assertEqual(Path(r.stdout.strip()).resolve(), falso.resolve())
+        with self.subTest(candidato="PATH antes de ~/.local/bin/claude"):
+            r = subprocess.run([sys.executable, str(PROGRAMA), "executavel"], capture_output=True, text=True, env=env)
+            self.assertNotEqual(candidato_path.resolve(), candidato_local.resolve())
+            self.assertEqual(Path(r.stdout.strip()).resolve(), candidato_path.resolve())
         env["PATH"] = "/nonexistent"
-        casa = Path(tempfile.mkdtemp(prefix="casa-"))
-        self.addCleanup(shutil.rmtree, casa, True)
-        (casa / ".local" / "bin").mkdir(parents=True)
-        os.symlink(shutil.which("sleep") or "/bin/sleep", casa / ".local" / "bin" / "claude")
-        env["HOME"] = str(casa)
-        r = subprocess.run([sys.executable, str(PROGRAMA), "executavel"], capture_output=True, text=True, env=env)
-        self.assertEqual(Path(r.stdout.strip()).resolve(), (casa / ".local" / "bin" / "claude").resolve())
+        with self.subTest(candidato="~/.local/bin/claude"):
+            r = subprocess.run([sys.executable, str(PROGRAMA), "executavel"], capture_output=True, text=True, env=env)
+            self.assertEqual(Path(r.stdout.strip()).resolve(), candidato_local.resolve())
+
 
 
 if __name__ == "__main__":

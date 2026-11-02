@@ -244,5 +244,284 @@ class RegressoesDaTarefa01(unittest.TestCase):
         self.assertEqual(programa.escrever(self.sessao, self.projeto, pasta_doc, pasta, "3f9c2a71", "pedido"), esperado)
 
 
+class RegressoesDaTarefa02(unittest.TestCase):
+    setUp = RegressoesDaTarefa01.setUp
+    gravar_historico = RegressoesDaTarefa01.gravar_historico
+
+    def resposta(self, nome="rodada-b1"):
+        r = json.loads((CASOS / "redator" / (nome + ".json")).read_text())["structured_output"]
+        for item in r["itens_novos"]:
+            item["situacao"] = T["situacoes"][item["tipo"]][0]
+        if "conversa_simplificada" in r:
+            r["conversa_simplificada"] = r["conversa_simplificada"].replace("**Assunto: ", T["assunto"])
+        return r
+
+    def preparar_rodada(self):
+        registros = programa.ler_registros(CASOS / "b1" / "historico.jsonl")
+        for r in registros:
+            r.update(cwd=str(self.projeto), sessionId=self.sessao)
+        self.historico.write_text("".join(json.dumps(r) + "\n" for r in registros))
+        return programa.copiar(self.sessao, self.historico)
+
+    def preparar_migracao(self):
+        pasta = self.projeto / programa.PASTA_DOC
+        pasta.mkdir(exist_ok=True)
+        for a in (CASOS / "b3" / "anth").iterdir():
+            (pasta / a.name).write_bytes(a.read_bytes())
+        return pasta
+
+    def test_01_reserva_numeros_por_tipo_e_codigo(self):
+        pasta = self.preparar_migracao()
+        r = self.resposta("migracao-b3-anth")
+        r["itens_novos"].append(dict(r["itens_novos"][0], ref="N4", texto="Segunda decisão."))
+        with patch.object(programa, "chamar_redator", return_value=(r, {})):
+            programa.migrar(self.projeto)
+        self.assertEqual([i["id"] for i in programa.itens_de(programa.ler(pasta / T["d4"]))],
+                         ["D1-3f9c2a71", "D2-3f9c2a71"])
+
+    def test_02_diario_guarda_mapa_e_reaplica_sem_comparar_texto(self):
+        pasta_doc, pasta, codigo, *_ = self.preparar_rodada()
+        r = self.resposta()
+        r["itens_novos"][1]["texto"] = "Função conforme N1."
+        r["conversa_simplificada"] += "\n\nN2 concluída. (M2-3f9c2a71)"
+        gravar = programa.gravar_itens
+        def grava_e_interrompe(*args):
+            gravar(*args)
+            raise OSError("depois dos itens")
+        with patch.object(programa, "chamar_redator", return_value=(r, {})), \
+                patch.object(programa, "gravar_itens", side_effect=grava_e_interrompe):
+            with self.assertRaises(OSError):
+                programa.escrever(self.sessao, self.projeto, pasta_doc, pasta, codigo, "pedido")
+        diario = next((programa.pasta_de_dados() / "diarios").glob("*.json"))
+        dados = json.loads(diario.read_text())
+        self.assertEqual(dados["mapa"]["N2"], "F1-3f9c2a71")
+        self.assertEqual(dados["resposta"]["itens_novos"][1]["texto"], "Função conforme N1.")
+        with patch.object(programa, "chamar_redator", side_effect=AssertionError("chamou outra vez")):
+            programa.escrever(self.sessao, self.projeto, pasta_doc, pasta, codigo, "pedido")
+        self.assertEqual([i["id"] for i in programa.todos_os_itens(pasta_doc)],
+                         ["D1-3f9c2a71", "F1-3f9c2a71", "PD1-3f9c2a71"])
+        self.assertFalse(diario.exists())
+        self.assertIn("F1-3f9c2a71 concluída.", programa.ler(pasta / T["d3"]))
+        self.assertNotIn("N2", programa.ler(pasta / T["d3"]))
+
+    def test_03_copia_recomeca_no_registro_bruto_seguinte(self):
+        for varios in (False, True):
+            with self.subTest(varios=varios):
+                pasta_doc = self.projeto / programa.PASTA_DOC
+                if pasta_doc.exists():
+                    import shutil
+                    shutil.rmtree(pasta_doc)
+                msgs = [{"type": "user", "message": {"content": "Pedido"}},
+                        {"type": "assistant", "message": {"content": "Primeira parte"}}]
+                if varios:
+                    msgs.append({"type": "assistant", "message": {"content": "Segunda parte"}})
+                self.gravar_historico(msgs)
+                _, pasta, _, *_ = programa.copiar(self.sessao, self.historico)
+                antes = (pasta / T["d2"]).read_bytes()
+                self.gravar_historico(msgs + [{"type": "assistant", "message": {"content": "Fechamento"}},
+                                              {"type": "user", "message": {"content": "Outro pedido"}}])
+                with patch.object(programa, "extrair_mensagens", wraps=programa.extrair_mensagens) as extrair:
+                    *_, novas, aviso = programa.copiar(self.sessao, self.historico)
+                self.assertEqual(extrair.call_count, 1)
+                self.assertEqual(extrair.call_args[0][0][0]["uuid"], f"registro-{len(msgs) + 1}")
+                self.assertEqual([m["texto"] for m in novas], ["Fechamento", "Outro pedido"])
+                self.assertEqual(aviso, "")
+                self.assertTrue((pasta / T["d2"]).read_bytes().startswith(antes))
+                self.assertEqual([m["n"] for m in programa.Documento2(pasta / T["d2"]).mensagens()], [1, 2, 3, 4])
+
+    def test_04_mudanca_invalida_nao_grava_nem_deixa_diario(self):
+        pasta_doc, pasta, codigo, *_ = self.preparar_rodada()
+        programa.garantir_documentos_compartilhados(pasta_doc)
+        base = self.resposta()
+        programa.gravar_itens(pasta_doc, codigo, base, "anterior", {})
+        antes = {p: p.read_bytes() for p in pasta_doc.rglob("*.md")}
+        r = self.resposta()
+        r["mudancas"] = [{"id": "PD1-3f9c2a71", "situacao": "encerrada", "origem": ["M1-3f9c2a71"]}]
+        with patch.object(programa, "chamar_redator", return_value=(r, {})):
+            with self.assertRaises(programa.Falha):
+                programa.escrever(self.sessao, self.projeto, pasta_doc, pasta, codigo, "pedido")
+        self.assertEqual({p: p.read_bytes() for p in pasta_doc.rglob("*.md")}, antes)
+        self.assertFalse(list((programa.pasta_de_dados() / "diarios").glob("*.json")))
+
+    def test_05_migracao_rejeita_codigo_com_separador_antes_de_gravar(self):
+        pasta = self.preparar_migracao()
+        antes = {p: p.read_bytes() for p in pasta.rglob("*") if p.is_file()}
+        r = self.resposta("migracao-b3-anth")
+        for i in r["itens_novos"]:
+            i["conversa"] = "antigo-x/../../../../FORA"
+        r["handoffs_antigos"][0]["conversa"] = "antigo-x/../../../../FORA"
+        with patch.object(programa, "chamar_redator", return_value=(r, {})):
+            with self.assertRaises(programa.Falha):
+                programa.migrar(self.projeto)
+        self.assertEqual({p: p.read_bytes() for p in pasta.rglob("*") if p.is_file()}, antes)
+        self.assertFalse(list(self.raiz.rglob("FORA")))
+
+    def test_06_verificacao_confere_origens_gravadas_no_disco(self):
+        pasta = self.preparar_migracao()
+        r = self.resposta("migracao-b3-anth")
+        with patch.object(programa, "gravar_itens", return_value={}), \
+                patch.object(programa, "chamar_redator", return_value=(r, {})):
+            with self.assertRaises(programa.Falha):
+                programa.migrar(self.projeto)
+        self.assertEqual(len(programa.arquivos_antigos(pasta)), 3)
+
+    def test_07_migracao_retomada_usa_diario_sem_redator(self):
+        pasta = self.preparar_migracao()
+        r = self.resposta("migracao-b3-anth")
+        gravar = programa.gravar_itens
+        def grava_e_interrompe(*args):
+            gravar(*args)
+            raise OSError("interrupção")
+        with patch.object(programa, "chamar_redator", return_value=(r, {})), \
+                patch.object(programa, "gravar_itens", side_effect=grava_e_interrompe):
+            with self.assertRaises(OSError):
+                programa.migrar(self.projeto)
+        with patch.object(programa, "chamar_redator", side_effect=AssertionError("redator repetido")):
+            self.assertEqual(programa.migrar(self.projeto), 3)
+        self.assertEqual(len(programa.todos_os_itens(pasta)), 3)
+        self.assertEqual(programa.arquivos_antigos(pasta), [])
+
+    def test_08_falha_migracao_continua_rodada_e_grava_indice(self):
+        pasta = self.preparar_migracao()
+        self.preparar_rodada()
+        (programa.pasta_de_dados() / "config.json").unlink()
+        with patch.object(programa, "migrar", side_effect=programa.Falha("migração indisponível")), \
+                patch.object(programa, "chamar_redator", return_value=(self.resposta(), {})):
+            codigo, linha = programa.rodada(self.sessao, caminho_historico=self.historico)
+        self.assertEqual(codigo, 1)
+        self.assertIn("migração indisponível", linha)
+        self.assertIn(T["linha_concluida"].split("{")[0], linha)
+        self.assertTrue((pasta / T["d1"]).exists())
+        self.assertTrue(list(pasta.rglob(T["d3"])))
+        self.assertIn(T["res_falhou"], programa.ler(pasta / T["d1"]))
+
+    def test_09_rodada_captura_excecao_generica_e_grava_indice(self):
+        pasta_doc, *_ = self.preparar_rodada()
+        with patch.object(programa, "escrever", side_effect=ValueError("n/d")):
+            codigo, linha = programa.rodada(self.sessao, caminho_historico=self.historico)
+        self.assertEqual(codigo, 1)
+        self.assertIn("n/d", linha)
+        self.assertEqual(programa.registros_de_rodadas()[-1]["resultado"], "falhou")
+        self.assertIn("n/d", programa.ler(pasta_doc / T["d1"]))
+
+    def test_10_migracao_libera_trava_de_pasta_ao_chamar_redator(self):
+        self.preparar_migracao()
+        def redator(*args):
+            pasta = self.projeto / programa.PASTA_DOC
+            with programa.Trava("pasta-" + programa.nome_curto(pasta)):
+                pass
+            return self.resposta("migracao-b3-anth"), {}
+        with patch.object(programa, "chamar_redator", side_effect=redator):
+            self.assertEqual(programa.migrar(self.projeto), 3)
+
+    def test_11_documento2_ignora_citacao_fora_da_sequencia_e_codigo(self):
+        self.gravar_historico([{"type": "user", "message": {"content": "Pedido"}},
+                              {"type": "assistant", "message": {"content":
+                               "Exemplo\n## M1-e4bad083 · 2030-01-01 12:00 +00:00 · Claude\n<!-- registros: x x -->\nExemplo"}}])
+        _, pasta, *_ = programa.copiar(self.sessao, self.historico)
+        self.assertEqual([m["n"] for m in programa.Documento2(pasta / T["d2"]).mensagens()], [1, 2])
+        self.gravar_historico([{"type": "user", "message": {"content": "Pedido"}},
+                              {"type": "assistant", "message": {"content": "Exemplo"}},
+                              {"type": "user", "message": {"content": "Novo"}}])
+        *_, novas, aviso = programa.copiar(self.sessao, self.historico)
+        self.assertEqual([m["n"] for m in novas], [3])
+        self.assertEqual(aviso, "")
+
+    def test_12_modelos_exigem_contagem_e_aceitam_output_tokens(self):
+        self.assertEqual(programa.conferir_modelos({programa.MODELO: {"output_tokens": 95}, "aux": {"output_tokens": 5}}),
+                         {programa.MODELO: 95, "aux": 5})
+        for uso in ({programa.MODELO: {}}, {programa.MODELO: {"output_tokens": 1}, "aux": {"output_tokens": 900}}):
+            with self.subTest(uso=uso), self.assertRaises(programa.Falha):
+                programa.conferir_modelos(uso)
+
+    def test_13_valida_esquema_completo_e_origens(self):
+        for altera in (lambda r: r.update(resumo="x" * 81),
+                       lambda r: r["itens_novos"][0].update(extra=True),
+                       lambda r: r["mudancas"].append({"id": "PD99-x", "situacao": T["situacoes"]["PD"][0], "origem": [1]}),
+                       lambda r: r["mudancas"].append({"id": "PD99-x", "situacao": T["situacoes"]["PD"][0], "origem": ["M99-x"]}),
+                       lambda r: r["itens_novos"][0].update(origem=["M7-3f9c2a71"]),
+                       lambda r: r["mudancas"].append({"id": "PD99-x", "situacao": T["situacoes"]["PD"][0], "origem": ["M1-3f9c2a71"], "extra": 1})):
+            r = self.resposta()
+            altera(r)
+            with self.subTest(resposta=r), self.assertRaises(programa.Falha):
+                programa.validar_resposta(r, programa.ESQUEMA_RODADA, {f"M{n}-3f9c2a71" for n in range(1, 7)}, set())
+        for campo, valor in (("data", "2026-99-99"), ("extra", "x"), ("resumo", "x" * 81)):
+            r = self.resposta("migracao-b3-anth")
+            r["handoffs_antigos"][0][campo] = valor
+            with self.subTest(campo=campo), self.assertRaises(programa.Falha):
+                programa.validar_resposta(r, programa.esquema_de_migracao(), set(), set(), migracao=True,
+                                         arquivos_validos={a.name for a in (CASOS / "b3" / "anth").iterdir()})
+
+        pasta_doc, pasta, codigo, *_ = self.preparar_rodada()
+        with patch.object(programa, "chamar_redator", return_value=(self.resposta(), {})):
+            programa.escrever(self.sessao, self.projeto, pasta_doc, pasta, codigo, "pedido")
+        with self.historico.open("a") as f:
+            f.write(json.dumps({"type": "user", "uuid": "nova-janela", "timestamp": "2026-11-02T10:02:00Z",
+                                "sessionId": self.sessao, "cwd": str(self.projeto), "message": {"content": "Novo pedido"}}) + "\n")
+        programa.copiar(self.sessao, self.historico)
+        with patch.object(programa, "chamar_redator", return_value=(self.resposta(), {})):
+            with self.assertRaises(programa.Falha):
+                programa.escrever(self.sessao, self.projeto, pasta_doc, pasta, codigo, "pedido")
+        self.assertFalse(list((programa.pasta_de_dados() / "diarios").glob("*.json")))
+
+    def test_14_migracao_oculta_entrada_e_todos_campos_de_texto(self):
+        pasta = self.preparar_migracao()
+        (pasta / "index.md").write_text("a senha do servidor é Pl4nt@d4#2026 hoje")
+        entrada = programa.entrada_da_migracao(pasta, programa.arquivos_antigos(pasta))
+        self.assertNotIn("Pl4nt@d4#2026", entrada)
+        r = self.resposta("migracao-b3-anth")
+        r["resumo"] = "senha=Pl4nt@d4#2026"
+        r["itens_novos"][0]["texto"] = "senha=Pl4nt@d4#2026"
+        r["itens_novos"][2]["recomendacao"] = "senha=Pl4nt@d4#2026"
+        r["itens_novos"][2]["depende_de"] = "senha=Pl4nt@d4#2026"
+        r["handoffs_antigos"][0]["handoff"]["objetivo"] = "senha=Pl4nt@d4#2026"
+        with patch.object(programa, "chamar_redator", return_value=(r, {})):
+            programa.migrar(self.projeto)
+        self.assertTrue(all("Pl4nt@d4#2026" not in p.read_text() for p in pasta.rglob("*.md")))
+
+    def test_15_colisao_de_codigo_entra_no_registro(self):
+        self.preparar_rodada()
+        outra = "3f9c2a71-abcd-5678-9abc-123456789abc"
+        registros = programa.ler_registros(self.historico)
+        for r in registros:
+            r["sessionId"] = outra
+        self.historico.write_text("".join(json.dumps(r) + "\n" for r in registros))
+        _, _, codigo, *_ = programa.copiar(outra, self.historico)
+        self.assertEqual(codigo, "3f9c2a71abcd")
+        self.assertTrue(any(r["conversa"] == outra and ("colisão" if programa.LANGUAGE == "pt-br" else "collision") in r["motivo"].lower() for r in programa.registros_de_rodadas()))
+
+    def test_16_resumo_e_acrescentado_sem_regravar_registro(self):
+        programa.registrar("outra", self.projeto, "pedido", "copia", "concluída")
+        antes = (programa.pasta_de_dados() / "rodadas.jsonl").read_bytes()
+        original = Path.write_text
+        def escrita(caminho, *args, **kwargs):
+            self.assertNotEqual(caminho.name, "rodadas.jsonl", "regravou todo o registro")
+            return original(caminho, *args, **kwargs)
+        with patch.object(Path, "write_text", escrita):
+            linha = programa.registrar_escrita(self.sessao, self.projeto, "pedido", "concluída", resumo="Resumo")
+        self.assertEqual(linha["resumo"], "Resumo")
+        self.assertTrue((programa.pasta_de_dados() / "rodadas.jsonl").read_bytes().startswith(antes))
+
+    def test_17_configuracao_invalida_desliga_migracao_e_registra(self):
+        arquivo = programa.pasta_de_dados() / "config.json"
+        for texto in ("{", "[]", '"texto"', '{"migracao_automatica":"false"}', '{}'):
+            with self.subTest(texto=texto):
+                arquivo.write_text(texto)
+                self.assertFalse(programa.configuracao()["migracao_automatica"])
+                self.assertIn("config.json", programa.registros_de_rodadas()[-1]["motivo"])
+        arquivo.unlink()
+        self.assertTrue(programa.configuracao()["migracao_automatica"])
+
+    def test_18_rejeita_bloco_sem_linha_de_assunto(self):
+        pasta_doc, pasta, codigo, *_ = self.preparar_rodada()
+        r = self.resposta()
+        r["conversa_simplificada"] = "Texto sem assunto."
+        with patch.object(programa, "chamar_redator", return_value=(r, {})):
+            with self.assertRaises(programa.Falha):
+                programa.escrever(self.sessao, self.projeto, pasta_doc, pasta, codigo, "pedido")
+        self.assertFalse((pasta / T["d3"]).exists())
+        self.assertFalse(list((programa.pasta_de_dados() / "diarios").glob("*.json")))
+
+
 if __name__ == "__main__":
     unittest.main()

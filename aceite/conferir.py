@@ -79,14 +79,12 @@ class Conferencia:
         d2 = pasta / self.t["d2"]
         if not d2.exists():
             return []
-        # Um cabeçalho de mensagem é uma linha "## M…" seguida do comentário de registros. Uma linha "## " no texto de
-        # uma mensagem (por exemplo, um título que o Claude escreveu) não é cabeçalho. Uma linha "## " fora desse par,
-        # logo depois do cabeçalho do arquivo, é reprovada em F2 como cabeçalho fora do formato.
+        # Reconhece a linha completa independentemente do comentário, para F2 detectar a ausência dele.
         linhas = le(d2).split("\n")
-        inicios = [i for i in range(len(linhas) - 1) if linhas[i].startswith("## ") and linhas[i + 1].startswith("<!-- registros:")]
-        primeiro = next((i for i, l in enumerate(linhas) if l.startswith("## ")), None)
+        inicios = [i for i, linha in enumerate(linhas) if RE_MENSAGEM.fullmatch(linha)]
+        primeiro = next((i for i, linha in enumerate(linhas) if linha.startswith("## ")), None)
         if primeiro is not None and primeiro not in inicios:
-            inicios = [primeiro] + inicios
+            inicios.insert(0, primeiro)
         saida = []
         for k, i in enumerate(inicios):
             fim = inicios[k + 1] if k + 1 < len(inicios) else len(linhas)
@@ -232,7 +230,8 @@ class Conferencia:
                 continue
             objeto = True
             secoes = [l[3:].strip() for l in le(d7).split("\n") if l.startswith("## ")]
-            if secoes != self.t["secoes_d7"]:
+            obrigatorias = [titulo for titulo in secoes if titulo in self.t["secoes_d7"]]
+            if obrigatorias != self.t["secoes_d7"]:
                 self.falha("F5", f"{pasta.name}: seções do documento 7: {secoes}")
         if not objeto:
             self.falha("F5", "nenhum documento 7")
@@ -254,9 +253,9 @@ class Conferencia:
 
     def f7(self):
         objeto = False
+        frases_total, longas = 0, 0
         for caminho in self.documentos_3_a_7():
             objeto = True
-            frases_total, longas, muito_longas = 0, 0, 0
             for paragrafo in self.paragrafos_contaveis(le(caminho)):
                 frases = [f for f in re.split(r"(?<=[.!?])\s+", paragrafo) if f.strip()]
                 if len(frases) > 6:
@@ -267,10 +266,9 @@ class Conferencia:
                     if palavras > 25:
                         longas += 1
                     if palavras > 40:
-                        muito_longas += 1
                         self.falha("F7", f"{caminho.name}: frase com {palavras} palavras")
-            if frases_total and longas / frases_total > 0.10:
-                self.falha("F7", f"{caminho.name}: {longas} de {frases_total} frases passam de 25 palavras")
+        if frases_total and longas / frases_total > 0.10:
+            self.falha("F7", f"{longas} de {frases_total} frases passam de 25 palavras nos documentos 3 a 7")
         if not objeto:
             self.falha("F7", "nenhum documento 3 a 7")
 
@@ -281,13 +279,19 @@ class Conferencia:
         return saida
 
     def paragrafos_contaveis(self, texto):
+        rotulos = ({"Conversa", "Pasta do projeto", "Fuso dos horários", "Origem", "Situação", "Intervalo da rodada",
+                    "Recomendação", "Depende de", "Última mensagem coberta", "Data da rodada", "Redator"}
+                   if self.idioma == "pt-br" else
+                   {"Conversation", "Project folder", "Time zone", "Source", "Status", "Run range", "Recommendation",
+                    "Depends on", "Last covered message", "Run date", "Writer"})
+        metadado = re.compile(r"^- (?:" + "|".join(re.escape(r) for r in rotulos) + r"): ")
         dentro_codigo = False
         paragrafos, atual = [], []
         for linha in texto.split("\n"):
             if linha.startswith("```"):
                 dentro_codigo = not dentro_codigo
                 continue
-            if dentro_codigo or linha.startswith("#") or linha.startswith(self.t["assunto"]) or linha.startswith("- ") \
+            if dentro_codigo or linha.startswith("#") or linha.startswith(self.t["assunto"]) or metadado.match(linha) \
                     or linha.startswith("|") or linha.startswith("<!--"):
                 continue
             if not linha.strip():

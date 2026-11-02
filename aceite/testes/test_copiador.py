@@ -32,15 +32,17 @@ class Copiador(CasoDeAceite):
         novo = registros_de(CASOS / "b1" / "segunda-rodada.jsonl")
 
         def acrescenta():
-            time.sleep(0.15)
-            self.amb.acrescenta_historico(SESSAO_B1, novo)
+            for n in range(12):
+                time.sleep(0.05)
+                registro = dict(novo[0], uuid=f"crescimento-{n}", message={"content": f"acréscimo {n}"})
+                self.amb.acrescenta_historico(SESSAO_B1, [registro])
 
         t = threading.Thread(target=acrescenta)
         t.start()
         r = self.amb.copia(escala="0.2")  # espera de C09: 0,1 s por leitura, 0,2 s estável, 1 s no máximo
         t.join()
         self.assertEqual(r.returncode, 0, r.stderr)
-        self.assertIn(f"## M7-{CODIGO_B1} ", le(self.amb.d(2)))
+        self.assertIn("acréscimo 11", le(self.amb.d(2)))
 
     def test_R05_cabecalhos_comentarios_e_texto_do_caso_b1(self):
         """T05: o corpo do documento 2 é igual à saída literal esperada do caso B1."""
@@ -71,8 +73,14 @@ class Copiador(CasoDeAceite):
         self.assertEqual(depois.count(f"## M3-{CODIGO_B1} "), 1)
         self.assertEqual(depois.count("Obrigado."), 1)
         # resposta sem itens (as origens de rodada-b1 citam M4, que esta conversa não tem)
-        self.assertEqual(self.amb.rodada(respostas=("rodada-nada-relevante",)).returncode, 0)
+        resposta = json.loads(le(self.amb.resposta("rodada-nada-relevante")))
+        resposta["structured_output"]["handoff"] = {k: f"Sem alteração. (M1-{CODIGO_B1} a M3-{CODIGO_B1})"
+                                                   for k in resposta["structured_output"]["handoff"]}
+        arquivo = self.amb.respostas / "somente-m1-a-m3.json"
+        arquivo.write_text(json.dumps(resposta), encoding="utf-8")
+        self.assertEqual(self.amb.rodada(respostas=(), extra={"HOPPER_DOCUMENTATION_ANTH_SIMULADO": str(arquivo)}).returncode, 0)
         self.assertIn(f"## M1-{CODIGO_B1} a M3-{CODIGO_B1}", le(self.amb.d(3)))
+        self.assertIn(texto_com_titulos, self.amb.chamadas()[0]["stdin"])
 
     def test_R06_uma_linha_por_ferramenta_sem_resultado(self):
         """T06: linha `Ferramenta: <nome> · <alvo>`, alvo cortado em 120 caracteres, sem o resultado; sem alvo, só o nome."""
@@ -114,6 +122,10 @@ class Copiador(CasoDeAceite):
             n += 1
             registros.append(usuario(f"u{n}", c["texto"], f"2026-03-14T15:{n // 60:02d}:{n % 60:02d}.000Z"))
             esperados.append(("caso", c))
+        for c in casos["json_aninhado"]:
+            n += 1
+            registros.append(usuario(f"u{n}", c["texto"], f"2026-03-14T16:00:{n % 60:02d}Z"))
+            esperados.append(("aninhado", c))
         for token in casos["tokens_inteiros"]:
             n += 1
             registros.append(usuario(f"u{n}", token, f"2026-03-14T16:{n // 60:02d}:{n % 60:02d}.000Z"))
@@ -135,10 +147,50 @@ class Copiador(CasoDeAceite):
                     self.assertNotIn(oculto, corpo, c["texto"])
                 for mantido in c["mantidos"]:
                     self.assertIn(mantido, corpo, c["texto"])
+            elif tipo == "aninhado":
+                for oculto in c["ocultos"]:
+                    self.assertNotIn(oculto, corpo)
+                decodificado = corpo
+                for _ in range(c["profundidade"]):
+                    decodificado = json.loads(decodificado)
+                self.assertEqual(decodificado["note"], "visible")
             elif tipo == "inteiro":
                 self.assertEqual(corpo, TEXTO["oculto"], c)
             else:
                 self.assertEqual(corpo, c[f"esperado_{IDIOMA}"])
+
+    def test_R07_ocultacao_em_tempo_linear(self):
+        """T07: os 8 textos longos da classe Masking, cada cópia em menos de 2 segundos."""
+        textos = ("A" * 200000, "token" * 40000, "\\" * 100000 + '"', ("n" * 50 + "=") * 4000,
+                  "password" * 25000 + "=v", "a." * 100000, "eyJhIjoxfQ." * 20000,
+                  "-----BEGIN A PRIVATE KEY-----\n" * 7000)
+        for n, texto in enumerate(textos):
+            sessao = f"cccc{n:04d}-0000-4000-8000-000000000001"
+            self.amb.grava_historico(sessao, [usuario(f"tempo-{n}", texto, "2026-03-14T15:00:00Z")])
+            inicio = time.monotonic()
+            r = self.amb.copia(sessao)
+            self.assertLess(time.monotonic() - inicio, 2, texto[:20])
+            self.assertEqual(r.returncode, 0, r.stderr)
+            self.assertTrue(self.amb.d(2, sessao[:8]).exists())
+
+    def test_R04_ancora_ausente_continua_pela_data_e_avisa(self):
+        self.amb.grava_historico(SESSAO_B1, [usuario("antes", "Anterior", "2026-03-14T15:00:00Z")])
+        self.amb.copia()
+        antes = self.amb.d(2).read_bytes()
+        self.amb.grava_historico(SESSAO_B1, [usuario("depois", "Posterior", "2026-03-14T15:01:01Z")])
+        self.amb.copia()
+        self.assertTrue(self.amb.d(2).read_bytes().startswith(antes))
+        self.assertIn(f"## M2-{CODIGO_B1}", le(self.amb.d(2)))
+        self.assertIn("Posterior", le(self.amb.d(2)))
+        self.assertTrue(self.amb.rodadas()[-1]["motivo"])
+
+    def test_R05_ignora_usuario_vazio_depois_dos_lembretes(self):
+        self.amb.grava_historico(SESSAO_B1, [usuario("vazio", "<system-reminder>interno</system-reminder>", "2026-03-14T15:00:00Z"),
+                                           usuario("real", "Pedido real", "2026-03-14T15:00:01Z")])
+        self.amb.copia()
+        texto = le(self.amb.d(2))
+        self.assertEqual(texto.count("\n## M"), 1)
+        self.assertIn("<!-- registros: real real -->", texto)
 
     def test_R08_inclui_usuario_claude_respostas_planos_mensagens_de_agente_interrupcoes_e_anexos(self):
         """T08: caso B1 e os casos herdados do clone de leitura (respostas a perguntas, plano aprovado, mensagens na fila)."""

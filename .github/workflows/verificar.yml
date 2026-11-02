@@ -19,6 +19,9 @@ jobs:
         run: |
           set -euo pipefail
           if [ ! -f aceite/MANIFESTO.sha256 ]; then echo "sem manifesto"; exit 1; fi
+          git ls-files aceite .github/workflows/verificar.yml SPEC.md | LC_ALL=C sort | sed '/^aceite\/MANIFESTO\.sha256$/d' > /tmp/criterios-versionados.txt
+          sed -E 's/^[0-9a-fA-F]{64} [ *]//' aceite/MANIFESTO.sha256 | LC_ALL=C sort > /tmp/criterios-manifesto.txt
+          if ! diff -u /tmp/criterios-manifesto.txt /tmp/criterios-versionados.txt; then echo "CRITÉRIO ALTERADO: a lista de caminhos difere do manifesto"; exit 1; fi
           if ! sha256sum --check --strict aceite/MANIFESTO.sha256; then echo "CRITÉRIO ALTERADO: um critério congelado não confere com o manifesto"; exit 1; fi
           if git rev-parse -q --verify refs/tags/criterios-congelados >/dev/null; then
             if ! git diff --quiet criterios-congelados -- aceite/MANIFESTO.sha256; then echo "CRITÉRIO ALTERADO: o manifesto difere do manifesto da tag criterios-congelados"; exit 1; fi
@@ -50,6 +53,7 @@ jobs:
           set -o pipefail
           cd aceite/testes && python3 -m unittest discover -s . -p 'test_*.py' -v 2>&1 | tee ../../aceite-${{ matrix.pacote }}.log
       - name: Testes do executor
+        if: always()
         shell: bash
         run: |
           cd ${{ matrix.pacote }} && if ls tests/test_*.py >/dev/null 2>&1; then python3 -m unittest discover -s tests -v; else echo "sem testes do executor ainda"; fi
@@ -74,9 +78,14 @@ jobs:
         run: |
           set -euo pipefail
           python3 aceite/conferir.py aceite/casos/conferidor/valida --idioma pt-br
+          python3 aceite/conferir.py aceite/casos/conferidor/valida-roteiro --idioma pt-br --roteiro aceite/roteiro.json
           for pasta in aceite/casos/conferidor/invalida-*; do
-            n="${pasta##*-}"
-            saida=$(python3 aceite/conferir.py "$pasta" --idioma pt-br || true)
+            nome="${pasta##*/}"
+            n="${nome#invalida-}"
+            n="${n%%-*}"
+            opcoes=()
+            if [ "$n" = F9 ]; then opcoes=(--roteiro aceite/roteiro.json); fi
+            saida=$(python3 aceite/conferir.py "$pasta" --idioma pt-br "${opcoes[@]}" || true)
             echo "$saida" | grep -q "^$n: reprovada" || { echo "$pasta: $n deveria reprovar"; echo "$saida"; exit 1; }
             echo "$pasta: ok"
           done

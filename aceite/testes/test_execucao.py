@@ -42,7 +42,7 @@ class Execucao(CasoDeAceite):
         registro = amb.rodadas()
         self.assertEqual(registro[-1]["acionamento"], "gatilho-copia")
         self.assertEqual(registro[-1]["resultado"], "falhou")
-        self.assertTrue(registro[-1]["motivo"])
+        self.assertIn("arquivo de histórico não encontrado" if TEXTO["conversa"] == "Conversa" else "transcript file not found", registro[-1]["motivo"])
 
     def test_R24_falha_de_rodada_fica_no_registro_no_documento_1_e_no_aviso(self):
         """T24: redator que falha; registro de rodadas, documento 1 e aviso (código 2 do gatilho de escrita, motivo na saída de erro)."""
@@ -107,7 +107,7 @@ class Execucao(CasoDeAceite):
         self.assertNotEqual(segunda.returncode, 0)
         self.assertTrue(ultima_linha(segunda.stdout))
         registro = amb.rodadas()
-        self.assertEqual(registro[-1]["resultado"] if registro[-1]["acionamento"] == "pedido" and registro[-1]["resultado"] == "falhou" else "falhou", "falhou")
+        self.assertTrue(any(x["acionamento"] == "pedido" and x["resultado"] == "falhou" and x["motivo"] for x in registro))
 
     def test_R28_nada_novo_nao_chama_o_redator_nem_altera_os_documentos(self):
         """T28: 2ª rodada sem registro novo: sem chamada ao redator, documentos iguais, linha final "nada novo"."""

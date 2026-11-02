@@ -458,5 +458,47 @@
    "esperado_pt-br": "Troque a senha e apague o rascunho; o token e a chave ficam no cofre.",
    "esperado_en": "Troque a senha e apague o rascunho; o token e a chave ficam no cofre."
   }
+ ],
+ "json_aninhado": [
+  {
+   "texto": "{\"password\": \"START \\\"MIDDLE\\\" END \\\\ tail\", \"api_key\": \"K_1\", \"note\": \"visible\"}",
+   "ocultos": [
+    "START",
+    "MIDDLE",
+    "END",
+    "K_1"
+   ],
+   "profundidade": 1
+  },
+  {
+   "texto": "\"{\\\"password\\\": \\\"START \\\\\\\"MIDDLE\\\\\\\" END \\\\\\\\ tail\\\", \\\"api_key\\\": \\\"K_2\\\", \\\"note\\\": \\\"visible\\\"}\"",
+   "ocultos": [
+    "START",
+    "MIDDLE",
+    "END",
+    "K_2"
+   ],
+   "profundidade": 2
+  },
+  {
+   "texto": "\"\\\"{\\\\\\\"password\\\\\\\": \\\\\\\"START \\\\\\\\\\\\\\\"MIDDLE\\\\\\\\\\\\\\\" END \\\\\\\\\\\\\\\\ tail\\\\\\\", \\\\\\\"api_key\\\\\\\": \\\\\\\"K_3\\\\\\\", \\\\\\\"note\\\\\\\": \\\\\\\"visible\\\\\\\"}\\\"\"",
+   "ocultos": [
+    "START",
+    "MIDDLE",
+    "END",
+    "K_3"
+   ],
+   "profundidade": 3
+  },
+  {
+   "texto": "\"\\\"\\\\\\\"{\\\\\\\\\\\\\\\"password\\\\\\\\\\\\\\\": \\\\\\\\\\\\\\\"START \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"MIDDLE\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\" END \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ tail\\\\\\\\\\\\\\\", \\\\\\\\\\\\\\\"api_key\\\\\\\\\\\\\\\": \\\\\\\\\\\\\\\"K_4\\\\\\\\\\\\\\\", \\\\\\\\\\\\\\\"note\\\\\\\\\\\\\\\": \\\\\\\\\\\\\\\"visible\\\\\\\\\\\\\\\"}\\\\\\\"\\\"\"",
+   "ocultos": [
+    "START",
+    "MIDDLE",
+    "END",
+    "K_4"
+   ],
+   "profundidade": 4
+  }
  ]
 }
