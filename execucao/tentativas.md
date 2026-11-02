@@ -6,6 +6,7 @@
 | --- | --- | --- |
 | Chamadas reais ao redator, U1 a U8 | 40 | 2 (U1, item 6) |
 | Rodadas disparadas pelas compactações da sessão do executor (fora do limite) | sem limite | 0 |
+| Outras chamadas reais fora do redator (retomada, sonda) | sem limite | 1 retomada (U1, item 7); sessões de sonda com Haiku 5.5 |
 | Execuções completas das avaliações de acionamento | 3 | 0 |
 | Passadas de revisão por unidade | 2 | U1: 0 |
 

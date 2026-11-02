@@ -43,3 +43,7 @@ Comando de C03 completo (`claude -p --model claude-sonnet-5-5 --effort high --to
 - VPS, conta `jpah`, ambiente limpo (`env -i`): `is_error=false`, mesmo `structured_output`, `modelUsage={"claude-sonnet-5-5": {"out": 68, "in": 2}}`, 1.893 ms, US$ 0,00448.
 - Regra de C04: 100% dos tokens de saída do `claude-sonnet-5-5`. Aprovado nos 2.
 - Observação: no terminal do MacBook (A1) com ambiente limpo, `claude auth status` mostra `loggedIn: false` e `claude -p` falha com "OAuth session expired and could not be refreshed" (03:22 UTC), mesmo depois de o proprietário informar login às 03:17 UTC. A1 depende de `claude auth login` no Terminal (pergunta P-02).
+
+## V-U1-07 · U1, item 7 · Retomada (C21) · 2026-11-02 03:26 · aprovado
+
+Comando: `claude -p 'Leia SPEC.md e a pasta execucao/. Diga em que unidade o trabalho está e qual é o próximo passo. Responda em até 8 linhas, em português.' --model sonnet --max-turns 20 --output-format json`, na cópia de trabalho, em sessão nova sem o contexto do executor. Resultado: 8 turnos, 23 s, US$ 0,18, `modelUsage` só `claude-sonnet-5-5`. A resposta disse U1 em andamento; itens 1, 2, 3 e 6 prontos; item 4 com `deny` aprovado e `ask` substituído por D-06; item 5 em andamento com A3 em prova, A1 dependente de P-02 e A2 de P-03; itens 7, 8 e 9 pendentes; próximo passo: destravar o item 5 e gravar V-U1-05. Igual a `estado.md` no momento da chamada. Chamada contada à parte das chamadas ao redator.
