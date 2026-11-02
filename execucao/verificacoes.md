@@ -150,3 +150,7 @@ Faltam: a lista de hooks com os 2 comandos (A1 e A3, por pseudoterminal), os pas
 ## V-U8-01 (correção) · 2026-11-02 10:00
 
 A desinstalação da 0.1.4 apagou a pasta de dados e o `config.json` gravado antes (D-14). O arquivo foi regravado nas 3 contas (MacBook `jonathan`, VPS `jpah` e `jonathan`) com `{"migracao_automatica": false}` e conferido por leitura. Nenhuma rodada da versão 2 rodou antes disso (nenhum `rodadas.jsonl` existia). N12 preservada.
+
+## V-U1-02 (correção de A1) · 2026-11-02 10:08 · A1 desbloqueado
+
+O bloqueio de A1 (P-02) estava errado. No painel de Terminal do app, que roda o shell de login do proprietário fora do isolamento da ferramenta Bash, `claude auth status` mostra `"loggedIn": true` e `"authMethod": "claude.ai"`, e `claude -p 'Responda so com a palavra ok.' --model haiku` respondeu "ok". O registro do Chaves do macOS (`Claude Code-credentials`) tem data de alteração 2026-11-02 03:17:03 UTC, o horário em que o proprietário informou o login. Causa do falso bloqueio: a ferramenta Bash da sessão do executor roda isolada e não lê o Chaves do macOS, então o `claude` iniciado por ela aparece sem login. Consequência para o método: os testes de A1 rodam pelo painel de Terminal (ferramenta `run_in_terminal`), e não pela ferramenta Bash. P-02 retirada sem resposta do proprietário.

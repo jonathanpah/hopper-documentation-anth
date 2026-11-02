@@ -15,7 +15,7 @@ Início: 2026-11-02 02:36 UTC.
 | 2. Acessos | pronto | `versoes.md`, V-U1-02 |
 | 3. Clone de leitura | pronto | V-U1-03 |
 | 4. Regras de permissão | `deny` aprovado (12 regras, 12 provas, V-U1-04 tentativa 3); `ask` bloqueado · motivo: as regras `ask` não geram pedido nesta sessão · evidência: V-U1-04, tentativa 2 (5 comandos rodaram sem pedido; proprietário confirmou no chat) · como reproduzir: rodar `echo hopper_documentation_anth.py migrar` com a regra `Bash(*hopper_documentation_anth.py migrar*)` em `.claude/settings.local.json`, em sessão da aba Code em modo `auto`. Mecanismo substituto: D-06. | V-U1-04, D-05, D-06, P-01 |
-| 5. Plugin de sonda | A3 aprovado (3 passagens e calibração: 90%). A1 bloqueado · motivo: Terminal sem login · evidência: `claude auth status` → `loggedIn: false` (03:22 UTC) · como reproduzir: `env -i HOME=$HOME PATH=$PATH claude auth status` · pergunta P-02. A2 bloqueado · motivo: a abertura da sessão de teste na pasta `hopper-sonda-a2` foi recusada (pasta não confiada; classificador do modo auto) · evidência: erros das ferramentas `start_session` às 03:1x e 03:22 UTC · pergunta P-03. | V-U1-05, D-10, D-11 |
+| 5. Plugin de sonda | A3 aprovado (3 passagens e calibração: 90%). A1 desbloqueado (o falso bloqueio vinha do isolamento da ferramenta Bash; V-U1-02, correção de A1); prova da sonda em A1 pelo painel de Terminal em andamento. A2 bloqueado · motivo: a abertura da sessão de teste na pasta `hopper-sonda-a2` foi recusada (pasta não confiada; classificador do modo auto) · evidência: erros das ferramentas `start_session` às 03:1x e 03:22 UTC · pergunta P-03. | V-U1-05, D-10, D-11 |
 | 6. Chamada real ao redator | pronto | V-U1-06 |
 | 7. Retomada | pronto | V-U1-07 |
 | 8. Avaliações | pronto | V-U1-08 |
