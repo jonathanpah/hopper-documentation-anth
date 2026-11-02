@@ -2,7 +2,7 @@
 
 ## O que o plugin faz com os seus dados
 
-- Ele lê o histórico do Claude Code da conversa atual e grava arquivos Markdown dentro da pasta `docs-by-hopper-documentation/` do projeto e da pasta de dados do plugin (`~/.claude/plugins/data/hopper-documentation-anth-hopper-documentation-anth/`). Não grava em nenhum outro lugar.
+- Ele lê o histórico do Claude Code da conversa atual e grava arquivos Markdown dentro da pasta `docs-by-hopper-documentation/` do projeto e da pasta de dados do plugin (`~/.claude/plugins/data/hopper-documentation-anth-hopper-documentation-anth/`). Não grava em nenhum outro lugar, exceto os arquivos que o próprio Claude Code grava na pasta de configuração quando o redator roda.
 - Senhas, tokens, chaves e códigos de acesso viram `[oculto]` na conversa integral antes de qualquer envio ao redator ou gravação em disco. As regras de ocultação são testadas contra os casos de `aceite/casos/b2/`.
 - O redator (Claude Sonnet 5.5) roda sem janela, em modo seguro, sem ferramentas, plugins, gatilhos, servidores MCP ou arquivos `CLAUDE.md`. Ele recebe só o trecho novo, os documentos atuais, as regras de escrita e os modelos, e devolve um objeto JSON que o programa valida antes de gravar.
 - O programa aceita uma resposta só quando o Claude Sonnet 5.5 produziu no mínimo 90% dos tokens de saída dela.

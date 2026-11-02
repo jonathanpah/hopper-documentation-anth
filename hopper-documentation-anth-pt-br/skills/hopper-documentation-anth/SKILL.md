@@ -31,7 +31,7 @@ docs-by-hopper-documentation/
 
 O programa do plugin grava o documento 2 sem IA. O Claude Sonnet 5.5, chamado sem janela (`claude -p`) e sem ferramentas, escreve o conteúdo dos documentos 3 a 7 seguindo `regras-de-escrita.md` e `modelos.md` desta pasta. O programa valida a resposta, numera os itens e grava os arquivos.
 
-A mesma rodada roda sozinha antes de toda compactação, por um gatilho do plugin. A primeira rodada em uma pasta que tem handoffs do formato antigo (`index.md` e `handoff-*.md` na raiz) migra esses arquivos e os apaga.
+A mesma rodada roda sozinha antes de toda compactação, por um gatilho do plugin. A primeira rodada em uma pasta que tem handoffs do formato antigo (`index.md` e `handoff-*.md` na raiz) migra esses arquivos e os apaga quando a configuração `migracao_automatica` está ligada, como no padrão.
 
 ## Como a skill roda
 

@@ -46,7 +46,7 @@ claude plugin marketplace add /caminho/para/hopper-documentation-anth-pt-br
 claude plugin install hopper-documentation-anth@hopper-documentation-anth
 ```
 
-Em uma sessão já aberta, envie `/reload-plugins`. Confira com `claude plugin details hopper-documentation-anth@hopper-documentation-anth`: a skill e o gatilho `PreCompact` devem aparecer. Para atualizar, atualize a cópia e rode `claude plugin marketplace update hopper-documentation-anth` e `claude plugin update hopper-documentation-anth@hopper-documentation-anth`. Para remover, `claude plugin uninstall hopper-documentation-anth@hopper-documentation-anth`; os documentos gravados nos projetos permanecem.
+Em uma sessão já aberta, envie `/reload-plugins`. Confira com `claude plugin details hopper-documentation-anth@hopper-documentation-anth`: a skill e o gatilho `PreCompact` devem aparecer. Para atualizar, atualize a cópia e rode `claude plugin uninstall --keep-data hopper-documentation-anth@hopper-documentation-anth` seguido de `claude plugin install hopper-documentation-anth@hopper-documentation-anth`. Esse procedimento atualiza também uma cópia com a mesma versão e preserva a pasta de dados e o `config.json`. Para remover, `claude plugin uninstall hopper-documentation-anth@hopper-documentation-anth`; os documentos gravados nos projetos permanecem.
 
 ## Limites e custos
 

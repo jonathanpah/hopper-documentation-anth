@@ -31,7 +31,7 @@ docs-by-hopper-documentation/
 
 The plugin's program writes document 2 without AI. Claude Sonnet 5.5, called headless (`claude -p`) and without tools, writes the content of documents 3 to 7 following `writing-rules.md` and `templates.md` in this folder. The program validates the answer, numbers the items and writes the files.
 
-The same run happens by itself before every compaction, through a plugin hook. The first run in a folder that has old-format handoffs (`index.md` and `handoff-*.md` at the root) migrates those files and deletes them.
+The same run happens by itself before every compaction, through a plugin hook. The first run in a folder that has old-format handoffs (`index.md` and `handoff-*.md` at the root) migrates those files and deletes them when the `migracao_automatica` setting is on, as it is by default.
 
 ## How the skill runs
 

@@ -76,8 +76,10 @@ TEXTOS = {
                             "origem igual ao nome do arquivo, e reescreva o último handoff de cada conversa antiga nas 9 seções. "
                             "Use N1, N2… para itens novos e o identificador de conversa indicado em cada arquivo."),
         "linha_concluida": "Documentação concluída: {intervalo}.", "linha_nada_novo": "Documentação: nada novo desde {ultima}.",
+        "linha_sem_mensagens": "Documentação: nada novo.",
         "linha_falhou": "Documentação falhou: {motivo}.", "linha_migracao": "Migração concluída: {n} arquivos antigos migrados.",
-        "motivo_historico": "arquivo de histórico não encontrado", "motivo_trava": "outra rodada da conversa em andamento há mais de {min} minutos",
+        "motivo_historico": "arquivo de histórico não encontrado",
+        "motivo_trava": "outra rodada da conversa ou da pasta em andamento; a espera de {segundos} segundos acabou",
         "motivo_esquema": "resposta do redator fora do esquema", "motivo_modelo": "resposta de outro modelo que não o {modelo}",
         "motivo_tempo": "o redator não respondeu em {min} minutos", "motivo_situacao": "situação não permitida: {situacao}",
         "motivo_origem": "origem inválida: {origem}", "motivo_verificacao": "verificação interna da migração reprovou: {detalhe}",
@@ -122,8 +124,10 @@ TEXTOS = {
                             "the source equal to the file name, and rewrite the last handoff of each old conversation in the 9 "
                             "sections. Use N1, N2… for new items and the conversation identifier given in each file."),
         "linha_concluida": "Documentation done: {intervalo}.", "linha_nada_novo": "Documentation: nothing new since {ultima}.",
+        "linha_sem_mensagens": "Documentation: nothing new.",
         "linha_falhou": "Documentation failed: {motivo}.", "linha_migracao": "Migration done: {n} old files migrated.",
-        "motivo_historico": "transcript file not found", "motivo_trava": "another run of the conversation in progress for more than {min} minutes",
+        "motivo_historico": "transcript file not found",
+        "motivo_trava": "another run of the conversation or folder is in progress; the {segundos}-second wait expired",
         "motivo_esquema": "writer response outside the schema", "motivo_modelo": "response from a model other than {modelo}",
         "motivo_tempo": "the writer did not answer in {min} minutes", "motivo_situacao": "status not allowed: {situacao}",
         "motivo_origem": "invalid source: {origem}", "motivo_verificacao": "internal migration check failed: {detalhe}",
@@ -255,10 +259,12 @@ def ler(caminho):
 # ---------------------------------------------------------------------------------------------------------------------
 # Registro de rodadas, saída bruta e travas.
 # ---------------------------------------------------------------------------------------------------------------------
-def registrar(conversa, pasta_do_projeto, acionamento, etapa, resultado, motivo="", intervalo="", modelos=None):
+def registrar(conversa, pasta_do_projeto, acionamento, etapa, resultado, motivo="", intervalo="", modelos=None, trigger=None):
     linha = {"data": iso(agora()), "conversa": conversa or "", "pasta_do_projeto": str(pasta_do_projeto or ""),
              "acionamento": acionamento, "etapa": etapa, "resultado": resultado, "motivo": motivo or "",
              "intervalo": intervalo or "", "modelos": modelos or {}}
+    if trigger is not None:
+        linha["trigger"] = trigger
     with (pasta_de_dados() / "rodadas.jsonl").open("a", encoding="utf-8") as f:
         f.write(json.dumps(linha, ensure_ascii=False) + "\n")
     return linha
@@ -288,7 +294,8 @@ class Trava:
 
     def __enter__(self):
         self.arquivo = self.caminho.open("a+")
-        fim = time.monotonic() + self.espera_maxima * escala()
+        duracao = self.espera_maxima * escala()
+        fim = time.monotonic() + duracao
         while True:
             try:
                 fcntl.flock(self.arquivo, fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -297,7 +304,7 @@ class Trava:
                 if time.monotonic() >= fim:
                     self.arquivo.close()
                     self.arquivo = None
-                    raise Falha(T["motivo_trava"].format(min=15))
+                    raise Falha(T["motivo_trava"].format(segundos=f"{duracao:g}"))
                 time.sleep(min(0.5 * escala(), 0.5))
 
     def __exit__(self, *_):
@@ -557,6 +564,8 @@ def alvo_da_ferramenta(entrada):
 
 def mensagem_de_usuario(registro):
     """Mensagem (autor, texto) de um registro do usuário, ou None quando ele não entra."""
+    if registro.get("isMeta"):
+        return None
     mensagem = registro.get("message") or {}
     conteudo = mensagem.get("content")
     resultado = registro.get("toolUseResult") or {}
@@ -775,7 +784,7 @@ def copiar(sessao, caminho_historico, pasta_do_projeto=None, acionamento="pedido
     interromper("meio-da-copia")
     if not novas and gravadas:
         return pasta_doc, pasta, codigo, [], aviso
-    with Trava(f"pasta-{nome_curto(pasta_doc)}", 60):
+    with Trava(f"pasta-{nome_curto(pasta_doc)}", 25 if acionamento == "gatilho-copia" else 60):
         if not doc2.texto:
             primeiro = hora_local(mensagens[0]["hora"])
             doc2.texto = (f"# {T['titulo_d2']} · {codigo}\n\n- {T['conversa']}: {sessao}\n- {T['pasta_do_projeto']}: {projeto}\n"
@@ -784,6 +793,7 @@ def copiar(sessao, caminho_historico, pasta_do_projeto=None, acionamento="pedido
         novo = doc2.texto
         for m in novas:
             n += 1
+            m["n"] = n
             novo += bloco_de_mensagem(n, codigo, m)
         try:
             gravar_atomico(doc2.caminho, novo)
@@ -1238,7 +1248,7 @@ def escrever(sessao, projeto, pasta_doc, pasta, codigo, acionamento):
                 gravar_documento_1(pasta_doc, projeto)
             return T["linha_concluida"].format(intervalo=concluidos[-1])
         registrar_escrita(sessao, projeto, acionamento, "nada novo", intervalo=f"M{coberto}-{codigo}" if coberto else "")
-        return T["linha_nada_novo"].format(ultima=f"M{coberto}-{codigo}" if coberto else "M0")
+        return T["linha_nada_novo"].format(ultima=f"M{coberto}-{codigo}") if coberto else T["linha_sem_mensagens"]
     modelos_total = {}
     resumo = ""
     for parte in partes_do_trecho(novas, coberto + 1):
@@ -1417,11 +1427,12 @@ def rodada(sessao, acionamento="pedido", caminho_historico=None, pasta_do_projet
                     return 1, T["linha_falhou"].format(motivo=erro)
             with Trava(f"copia-{sessao}", 60):
                 pasta_doc, pasta, codigo, novas, aviso = copiar(sessao, caminho, projeto, acionamento)
-            registrar(sessao, projeto, acionamento, "copia", "concluída", aviso, f"{len(novas)}")
+            intervalo = intervalo_de(codigo, novas[0]["n"], novas[-1]["n"]) if novas else ""
+            registrar(sessao, projeto, acionamento, "copia", "concluída", aviso, intervalo)
             interromper("depois-da-copia")
             if pasta is None:
                 registrar_escrita(sessao, projeto, acionamento, "nada novo")
-                return 0, T["linha_nada_novo"].format(ultima="M0")
+                return 0, T["linha_sem_mensagens"]
             linha = escrever(sessao, projeto, pasta_doc, pasta, codigo, acionamento)
             return 0, linha
     except Falha as erro:
@@ -1446,13 +1457,14 @@ def comando_copia():
     sessao = evento.get("session_id") or ""
     caminho = evento.get("transcript_path") or ""
     projeto = evento.get("cwd") or ""
-    registrar(sessao, projeto, "gatilho-copia", "inicio-compactacao", "em andamento", evento.get("trigger") or "")
+    registrar(sessao, projeto, "gatilho-copia", "inicio-compactacao", "em andamento", trigger=evento.get("trigger") or "")
     try:
         if not sessao or not caminho:
             raise Falha(T["motivo_historico"])
         with Trava(f"copia-{sessao}", 20):
-            _, _, _, novas, aviso = copiar(sessao, caminho, None, "gatilho-copia")
-        registrar(sessao, projeto, "gatilho-copia", "copia", "concluída", aviso, f"{len(novas)}")
+            _, _, codigo, novas, aviso = copiar(sessao, caminho, None, "gatilho-copia")
+        intervalo = intervalo_de(codigo, novas[0]["n"], novas[-1]["n"]) if novas else ""
+        registrar(sessao, projeto, "gatilho-copia", "copia", "concluída", aviso, intervalo)
     except Falha as erro:
         registrar(sessao, projeto, "gatilho-copia", "copia", "falhou", str(erro))
     except Exception as erro:  # noqa: BLE001
@@ -1465,7 +1477,6 @@ def comando_escrita():
     evento = ler_evento()
     sessao = evento.get("session_id") or ""
     caminho = evento.get("transcript_path") or ""
-    projeto = evento.get("cwd") or ""
     if not sessao:
         sys.stderr.write(T["motivo_historico"] + "\n")
         return 2
@@ -1476,7 +1487,7 @@ def comando_escrita():
     marcador = marcadores / f"{sessao[:8]}-{os.getpid()}.json"
     saida = saidas / f"{sessao[:8]}-{agora().strftime('%Y%m%d-%H%M%S')}.log"
     comando = [sys.executable, os.path.abspath(__file__), "rodada", "--sessao", sessao, "--acionamento", "gatilho-escrita",
-               "--historico", caminho, "--pasta-do-projeto", projeto, "--marcador", str(marcador)]
+               "--historico", caminho, "--marcador", str(marcador)]
     pid = os.fork()
     if pid == 0:
         os.setsid()
@@ -1540,7 +1551,11 @@ def main(argv=None):
             sys.stderr.write(str(erro) + "\n")
             return 1
     if args.comando == "rodada":
-        codigo, linha = rodada(args.sessao, args.acionamento, args.historico or None, args.pasta_do_projeto or None)
+        try:
+            codigo, linha = rodada(args.sessao, args.acionamento, args.historico or None, args.pasta_do_projeto or None)
+        except Exception as erro:  # noqa: BLE001
+            registrar_escrita(args.sessao, args.pasta_do_projeto, args.acionamento, "falhou", repr(erro))
+            codigo, linha = 1, T["linha_falhou"].format(motivo=repr(erro))
         if args.marcador:
             gravar_atomico(args.marcador, json.dumps({"codigo": codigo, "linha": linha}, ensure_ascii=False))
         print(linha)

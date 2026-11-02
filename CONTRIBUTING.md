@@ -35,3 +35,5 @@ The files in `aceite/`, the workflow and `SPEC.md` are frozen: `aceite/MANIFESTO
 - The transcript format is internal to Claude Code: keep test transcripts from real sessions in `aceite/casos/`.
 - The data folder is the one Claude Code reserves for the plugin (`<plugin>-<marketplace>`); never create a parallel folder.
 - A detached process must be created with a double fork and `setsid`; `Popen(start_new_session=True)` dies with Claude Code.
+- `claude plugin uninstall` without `--keep-data` deletes the plugin data folder, including `config.json`. Use `--keep-data` to preserve the data and configuration (D-14).
+- With the same plugin version, `claude plugin update` does not refresh the installed copy. After updating the source copy, run `claude plugin uninstall --keep-data hopper-documentation-anth@hopper-documentation-anth` followed by `claude plugin install hopper-documentation-anth@hopper-documentation-anth` (D-15).

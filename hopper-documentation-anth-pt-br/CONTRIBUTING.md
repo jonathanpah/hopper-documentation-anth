@@ -35,3 +35,5 @@ Os arquivos de `aceite/`, o fluxo de verificação e o `SPEC.md` são congelados
 - O formato do histórico é interno do Claude Code: mantenha em `aceite/casos/` históricos de teste vindos de sessões reais.
 - A pasta de dados é a que o Claude Code reserva ao plugin (`<plugin>-<catálogo>`); nunca crie uma pasta paralela.
 - Um processo separado precisa de fork duplo com `setsid`; `Popen(start_new_session=True)` morre junto com o Claude Code.
+- `claude plugin uninstall` sem `--keep-data` apaga a pasta de dados do plugin, inclusive o `config.json`. Use `--keep-data` para preservar os dados e a configuração (D-14).
+- Com a mesma versão do plugin, `claude plugin update` não atualiza a cópia instalada. Depois de atualizar a cópia de origem, rode `claude plugin uninstall --keep-data hopper-documentation-anth@hopper-documentation-anth` seguido de `claude plugin install hopper-documentation-anth@hopper-documentation-anth` (D-15).

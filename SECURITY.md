@@ -2,7 +2,7 @@
 
 ## What the plugin does with your data
 
-- It reads the Claude Code transcript of the current conversation and writes Markdown files inside the project's `docs-by-hopper-documentation/` folder and the plugin's data folder (`~/.claude/plugins/data/hopper-documentation-anth-hopper-documentation-anth/`). It writes nowhere else.
+- It reads the Claude Code transcript of the current conversation and writes Markdown files inside the project's `docs-by-hopper-documentation/` folder and the plugin's data folder (`~/.claude/plugins/data/hopper-documentation-anth-hopper-documentation-anth/`). It writes nowhere else, except for the files Claude Code itself writes in its configuration folder when the writer runs.
 - Passwords, tokens, keys and access codes are replaced by `[hidden]` in the full conversation before anything is sent to the writer or written to disk. The hiding rules are tested against the cases in `aceite/casos/b2/`.
 - The writer (Claude Sonnet 5.5) runs headless, in safe mode, without tools, plugins, hooks, MCP servers or `CLAUDE.md` files. It receives only the new segment, the current documents, the writing rules and the templates, and it returns a JSON object that the program validates before writing.
 - The program accepts a response only when Claude Sonnet 5.5 produced at least 90% of its output tokens.
