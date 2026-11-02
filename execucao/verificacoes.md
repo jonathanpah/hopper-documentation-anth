@@ -213,3 +213,11 @@ Relatório em `execucao/codex/tarefa-07-relatorio.md`. Conferidor 10 de 10, mas 
 ## V-CODEX-08 · Tarefa 08 do Codex (nova tentativa para origem fora do trecho) · 2026-11-02 18:55 · aprovado pelo verificador
 
 Conferência própria: aceite 42 de 42 nos 2 pacotes; executor 48 de 48 nos 2; programas iguais exceto `LANGUAGE`; manifesto 129 de 129 OK.
+
+## V-U8-06 · U8 · Roteiro de aceite em A2 (app Claude, aba Code) · 2026-11-02 19:49 · aprovado
+
+Conduzido pelo verificador com as ferramentas de sessão (C26), na pasta confiada `5-claude/hopper-sonda-a2` (D-07). 1ª tentativa (sessão `0cb3d939`): falhou por compactação em ciclo, porque o contexto inicial de uma sessão da aba Code é de 88.168 tokens, acima do limite com janela de 100 mil; os dados ficaram em `execucao/aceite/a2-1/` (conferidor 8 de 10). 2ª tentativa (sessão `7f7c1abc`), com janela de 200 mil e 56% (limite de cerca de 98,8 mil, pela reserva de cerca de 23,5 mil medida em A3): as 6 mensagens do passo F-C chegaram com o rótulo da sessão que as enviou; a skill rodou a pedido e informou "Documentação concluída: M1-7f7c1abc a M12-7f7c1abc." (R25); 1ª compactação às 19:41:20 UTC, cópia às 19:41:22, escrita concluída às 19:42:04 (M13 a M16); 2ª compactação às 19:47:05, cópia às 19:47:07, turno interrompido com `stop_session` às 19:47:27 (22 s depois do início, e não 5 s, pelo tempo de reação do aviso), **escrita concluída às 19:47:36** (M17 a M18) (R23 em A2, C25). Conferidor com o roteiro: **10 de 10**. R39 em A2: a skill acionada pela mensagem 6 e os 2 comandos do gatilho no registro de rodadas. R38 em A2: o redator rodou pelo executável da aba Code. Dados em `execucao/aceite/a2-2/`.
+
+## V-U8-07 · U8 · Avaliações de acionamento completas · 2026-11-02 19:49 · reprovado em 1 caso
+
+`claude plugin eval --ablation none --model sonnet`, no painel de Terminal, commit `5e91343`. Pacote em português: 22 de 23 casos com nota 1,00; `registra-pedido` com 0,92 (o juiz de `relato-fiel` reprovou 1 de 3 execuções). Pacote em inglês: 22 de 23; `record-request` com 0,75 (`runs-program` sem chamada ao Bash em 2 de 3 execuções e `faithful-report` reprovado em 1). Todos os casos negativos (R26) aprovados nos 2. Saídas em `execucao/avaliacoes/u8-*/`. Contam 2 das 3 execuções completas de C20.

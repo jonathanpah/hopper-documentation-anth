@@ -1,0 +1,20 @@
+hopper-documentation-anth 2.0.0
+  Description: Documenta cada conversa do Claude Code em 7 documentos Markdown (índice, conversa integral, conversa simplificada, decisões, funções implementadas, pendências e handoff), a pedido e antes de toda compactação.
+  Source: hopper-documentation-anth@hopper-documentation-anth
+
+Component inventory
+  Skills (1)  hopper-documentation-anth
+  Agents (0)
+  Hooks (1)  PreCompact  (harness-only — no model context cost)
+  MCP servers (0)
+  LSP servers (0)
+
+Projected token cost
+  Always-on:   ~172 tok   added to every session
+
+Per-component (rounded)
+  component                  always-on  on-invoke
+  hopper-documentation-anth       ~170      ~1.5k
+
+  On-invoke cost is paid each time a skill or agent fires.
+  Token counts are estimates and may differ from actual usage.

@@ -1,0 +1,11 @@
+F1: aprovada
+F2: aprovada
+F3: aprovada
+F4: aprovada
+F5: aprovada
+F6: aprovada
+F7: aprovada
+F8: aprovada
+F9: aprovada
+F10: aprovada
+verificações rodadas: 10, aprovadas: 10, reprovadas: 0

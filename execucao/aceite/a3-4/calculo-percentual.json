@@ -1,0 +1,8 @@
+{
+  "origem": "Determinação da tarefa 09; medição da tarefa 04",
+  "arquivo_medicao": "execucao/aceite/a3-2/resultado-a3-medir-u8-2.json",
+  "sessao_medicao": "c0dffe69-605c-45ee-a94b-53c6a19da451",
+  "contexto_inicial_tokens": 58979,
+  "percentual": 85,
+  "formula": "min(100, teto((58979 + 6000) / 765)) = 85"
+}

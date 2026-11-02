@@ -1,0 +1,50 @@
+{
+  "docs-by-hopper-documentation/1-indice.md": {
+    "sha256": "1edfec0ab89e129eaeb701550660eaac615274df3b840b65fcdc2eca80a62585",
+    "origem": "/home/jpah/hopper-teste-a3-4/docs-by-hopper-documentation/1-indice.md"
+  },
+  "docs-by-hopper-documentation/4-decisoes.md": {
+    "sha256": "93a8042c9fff129b1fc7f8b7d2a024583c96d073858a3945b7b9fab8867ab7fb",
+    "origem": "/home/jpah/hopper-teste-a3-4/docs-by-hopper-documentation/4-decisoes.md"
+  },
+  "docs-by-hopper-documentation/5-funcoes.md": {
+    "sha256": "62f4a8fca5c4714cf45a3dcc613c9251b9e997fed04ec8b9c1c934237419ec4d",
+    "origem": "/home/jpah/hopper-teste-a3-4/docs-by-hopper-documentation/5-funcoes.md"
+  },
+  "docs-by-hopper-documentation/6-pendencias.md": {
+    "sha256": "abdcc363b127ea1ac59bdc1e9d241053ecb461376744d21a671e38f520ca189f",
+    "origem": "/home/jpah/hopper-teste-a3-4/docs-by-hopper-documentation/6-pendencias.md"
+  },
+  "docs-by-hopper-documentation/conversas/2026-11-02-24064e74/2-conversa-integral.md": {
+    "sha256": "0908f31ddaed92b0824e0aea4a6baa79f6891097adf6ff4914f42cc7283737c9",
+    "origem": "/home/jpah/hopper-teste-a3-4/docs-by-hopper-documentation/conversas/2026-11-02-24064e74/2-conversa-integral.md"
+  },
+  "docs-by-hopper-documentation/conversas/2026-11-02-24064e74/3-conversa-simplificada.md": {
+    "sha256": "faf0619a0db57aad64af1829769586e92f8d619fec9c9de1dd9f589bfdc2ad34",
+    "origem": "/home/jpah/hopper-teste-a3-4/docs-by-hopper-documentation/conversas/2026-11-02-24064e74/3-conversa-simplificada.md"
+  },
+  "docs-by-hopper-documentation/conversas/2026-11-02-24064e74/7-handoff.md": {
+    "sha256": "fc4e60211b7857e6d71736a0d931dbfcc822193bf878e206980429e7f4561279",
+    "origem": "/home/jpah/hopper-teste-a3-4/docs-by-hopper-documentation/conversas/2026-11-02-24064e74/7-handoff.md"
+  },
+  "resultado-a3-u8-4.json": {
+    "sha256": "06fe5b9a08e28b14373534243ccf67496b1a5a2a532f9217e43897b179b27e7e",
+    "origem": "/home/jpah/hopper-sonda/resultado-a3-u8-4.json"
+  },
+  "erro-a3-u8-4.log": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "origem": "/home/jpah/hopper-sonda/erro-a3-u8-4.log"
+  },
+  "saida-a3-u8-4.log": {
+    "sha256": "75bf32098db8d75e6e100a2b598bb58cd14944f3a77836279d6325e2ed977142",
+    "origem": "/home/jpah/hopper-sonda/saida-a3-u8-4.log"
+  },
+  "logs-das-rodadas/24064e74-20261102-160457.log": {
+    "sha256": "9595294e36586f69f6ed0c1da8925f9f318c79894cb6b488da5d0a009c91dc30",
+    "origem": "/home/jpah/.claude/plugins/data/hopper-documentation-anth-hopper-documentation-anth/saidas/24064e74-20261102-160457.log"
+  },
+  "logs-das-rodadas/24064e74-20261102-160559.log": {
+    "sha256": "22174485aa9ba0e130cd4637cf5c4fcd775a01175924f80936773d01a3a447a0",
+    "origem": "/home/jpah/.claude/plugins/data/hopper-documentation-anth-hopper-documentation-anth/saidas/24064e74-20261102-160559.log"
+  }
+}

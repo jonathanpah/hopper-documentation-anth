@@ -1,0 +1,232 @@
+Plugin under test: "hopper-documentation-anth" version "2.0.0" at "/Users/jonathan/Library/CloudStorage/Dropbox/5-ai/5-claude/hopper-documentation-anth/hopper-documentation-anth-en"
+⚠ case "record-request": grader "runs-program" cannot pass with the granted tools: it needs a Bash call in the trace, but Bash is not granted, so the run withholds it from the model and no call (not even a refused one) can occur — add Bash to the case's allowed_tools and grant it with --allow-tools Bash
+  no-trigger-explain run 1/3: score 1.00  $0.02
+    ✓ no-agent (weight 1): Agent called 0x (expected 0..0)
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+  no-trigger-explain run 2/3: score 1.00  $0.02
+    ✓ no-agent (weight 1): Agent called 0x (expected 0..0)
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+  no-trigger-explain run 3/3: score 1.00  $0.02
+    ✓ no-agent (weight 1): Agent called 0x (expected 0..0)
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+✓ no-trigger-explain  score 1.00  (3 runs)  $0.07
+  no-trigger-review run 1/3: score 1.00  $0.03
+    ✓ no-agent (weight 1): Agent called 0x (expected 0..0)
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+  no-trigger-review run 2/3: score 1.00  $0.03
+    ✓ no-agent (weight 1): Agent called 0x (expected 0..0)
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+  no-trigger-review run 3/3: score 1.00  $0.03
+    ✓ no-agent (weight 1): Agent called 0x (expected 0..0)
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+✓ no-trigger-review  score 1.00  (3 runs)  $0.08
+  record-request run 1/3: score 0.75  $0.06
+    ✓ does-not-write-itself (weight 1): Write called 0x (expected 0..0)
+    ✓ faithful-report (weight 1): judge votes: PASS PASS PASS
+    ✗ runs-program (weight 1): Bash called 0x (expected 1..∞)
+    ✓ skill-invoked (weight 1): Skill called 1x (expected 1..∞)
+  record-request run 2/3: score 0.75  $0.04
+    ✓ does-not-write-itself (weight 1): Write called 0x (expected 0..0)
+    ✗ faithful-report (weight 1): judge votes: FAIL FAIL FAIL
+    ✓ runs-program (weight 1): Bash called 1x (expected 1..∞)
+    ✓ skill-invoked (weight 1): Skill called 1x (expected 1..∞)
+  record-request run 3/3: score 0.75  $0.06
+    ✓ does-not-write-itself (weight 1): Write called 0x (expected 0..0)
+    ✓ faithful-report (weight 1): judge votes: PASS PASS PASS
+    ✗ runs-program (weight 1): Bash called 0x (expected 1..∞)
+    ✓ skill-invoked (weight 1): Skill called 1x (expected 1..∞)
+✗ record-request  score 0.75  (3 runs)  $0.16
+  no-changelog run 1/3: score 1.00  $0.03
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-not-invoked (weight 1): Skill called 0x (expected 0..0)
+  no-changelog run 2/3: score 1.00  $0.03
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-not-invoked (weight 1): Skill called 0x (expected 0..0)
+  no-changelog run 3/3: score 1.00  $0.03
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-not-invoked (weight 1): Skill called 0x (expected 0..0)
+✓ no-changelog  score 1.00  (3 runs)  $0.09
+  no-chat-summary run 1/3: score 1.00  $0.02
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-not-invoked (weight 1): Skill called 0x (expected 0..0)
+  no-chat-summary run 2/3: score 1.00  $0.02
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-not-invoked (weight 1): Skill called 0x (expected 0..0)
+  no-chat-summary run 3/3: score 1.00  $0.02
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-not-invoked (weight 1): Skill called 0x (expected 0..0)
+✓ no-chat-summary  score 1.00  (3 runs)  $0.07
+  no-claude-md run 1/3: score 1.00  $0.03
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-not-invoked (weight 1): Skill called 0x (expected 0..0)
+  no-claude-md run 2/3: score 1.00  $0.03
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-not-invoked (weight 1): Skill called 0x (expected 0..0)
+  no-claude-md run 3/3: score 1.00  $0.03
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-not-invoked (weight 1): Skill called 0x (expected 0..0)
+✓ no-claude-md  score 1.00  (3 runs)  $0.08
+  no-commit run 1/3: score 1.00  $0.02
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-not-invoked (weight 1): Skill called 0x (expected 0..0)
+  no-commit run 2/3: score 1.00  $0.02
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-not-invoked (weight 1): Skill called 0x (expected 0..0)
+  no-commit run 3/3: score 1.00  $0.02
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-not-invoked (weight 1): Skill called 0x (expected 0..0)
+✓ no-commit  score 1.00  (3 runs)  $0.07
+  no-docstrings run 1/3: score 1.00  $0.04
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-not-invoked (weight 1): Skill called 0x (expected 0..0)
+  no-docstrings run 2/3: score 1.00  $0.03
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-not-invoked (weight 1): Skill called 0x (expected 0..0)
+  no-docstrings run 3/3: score 1.00  $0.03
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-not-invoked (weight 1): Skill called 0x (expected 0..0)
+✓ no-docstrings  score 1.00  (3 runs)  $0.10
+  no-edit-skill run 1/3: score 1.00  $0.02
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+  no-edit-skill run 2/3: score 1.00  $0.02
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+  no-edit-skill run 3/3: score 1.00  $0.02
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+✓ no-edit-skill  score 1.00  (3 runs)  $0.07
+  no-explain-skill run 1/3: score 1.00  $0.03
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+  no-explain-skill run 2/3: score 1.00  $0.03
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+  no-explain-skill run 3/3: score 1.00  $0.03
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+✓ no-explain-skill  score 1.00  (3 runs)  $0.09
+  no-memory run 1/3: score 1.00  $0.02
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-not-invoked (weight 1): Skill called 0x (expected 0..0)
+  no-memory run 2/3: score 1.00  $0.02
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-not-invoked (weight 1): Skill called 0x (expected 0..0)
+  no-memory run 3/3: score 1.00  $0.02
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-not-invoked (weight 1): Skill called 0x (expected 0..0)
+✓ no-memory  score 1.00  (3 runs)  $0.06
+  no-readme run 1/3: score 1.00  $0.05
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-not-invoked (weight 1): Skill called 0x (expected 0..0)
+  no-readme run 2/3: score 1.00  $0.05
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-not-invoked (weight 1): Skill called 0x (expected 0..0)
+  no-readme run 3/3: score 1.00  $0.04
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-not-invoked (weight 1): Skill called 0x (expected 0..0)
+✓ no-readme  score 1.00  (3 runs)  $0.14
+  no-what-is-handoff run 1/3: score 1.00  $0.02
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-not-invoked (weight 1): Skill called 0x (expected 0..0)
+  no-what-is-handoff run 2/3: score 1.00  $0.02
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-not-invoked (weight 1): Skill called 0x (expected 0..0)
+  no-what-is-handoff run 3/3: score 1.00  $0.02
+    ✓ no-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-not-invoked (weight 1): Skill called 0x (expected 0..0)
+✓ no-what-is-handoff  score 1.00  (3 runs)  $0.07
+  yes-another-ai run 1/3: score 1.00  $0.06
+    ✓ skill-invoked (weight 1): Skill called 1x (expected 1..∞)
+  yes-another-ai run 2/3: score 1.00  $0.04
+    ✓ skill-invoked (weight 1): Skill called 1x (expected 1..∞)
+  yes-another-ai run 3/3: score 1.00  $0.04
+    ✓ skill-invoked (weight 1): Skill called 1x (expected 1..∞)
+✓ yes-another-ai  score 1.00  (3 runs)  $0.13
+  yes-another-person run 1/3: score 1.00  $0.04
+    ✓ skill-invoked (weight 1): Skill called 1x (expected 1..∞)
+  yes-another-person run 2/3: score 1.00  $0.06
+    ✓ skill-invoked (weight 1): Skill called 1x (expected 1..∞)
+  yes-another-person run 3/3: score 1.00  $0.04
+    ✓ skill-invoked (weight 1): Skill called 1x (expected 1..∞)
+✓ yes-another-person  score 1.00  (3 runs)  $0.13
+  yes-asks-handoff run 1/3: score 1.00  $0.06
+    ✓ skill-invoked (weight 1): Skill called 1x (expected 1..∞)
+  yes-asks-handoff run 2/3: score 1.00  $0.04
+    ✓ skill-invoked (weight 1): Skill called 1x (expected 1..∞)
+  yes-asks-handoff run 3/3: score 1.00  $0.04
+    ✓ skill-invoked (weight 1): Skill called 1x (expected 1..∞)
+✓ yes-asks-handoff  score 1.00  (3 runs)  $0.14
+  yes-before-clear run 1/3: score 1.00  $0.04
+    ✓ skill-invoked (weight 1): Skill called 1x (expected 1..∞)
+  yes-before-clear run 2/3: score 1.00  $0.04
+    ✓ skill-invoked (weight 1): Skill called 1x (expected 1..∞)
+  yes-before-clear run 3/3: score 1.00  $0.08
+    ✓ skill-invoked (weight 1): Skill called 1x (expected 1..∞)
+✓ yes-before-clear  score 1.00  (3 runs)  $0.15
+  yes-closing run 1/3: score 1.00  $0.04
+    ✓ skill-invoked (weight 1): Skill called 1x (expected 1..∞)
+  yes-closing run 2/3: score 1.00  $0.04
+    ✓ skill-invoked (weight 1): Skill called 1x (expected 1..∞)
+  yes-closing run 3/3: score 1.00  $0.04
+    ✓ skill-invoked (weight 1): Skill called 1x (expected 1..∞)
+✓ yes-closing  score 1.00  (3 runs)  $0.11
+  yes-continue-tomorrow run 1/3: score 1.00  $0.06
+    ✓ skill-invoked (weight 1): Skill called 1x (expected 1..∞)
+  yes-continue-tomorrow run 2/3: score 1.00  $0.04
+    ✓ skill-invoked (weight 1): Skill called 1x (expected 1..∞)
+  yes-continue-tomorrow run 3/3: score 1.00  $0.07
+    ✓ skill-invoked (weight 1): Skill called 1x (expected 1..∞)
+✓ yes-continue-tomorrow  score 1.00  (3 runs)  $0.16
+  yes-documents-conversation run 1/3: score 1.00  $0.03
+    ✓ skill-invoked (weight 1): Skill called 1x (expected 1..∞)
+  yes-documents-conversation run 2/3: score 1.00  $0.04
+    ✓ skill-invoked (weight 1): Skill called 1x (expected 1..∞)
+  yes-documents-conversation run 3/3: score 1.00  $0.04
+    ✓ skill-invoked (weight 1): Skill called 1x (expected 1..∞)
+✓ yes-documents-conversation  score 1.00  (3 runs)  $0.10
+  yes-portuguese run 1/3: score 1.00  $0.04
+    ✓ skill-invoked (weight 1): Skill called 1x (expected 1..∞)
+  yes-portuguese run 2/3: score 1.00  $0.04
+    ✓ skill-invoked (weight 1): Skill called 1x (expected 1..∞)
+  yes-portuguese run 3/3: score 1.00  $0.04
+    ✓ skill-invoked (weight 1): Skill called 1x (expected 1..∞)
+✓ yes-portuguese  score 1.00  (3 runs)  $0.11
+  yes-records-conversation run 1/3: score 1.00  $0.06
+    ✓ skill-invoked (weight 1): Skill called 1x (expected 1..∞)
+  yes-records-conversation run 2/3: score 1.00  $0.03
+    ✓ skill-invoked (weight 1): Skill called 1x (expected 1..∞)
+  yes-records-conversation run 3/3: score 1.00  $0.04
+    ✓ skill-invoked (weight 1): Skill called 1x (expected 1..∞)
+✓ yes-records-conversation  score 1.00  (3 runs)  $0.13
+  yes-save-record run 1/3: score 1.00  $0.04
+    ✓ skill-invoked (weight 1): Skill called 1x (expected 1..∞)
+  yes-save-record run 2/3: score 1.00  $0.05
+    ✓ skill-invoked (weight 1): Skill called 1x (expected 1..∞)
+  yes-save-record run 3/3: score 1.00  $0.04
+    ✓ skill-invoked (weight 1): Skill called 1x (expected 1..∞)
+✓ yes-save-record  score 1.00  (3 runs)  $0.13
+
+CASE                        SCORE PASS% RUNS COST    NOTES
+no-trigger-explain          1.00  100%  3    $0.07   
+no-trigger-review           1.00  100%  3    $0.08   
+record-request              0.75  0%    3    $0.16   runs-program: Bash called 0x (expected 1..∞)
+no-changelog                1.00  100%  3    $0.09   
+no-chat-summary             1.00  100%  3    $0.07   
+no-claude-md                1.00  100%  3    $0.08   
+no-commit                   1.00  100%  3    $0.07   
+no-docstrings               1.00  100%  3    $0.10   
+no-edit-skill               1.00  100%  3    $0.07   
+no-explain-skill            1.00  100%  3    $0.09   
+no-memory                   1.00  100%  3    $0.06   
+no-readme                   1.00  100%  3    $0.14   
+no-what-is-handoff          1.00  100%  3    $0.07   
+yes-another-ai              1.00  100%  3    $0.13   
+yes-another-person          1.00  100%  3    $0.13   
+yes-asks-handoff            1.00  100%  3    $0.14   
+yes-before-clear            1.00  100%  3    $0.15   
+yes-closing                 1.00  100%  3    $0.11   
+yes-continue-tomorrow       1.00  100%  3    $0.16   
+yes-documents-conversation  1.00  100%  3    $0.10   
+yes-portuguese              1.00  100%  3    $0.11   
+yes-records-conversation    1.00  100%  3    $0.13   
+yes-save-record             1.00  100%  3    $0.13   
+
+23 case(s) · 682s · $2.42
+
+Re-run with --keep-temp to preserve each run's sandbox (workspace + trace.jsonl) for debugging.
+Report: execucao/avaliacoes/u8-en/report.html

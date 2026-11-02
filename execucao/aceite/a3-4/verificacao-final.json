@@ -1,0 +1,24 @@
+{
+  "data": "2026-11-02T19:09:03.105451+00:00",
+  "arquivos_versionados_iniciais": 395,
+  "arquivos_versionados_alterados": [],
+  "arquivos_novos_quantidade": 36,
+  "arquivos_novos_fora_escopo": [],
+  "json_e_jsonl_validados": 25,
+  "json_invalidos": [],
+  "links_locais_do_relatorio_validados": 35,
+  "links_inexistentes": [],
+  "linhas_de_link_invalidas": [],
+  "copias_com_hash_divergente": [],
+  "pacote_instalado_preservado": true,
+  "config_preservada": true,
+  "git_diff_check": {
+    "codigo": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "helper_temporario_removido": true,
+  "relatorio_sha256": "5de8472b1527f620f3c4c948f69387f9d2a53fcb17766653cd133db3a564ab5e",
+  "arquivos_na_pasta_de_evidencias": 49,
+  "aprovada": true
+}

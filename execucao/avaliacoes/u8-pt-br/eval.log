@@ -1,0 +1,232 @@
+Plugin under test: "hopper-documentation-anth" version "2.0.0" at "/Users/jonathan/Library/CloudStorage/Dropbox/5-ai/5-claude/hopper-documentation-anth/hopper-documentation-anth-pt-br"
+⚠ case "registra-pedido": grader "roda-programa" cannot pass with the granted tools: it needs a Bash call in the trace, but Bash is not granted, so the run withholds it from the model and no call (not even a refused one) can occur — add Bash to the case's allowed_tools and grant it with --allow-tools Bash
+  nao-changelog run 1/3: score 1.00  $0.03
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-nao-acionada (weight 1): Skill called 0x (expected 0..0)
+  nao-changelog run 2/3: score 1.00  $0.03
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-nao-acionada (weight 1): Skill called 0x (expected 0..0)
+  nao-changelog run 3/3: score 1.00  $0.03
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-nao-acionada (weight 1): Skill called 0x (expected 0..0)
+✓ nao-changelog  score 1.00  (3 runs)  $0.09
+  nao-claude-md run 1/3: score 1.00  $0.03
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-nao-acionada (weight 1): Skill called 0x (expected 0..0)
+  nao-claude-md run 2/3: score 1.00  $0.03
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-nao-acionada (weight 1): Skill called 0x (expected 0..0)
+  nao-claude-md run 3/3: score 1.00  $0.03
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-nao-acionada (weight 1): Skill called 0x (expected 0..0)
+✓ nao-claude-md  score 1.00  (3 runs)  $0.09
+  nao-commit run 1/3: score 1.00  $0.03
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-nao-acionada (weight 1): Skill called 0x (expected 0..0)
+  nao-commit run 2/3: score 1.00  $0.03
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-nao-acionada (weight 1): Skill called 0x (expected 0..0)
+  nao-commit run 3/3: score 1.00  $0.03
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-nao-acionada (weight 1): Skill called 0x (expected 0..0)
+✓ nao-commit  score 1.00  (3 runs)  $0.08
+  nao-docstrings run 1/3: score 1.00  $0.04
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-nao-acionada (weight 1): Skill called 0x (expected 0..0)
+  nao-docstrings run 2/3: score 1.00  $0.04
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-nao-acionada (weight 1): Skill called 0x (expected 0..0)
+  nao-docstrings run 3/3: score 1.00  $0.04
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-nao-acionada (weight 1): Skill called 0x (expected 0..0)
+✓ nao-docstrings  score 1.00  (3 runs)  $0.12
+  nao-edita-skill run 1/3: score 1.00  $0.02
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+  nao-edita-skill run 2/3: score 1.00  $0.02
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+  nao-edita-skill run 3/3: score 1.00  $0.03
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+✓ nao-edita-skill  score 1.00  (3 runs)  $0.07
+  nao-explica-skill run 1/3: score 1.00  $0.04
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+  nao-explica-skill run 2/3: score 1.00  $0.03
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+  nao-explica-skill run 3/3: score 1.00  $0.03
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+✓ nao-explica-skill  score 1.00  (3 runs)  $0.10
+  nao-memoria run 1/3: score 1.00  $0.02
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-nao-acionada (weight 1): Skill called 0x (expected 0..0)
+  nao-memoria run 2/3: score 1.00  $0.02
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-nao-acionada (weight 1): Skill called 0x (expected 0..0)
+  nao-memoria run 3/3: score 1.00  $0.02
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-nao-acionada (weight 1): Skill called 0x (expected 0..0)
+✓ nao-memoria  score 1.00  (3 runs)  $0.06
+  nao-o-que-e-handoff run 1/3: score 1.00  $0.02
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-nao-acionada (weight 1): Skill called 0x (expected 0..0)
+  nao-o-que-e-handoff run 2/3: score 1.00  $0.02
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-nao-acionada (weight 1): Skill called 0x (expected 0..0)
+  nao-o-que-e-handoff run 3/3: score 1.00  $0.02
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-nao-acionada (weight 1): Skill called 0x (expected 0..0)
+✓ nao-o-que-e-handoff  score 1.00  (3 runs)  $0.07
+  nao-readme run 1/3: score 1.00  $0.05
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-nao-acionada (weight 1): Skill called 0x (expected 0..0)
+  nao-readme run 2/3: score 1.00  $0.05
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-nao-acionada (weight 1): Skill called 0x (expected 0..0)
+  nao-readme run 3/3: score 1.00  $0.05
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-nao-acionada (weight 1): Skill called 0x (expected 0..0)
+✓ nao-readme  score 1.00  (3 runs)  $0.15
+  nao-resumo-no-chat run 1/3: score 1.00  $0.02
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-nao-acionada (weight 1): Skill called 0x (expected 0..0)
+  nao-resumo-no-chat run 2/3: score 1.00  $0.02
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-nao-acionada (weight 1): Skill called 0x (expected 0..0)
+  nao-resumo-no-chat run 3/3: score 1.00  $0.02
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+    ✓ skill-nao-acionada (weight 1): Skill called 0x (expected 0..0)
+✓ nao-resumo-no-chat  score 1.00  (3 runs)  $0.07
+  sim-antes-do-clear run 1/3: score 1.00  $0.08
+    ✓ skill-acionada (weight 1): Skill called 1x (expected 1..∞)
+  sim-antes-do-clear run 2/3: score 1.00  $0.04
+    ✓ skill-acionada (weight 1): Skill called 1x (expected 1..∞)
+  sim-antes-do-clear run 3/3: score 1.00  $0.07
+    ✓ skill-acionada (weight 1): Skill called 1x (expected 1..∞)
+✓ sim-antes-do-clear  score 1.00  (3 runs)  $0.19
+  sim-continuar-amanha run 1/3: score 1.00  $0.04
+    ✓ skill-acionada (weight 1): Skill called 1x (expected 1..∞)
+  sim-continuar-amanha run 2/3: score 1.00  $0.04
+    ✓ skill-acionada (weight 1): Skill called 1x (expected 1..∞)
+  sim-continuar-amanha run 3/3: score 1.00  $0.04
+    ✓ skill-acionada (weight 1): Skill called 1x (expected 1..∞)
+✓ sim-continuar-amanha  score 1.00  (3 runs)  $0.12
+  sim-documenta-conversa run 1/3: score 1.00  $0.06
+    ✓ skill-acionada (weight 1): Skill called 1x (expected 1..∞)
+  sim-documenta-conversa run 2/3: score 1.00  $0.06
+    ✓ skill-acionada (weight 1): Skill called 1x (expected 1..∞)
+  sim-documenta-conversa run 3/3: score 1.00  $0.04
+    ✓ skill-acionada (weight 1): Skill called 1x (expected 1..∞)
+✓ sim-documenta-conversa  score 1.00  (3 runs)  $0.16
+  sim-encerrando run 1/3: score 1.00  $0.04
+    ✓ skill-acionada (weight 1): Skill called 1x (expected 1..∞)
+  sim-encerrando run 2/3: score 1.00  $0.04
+    ✓ skill-acionada (weight 1): Skill called 1x (expected 1..∞)
+  sim-encerrando run 3/3: score 1.00  $0.06
+    ✓ skill-acionada (weight 1): Skill called 1x (expected 1..∞)
+✓ sim-encerrando  score 1.00  (3 runs)  $0.14
+  sim-grava-registro run 1/3: score 1.00  $0.06
+    ✓ skill-acionada (weight 1): Skill called 1x (expected 1..∞)
+  sim-grava-registro run 2/3: score 1.00  $0.04
+    ✓ skill-acionada (weight 1): Skill called 1x (expected 1..∞)
+  sim-grava-registro run 3/3: score 1.00  $0.04
+    ✓ skill-acionada (weight 1): Skill called 1x (expected 1..∞)
+✓ sim-grava-registro  score 1.00  (3 runs)  $0.14
+  sim-ingles run 1/3: score 1.00  $0.06
+    ✓ skill-acionada (weight 1): Skill called 1x (expected 1..∞)
+  sim-ingles run 2/3: score 1.00  $0.06
+    ✓ skill-acionada (weight 1): Skill called 1x (expected 1..∞)
+  sim-ingles run 3/3: score 1.00  $0.06
+    ✓ skill-acionada (weight 1): Skill called 1x (expected 1..∞)
+✓ sim-ingles  score 1.00  (3 runs)  $0.18
+  sim-outra-ia run 1/3: score 1.00  $0.04
+    ✓ skill-acionada (weight 1): Skill called 1x (expected 1..∞)
+  sim-outra-ia run 2/3: score 1.00  $0.04
+    ✓ skill-acionada (weight 1): Skill called 1x (expected 1..∞)
+  sim-outra-ia run 3/3: score 1.00  $0.04
+    ✓ skill-acionada (weight 1): Skill called 1x (expected 1..∞)
+✓ sim-outra-ia  score 1.00  (3 runs)  $0.11
+  sim-outra-pessoa run 1/3: score 1.00  $0.07
+    ✓ skill-acionada (weight 1): Skill called 1x (expected 1..∞)
+  sim-outra-pessoa run 2/3: score 1.00  $0.04
+    ✓ skill-acionada (weight 1): Skill called 1x (expected 1..∞)
+  sim-outra-pessoa run 3/3: score 1.00  $0.06
+    ✓ skill-acionada (weight 1): Skill called 1x (expected 1..∞)
+✓ sim-outra-pessoa  score 1.00  (3 runs)  $0.17
+  sim-pede-handoff run 1/3: score 1.00  $0.06
+    ✓ skill-acionada (weight 1): Skill called 1x (expected 1..∞)
+  sim-pede-handoff run 2/3: score 1.00  $0.06
+    ✓ skill-acionada (weight 1): Skill called 1x (expected 1..∞)
+  sim-pede-handoff run 3/3: score 1.00  $0.06
+    ✓ skill-acionada (weight 1): Skill called 1x (expected 1..∞)
+✓ sim-pede-handoff  score 1.00  (3 runs)  $0.18
+  sim-registra-conversa run 1/3: score 1.00  $0.04
+    ✓ skill-acionada (weight 1): Skill called 1x (expected 1..∞)
+  sim-registra-conversa run 2/3: score 1.00  $0.06
+    ✓ skill-acionada (weight 1): Skill called 1x (expected 1..∞)
+  sim-registra-conversa run 3/3: score 1.00  $0.04
+    ✓ skill-acionada (weight 1): Skill called 1x (expected 1..∞)
+✓ sim-registra-conversa  score 1.00  (3 runs)  $0.13
+  nao-aciona-explicar run 1/3: score 1.00  $0.02
+    ✓ sem-agente (weight 1): Agent called 0x (expected 0..0)
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+  nao-aciona-explicar run 2/3: score 1.00  $0.02
+    ✓ sem-agente (weight 1): Agent called 0x (expected 0..0)
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+  nao-aciona-explicar run 3/3: score 1.00  $0.02
+    ✓ sem-agente (weight 1): Agent called 0x (expected 0..0)
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+✓ nao-aciona-explicar  score 1.00  (3 runs)  $0.07
+  nao-aciona-revisar run 1/3: score 1.00  $0.03
+    ✓ sem-agente (weight 1): Agent called 0x (expected 0..0)
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+  nao-aciona-revisar run 2/3: score 1.00  $0.03
+    ✓ sem-agente (weight 1): Agent called 0x (expected 0..0)
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+  nao-aciona-revisar run 3/3: score 1.00  $0.03
+    ✓ sem-agente (weight 1): Agent called 0x (expected 0..0)
+    ✓ sem-handoff (weight 1): docs-by-hopper-documentation/** absent as expected
+✓ nao-aciona-revisar  score 1.00  (3 runs)  $0.09
+  registra-pedido run 1/3: score 1.00  $0.07
+    ✓ nao-escreve-sozinho (weight 1): Write called 0x (expected 0..0)
+    ✓ relato-fiel (weight 1): judge votes: PASS PASS PASS
+    ✓ roda-programa (weight 1): Bash called 1x (expected 1..∞)
+    ✓ skill-acionada (weight 1): Skill called 1x (expected 1..∞)
+  registra-pedido run 2/3: score 1.00  $0.04
+    ✓ nao-escreve-sozinho (weight 1): Write called 0x (expected 0..0)
+    ✓ relato-fiel (weight 1): judge votes: PASS PASS FAIL
+    ✓ roda-programa (weight 1): Bash called 1x (expected 1..∞)
+    ✓ skill-acionada (weight 1): Skill called 1x (expected 1..∞)
+  registra-pedido run 3/3: score 0.75  $0.04
+    ✓ nao-escreve-sozinho (weight 1): Write called 0x (expected 0..0)
+    ✗ relato-fiel (weight 1): judge votes: FAIL FAIL PASS
+    ✓ roda-programa (weight 1): Bash called 1x (expected 1..∞)
+    ✓ skill-acionada (weight 1): Skill called 1x (expected 1..∞)
+✗ registra-pedido  score 0.92  (3 runs)  $0.16
+
+CASE                    SCORE PASS% RUNS COST    NOTES
+nao-changelog           1.00  100%  3    $0.09   
+nao-claude-md           1.00  100%  3    $0.09   
+nao-commit              1.00  100%  3    $0.08   
+nao-docstrings          1.00  100%  3    $0.12   
+nao-edita-skill         1.00  100%  3    $0.07   
+nao-explica-skill       1.00  100%  3    $0.10   
+nao-memoria             1.00  100%  3    $0.06   
+nao-o-que-e-handoff     1.00  100%  3    $0.07   
+nao-readme              1.00  100%  3    $0.15   
+nao-resumo-no-chat      1.00  100%  3    $0.07   
+sim-antes-do-clear      1.00  100%  3    $0.19   
+sim-continuar-amanha    1.00  100%  3    $0.12   
+sim-documenta-conversa  1.00  100%  3    $0.16   
+sim-encerrando          1.00  100%  3    $0.14   
+sim-grava-registro      1.00  100%  3    $0.14   
+sim-ingles              1.00  100%  3    $0.18   
+sim-outra-ia            1.00  100%  3    $0.11   
+sim-outra-pessoa        1.00  100%  3    $0.17   
+sim-pede-handoff        1.00  100%  3    $0.18   
+sim-registra-conversa   1.00  100%  3    $0.13   
+nao-aciona-explicar     1.00  100%  3    $0.07   
+nao-aciona-revisar      1.00  100%  3    $0.09   
+registra-pedido         0.92  67%   3    $0.16   relato-fiel: judge votes: FAIL FAIL PASS
+
+23 case(s) · 866s · $2.72
+
+Re-run with --keep-temp to preserve each run's sandbox (workspace + trace.jsonl) for debugging.
+Report: execucao/avaliacoes/u8-pt-br/report.html

@@ -1,0 +1,30 @@
+{
+  "docs-by-hopper-documentation/1-indice.md": {
+    "sha256": "fc603313a38bbd67966d565223dde2f9417685728a2a1e4e442f5c635d996bc9",
+    "origem": "/home/jpah/hopper-teste-a3-4/docs-by-hopper-documentation/1-indice.md"
+  },
+  "docs-by-hopper-documentation/4-decisoes.md": {
+    "sha256": "93a8042c9fff129b1fc7f8b7d2a024583c96d073858a3945b7b9fab8867ab7fb",
+    "origem": "/home/jpah/hopper-teste-a3-4/docs-by-hopper-documentation/4-decisoes.md"
+  },
+  "docs-by-hopper-documentation/5-funcoes.md": {
+    "sha256": "62f4a8fca5c4714cf45a3dcc613c9251b9e997fed04ec8b9c1c934237419ec4d",
+    "origem": "/home/jpah/hopper-teste-a3-4/docs-by-hopper-documentation/5-funcoes.md"
+  },
+  "docs-by-hopper-documentation/6-pendencias.md": {
+    "sha256": "abdcc363b127ea1ac59bdc1e9d241053ecb461376744d21a671e38f520ca189f",
+    "origem": "/home/jpah/hopper-teste-a3-4/docs-by-hopper-documentation/6-pendencias.md"
+  },
+  "docs-by-hopper-documentation/conversas/2026-11-02-24064e74/2-conversa-integral.md": {
+    "sha256": "9a80abbc4adbb95f02d3fc87fd599b2f2da1b0a4402fbcff36252f5b4dc341c6",
+    "origem": "/home/jpah/hopper-teste-a3-4/docs-by-hopper-documentation/conversas/2026-11-02-24064e74/2-conversa-integral.md"
+  },
+  "docs-by-hopper-documentation/conversas/2026-11-02-24064e74/3-conversa-simplificada.md": {
+    "sha256": "f5416bd5c02d0103ee8678785b7ebdeaa774367e0b9931285e64d3432693d8a2",
+    "origem": "/home/jpah/hopper-teste-a3-4/docs-by-hopper-documentation/conversas/2026-11-02-24064e74/3-conversa-simplificada.md"
+  },
+  "docs-by-hopper-documentation/conversas/2026-11-02-24064e74/7-handoff.md": {
+    "sha256": "381babe44ef9f60e1c1c2b12dab1a5f9d5e1c9cb636955c55b7d97c8242abad6",
+    "origem": "/home/jpah/hopper-teste-a3-4/docs-by-hopper-documentation/conversas/2026-11-02-24064e74/7-handoff.md"
+  }
+}
