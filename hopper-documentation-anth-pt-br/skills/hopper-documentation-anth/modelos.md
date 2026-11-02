@@ -41,7 +41,7 @@ Escrever a spec do modelo de 7 documentos.
 - Intervalo da rodada: M56-e4bad083 a M80-e4bad083
 ```
 
-Para mudar a situação de um item que já existe, inclusive de outra conversa da mesma pasta, use `mudancas`, com o identificador, a situação nova e as mensagens de origem.
+Para mudar a situação de um item que já existe, inclusive de outra conversa da mesma pasta, use `mudancas`, com o identificador, a situação nova e a origem. A origem de um item novo ou de uma mudança é uma mensagem do trecho novo ou um item existente, nunca uma mensagem de um trecho anterior. Na migração, a origem é o nome do arquivo antigo.
 
 ## Documento 7, handoff
 

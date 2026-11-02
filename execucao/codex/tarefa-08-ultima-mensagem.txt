@@ -1,0 +1,6 @@
+Correção implementada nos 2 pacotes. Os **48 testes do executor passaram** em cada idioma.
+
+O aceite ficou em **41 de 42** por pacote. T38 falhou porque o sandbox bloqueia `ps`. A aprovação integral permanece pendente.
+
+[Relatório da tarefa 08](/Users/jonathan/Library/CloudStorage/Dropbox/5-ai/5-claude/hopper-documentation-anth/execucao/codex/tarefa-08-relatorio.md), com alterações, testes, saídas e limitação. `aceite/` permaneceu intacto.
+

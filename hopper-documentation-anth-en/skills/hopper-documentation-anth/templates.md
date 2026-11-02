@@ -41,7 +41,7 @@ Write the spec of the 7-document model.
 - Run range: M56-e4bad083 a M80-e4bad083
 ```
 
-To change the status of an item that already exists, including one from another conversation of the same folder, use `mudancas`, with the identifier, the new status and the source messages.
+To change the status of an item that already exists, including one from another conversation of the same folder, use `mudancas`, with the identifier, the new status and the source. The source of a new item or a change is a message from the new segment or an existing item, never a message from an earlier segment. During migration, the source is the old file name.
 
 ## Document 7, handoff
 

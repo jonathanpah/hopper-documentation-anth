@@ -209,3 +209,7 @@ Rodado pelo verificador no painel de Terminal (D-22), com o commit `715b229` ins
 ## V-U8-05 · U8 · Roteiro de aceite em A3, 3ª execução (tarefa 07 do Codex) · 2026-11-02 18:47 · reprovado em R23
 
 Relatório em `execucao/codex/tarefa-07-relatorio.md`. Conferidor 10 de 10, mas a escrita da 2ª passagem falhou com "origem inválida: M17-958e55b3": o redator citou como origem de um item uma mensagem do trecho anterior, e o Anexo D exige origem no trecho novo ou em item existente. A nova tentativa da tarefa 05 vale só para referências inexistentes, e não para origem fora do trecho. R22 (1ª passagem) e R25 aprovados.
+
+## V-CODEX-08 · Tarefa 08 do Codex (nova tentativa para origem fora do trecho) · 2026-11-02 18:55 · aprovado pelo verificador
+
+Conferência própria: aceite 42 de 42 nos 2 pacotes; executor 48 de 48 nos 2; programas iguais exceto `LANGUAGE`; manifesto 129 de 129 OK.

@@ -611,9 +611,9 @@ class RegressoesDaTarefa05(unittest.TestCase):
         self.assertEqual(codigo, 0)
         self.assertEqual(redator.call_count, 2)
         entrada = redator.call_args_list[0].args[0]
-        linha = ("Referências inexistentes na resposta anterior: M19-3f9c2a71. Cite só mensagens e itens que já existem."
+        linha = ("Problemas na resposta anterior: referências inexistentes: M19-3f9c2a71."
                  if programa.LANGUAGE == "pt-br" else
-                 "Nonexistent references in the previous response: M19-3f9c2a71. Cite only messages and items that already exist.")
+                 "Problems in the previous response: nonexistent references: M19-3f9c2a71.")
         self.assertEqual(redator.call_args_list[1].args, (entrada + linha + "\n", programa.ESQUEMA_RODADA))
         registros = [r for r in programa.registros_de_rodadas() if r["etapa"] == "escrita"]
         self.assertEqual([r["modelos"] for r in registros], [{programa.MODELO: 11}, {programa.MODELO: 23}])
@@ -642,21 +642,17 @@ class RegressoesDaTarefa05(unittest.TestCase):
         self.assertEqual(registros[-1]["resultado"], "falhou")
         self.assertIn("M19-3f9c2a71", programa.ler(pasta_doc / T["d1"]))
 
-    def test_outros_erros_nao_acionam_nova_tentativa(self):
+    def test_erro_de_esquema_nao_aciona_nova_tentativa(self):
         pasta_doc, pasta, codigo, *_ = self.preparar_rodada()
-        for erro in ("esquema", "origem", "situacao"):
-            r = self.resposta()
-            r["handoff"]["proximo_passo"] += " M19-3f9c2a71"
-            if erro == "esquema":
-                r["extra"] = True
-            elif erro == "origem":
-                r["itens_novos"][0]["origem"] = ["M19-3f9c2a71"]
-            else:
-                r["itens_novos"][0]["situacao"] = "invalida"
-            with self.subTest(erro=erro), patch.object(programa, "chamar_redator", return_value=(r, {})) as redator:
-                with self.assertRaises(programa.Falha):
-                    programa.escrever(self.sessao, self.projeto, pasta_doc, pasta, codigo, "pedido")
-                self.assertEqual(redator.call_count, 1)
+        r = self.resposta()
+        r["extra"] = True
+        r["handoff"]["proximo_passo"] += " M19-3f9c2a71"
+        r["itens_novos"][0]["origem"] = ["M19-3f9c2a71"]
+        r["itens_novos"][0]["situacao"] = "invalida"
+        with patch.object(programa, "chamar_redator", return_value=(r, {})) as redator:
+            with self.assertRaises(programa.Falha):
+                programa.escrever(self.sessao, self.projeto, pasta_doc, pasta, codigo, "pedido")
+            self.assertEqual(redator.call_count, 1)
 
     def test_textos_aceitam_mensagens_anteriores_e_de_outra_conversa(self):
         pasta_doc, pasta, codigo, *_ = self.preparar_rodada()
@@ -719,6 +715,126 @@ class RegressoesDaTarefa05(unittest.TestCase):
         registros = [r for r in programa.registros_de_rodadas() if r["etapa"] == "migracao"]
         self.assertEqual(registros[0]["modelos"], {programa.MODELO: 11})
         self.assertEqual(registros[-1]["modelos"], {programa.MODELO: 23})
+
+
+class RegressoesDaTarefa08(unittest.TestCase):
+    setUp = RegressoesDaTarefa01.setUp
+    resposta = RegressoesDaTarefa02.resposta
+    preparar_rodada = RegressoesDaTarefa02.preparar_rodada
+
+    def preparar_incremento(self):
+        pasta_doc, pasta, *_ = self.preparar_rodada()
+        with patch.object(programa, "chamar_redator", return_value=(self.resposta(), {})):
+            self.assertEqual(programa.rodada(self.sessao, caminho_historico=self.historico)[0], 0)
+        self.assertEqual(programa.ultimo_coberto(pasta), 6)
+        with self.historico.open("a", encoding="utf-8") as f:
+            for n, tipo in ((7, "user"), (8, "assistant")):
+                f.write(json.dumps({"type": tipo, "uuid": f"incremento-{n}", "sessionId": self.sessao,
+                                    "cwd": str(self.projeto), "timestamp": f"2026-11-02T11:00:0{n}Z",
+                                    "message": {"content": f"Continuação {n}."}}) + "\n")
+        return pasta_doc, pasta
+
+    def resposta_do_incremento(self):
+        r = self.resposta()
+        for item in r["itens_novos"]:
+            item["origem"] = ["M7-3f9c2a71"]
+        r["conversa_simplificada"] = T["assunto"] + "continuidade.**\n\nContinuação. (M7-3f9c2a71)"
+        r["handoff"] = {k: "Continuação. (M7-3f9c2a71)" for k in programa.ESQUEMA_HANDOFF}
+        r["mudancas"] = [{"id": "PD1-3f9c2a71", "situacao": T["situacoes"]["PD"][1] + "M8-3f9c2a71 (fim)",
+                           "origem": ["M8-3f9c2a71"]}]
+        return r
+
+    def conferir_correcao_de_origem(self, campo):
+        pasta_doc, pasta = self.preparar_incremento()
+        invalida = self.resposta_do_incremento()
+        invalida[campo][0]["origem"] = ["M6-3f9c2a71"]
+        self.assertIn("M6-3f9c2a71", programa.ler(pasta / T["d2"]))
+        with patch.object(programa, "chamar_redator", side_effect=[(invalida, {programa.MODELO: 11}),
+                                                                 (self.resposta_do_incremento(), {programa.MODELO: 23})]) as redator:
+            codigo, _ = programa.rodada(self.sessao, caminho_historico=self.historico)
+        self.assertEqual(codigo, 0)
+        self.assertEqual(redator.call_count, 2)
+        entrada = redator.call_args_list[0].args[0]
+        linha = ("Problemas na resposta anterior: origem fora do trecho novo: M6-3f9c2a71; "
+                 "a origem de um item novo ou de uma mudança é uma mensagem de M7-3f9c2a71 a M8-3f9c2a71 ou um item existente."
+                 if programa.LANGUAGE == "pt-br" else
+                 "Problems in the previous response: source outside the new segment: M6-3f9c2a71; "
+                 "the source of a new item or a change is a message from M7-3f9c2a71 to M8-3f9c2a71 or an existing item.")
+        self.assertEqual(redator.call_args_list[1].args, (entrada + linha + "\n", programa.ESQUEMA_RODADA))
+        registros = [r for r in programa.registros_de_rodadas() if r["etapa"] == "escrita"][-2:]
+        self.assertEqual([r["modelos"] for r in registros], [{programa.MODELO: 11}, {programa.MODELO: 23}])
+        self.assertEqual([r["resultado"] for r in registros], ["em andamento", "concluída"])
+        self.assertEqual(programa.ultimo_coberto(pasta), 8)
+        self.assertIn("M8-3f9c2a71", programa.ler(pasta / T["d7"]))
+        self.assertIn("### D2-3f9c2a71", programa.ler(pasta_doc / T["d4"]))
+        self.assertIn(T["situacoes"]["PD"][1] + "M8-3f9c2a71", programa.ler(pasta_doc / T["d6"]))
+
+    def test_origem_anterior_em_item_novo_repete_e_conclui(self):
+        self.conferir_correcao_de_origem("itens_novos")
+
+    def test_origem_anterior_em_mudanca_repete_e_conclui(self):
+        self.conferir_correcao_de_origem("mudancas")
+
+    def test_origem_anterior_duas_vezes_falha_e_preserva_documentos(self):
+        pasta_doc, pasta = self.preparar_incremento()
+        antes = {p: p.read_bytes() for p in [pasta / T["d3"], pasta / T["d7"],
+                                             *programa.documentos_da_pasta(pasta_doc).values()]}
+        invalida = self.resposta_do_incremento()
+        invalida["itens_novos"][0]["origem"] = ["M6-3f9c2a71"]
+        invalida["mudancas"][0]["origem"] = ["M5-3f9c2a71"]
+        with patch.object(programa, "chamar_redator", side_effect=[(invalida, {programa.MODELO: 11}),
+                                                                 (invalida, {programa.MODELO: 23})]) as redator:
+            codigo, linha = programa.rodada(self.sessao, caminho_historico=self.historico)
+        self.assertEqual(codigo, 1)
+        self.assertEqual(redator.call_count, 2)
+        for origem in ("M5-3f9c2a71", "M6-3f9c2a71"):
+            self.assertIn(origem, linha)
+        self.assertEqual({p: p.read_bytes() for p in antes}, antes)
+        self.assertEqual(programa.ultimo_coberto(pasta), 6)
+        self.assertFalse(list((programa.pasta_de_dados() / "diarios").glob("*.json")))
+        registros = [r for r in programa.registros_de_rodadas() if r["etapa"] == "escrita"][-3:]
+        self.assertEqual([r["modelos"] for r in registros], [{programa.MODELO: 11}, {programa.MODELO: 23}, {}])
+        self.assertEqual(registros[-1]["resultado"], "falhou")
+        self.assertIn("M6-3f9c2a71", programa.ler(pasta_doc / T["d1"]))
+
+    def test_situacao_e_assunto_repete_com_lista_de_todos_os_problemas(self):
+        _, pasta, *_ = self.preparar_rodada()
+        invalida = self.resposta()
+        invalida["conversa_simplificada"] = "Texto sem assunto."
+        invalida["itens_novos"][0]["situacao"] = "invalida\nna linha seguinte"
+        invalida["itens_novos"][0]["origem"] = ["M19-3f9c2a71"]
+        invalida["mudancas"] = [{"id": "N3", "situacao": "outra invalida", "origem": ["M1-3f9c2a71"]}]
+        invalida["handoff"]["proximo_passo"] += " M99-3f9c2a71"
+        with patch.object(programa, "chamar_redator", side_effect=[(invalida, {programa.MODELO: 11}),
+                                                                 (self.resposta(), {programa.MODELO: 23})]) as redator:
+            codigo, _ = programa.rodada(self.sessao, caminho_historico=self.historico)
+        self.assertEqual(codigo, 0)
+        self.assertEqual(redator.call_count, 2)
+        entrada = redator.call_args_list[0].args[0]
+        segunda = redator.call_args_list[1].args[0]
+        self.assertTrue(segunda.startswith(entrada))
+        linha = segunda[len(entrada):]
+        self.assertEqual(len(linha.splitlines()), 1)
+        for problema in ("invalida", "na linha seguinte", "outra invalida", "conversa_simplificada", "M19-3f9c2a71", "M99-3f9c2a71"):
+            self.assertIn(problema, linha)
+        self.assertIn("M1-3f9c2a71 a M6-3f9c2a71" if programa.LANGUAGE == "pt-br" else
+                      "M1-3f9c2a71 to M6-3f9c2a71", linha)
+        self.assertNotIn("M99-3f9c2a71", programa.ler(pasta / T["d7"]))
+
+    def test_modelo_e_tempo_nao_acionam_nova_tentativa(self):
+        pasta_doc, pasta, codigo, *_ = self.preparar_rodada()
+        envelope = {"structured_output": self.resposta(), "modelUsage": {"outro-modelo": {"outputTokens": 10}}}
+        casos = (("modelo", subprocess.CompletedProcess([], 0, json.dumps(envelope), "")),
+                 ("tempo", subprocess.TimeoutExpired(["redator-simulado"], 900)))
+        for motivo, resultado in casos:
+            opcoes = {"side_effect": resultado} if isinstance(resultado, Exception) else {"return_value": resultado}
+            with self.subTest(motivo=motivo), patch.object(programa, "executavel_do_claude", return_value="redator-simulado"), \
+                    patch.object(programa.subprocess, "run", **opcoes) as processo:
+                with self.assertRaises(programa.Falha) as erro:
+                    programa.escrever(self.sessao, self.projeto, pasta_doc, pasta, codigo, "pedido")
+                self.assertEqual(processo.call_count, 1)
+                self.assertIn(T["motivo_modelo"].format(modelo=programa.MODELO) if motivo == "modelo" else
+                              T["motivo_tempo"].format(min=15), str(erro.exception))
 
 
 if __name__ == "__main__":

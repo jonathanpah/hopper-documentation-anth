@@ -84,7 +84,10 @@ TEXTOS = {
         "motivo_tempo": "o redator não respondeu em {min} minutos", "motivo_situacao": "situação não permitida: {situacao}",
         "motivo_origem": "origem inválida: {origem}", "motivo_verificacao": "verificação interna da migração reprovou: {detalhe}",
         "motivo_referencias": "referências inexistentes: {referencias}",
-        "nova_tentativa_referencias": "Referências inexistentes na resposta anterior: {referencias}. Cite só mensagens e itens que já existem.",
+        "motivo_origem_fora": "origem fora do trecho novo: {origem}",
+        "motivo_assunto": "linha de assunto ausente em conversa_simplificada",
+        "regra_origem": "a origem de um item novo ou de uma mudança é uma mensagem de {inicio} a {fim} ou um item existente",
+        "nova_tentativa": "Problemas na resposta anterior: {problemas}.",
         "motivo_gravacao": "a pasta do projeto não aceita gravação", "motivo_interrompida": "interrompida em {etapa}",
         "aviso_ponto": "o registro da última mensagem copiada não existe mais no histórico; a cópia seguiu pela data e hora",
     },
@@ -134,7 +137,10 @@ TEXTOS = {
         "motivo_tempo": "the writer did not answer in {min} minutes", "motivo_situacao": "status not allowed: {situacao}",
         "motivo_origem": "invalid source: {origem}", "motivo_verificacao": "internal migration check failed: {detalhe}",
         "motivo_referencias": "nonexistent references: {referencias}",
-        "nova_tentativa_referencias": "Nonexistent references in the previous response: {referencias}. Cite only messages and items that already exist.",
+        "motivo_origem_fora": "source outside the new segment: {origem}",
+        "motivo_assunto": "subject line missing in conversa_simplificada",
+        "regra_origem": "the source of a new item or a change is a message from {inicio} to {fim} or an existing item",
+        "nova_tentativa": "Problems in the previous response: {problemas}.",
         "motivo_gravacao": "the project folder does not accept writes", "motivo_interrompida": "interrupted at {etapa}",
         "aviso_ponto": "the record of the last copied message no longer exists in the transcript; the copy continued by date and time",
     },
@@ -187,10 +193,16 @@ class Falha(Exception):
     pass
 
 
-class ReferenciasInexistentes(Falha):
+class RespostaCorrigivel(Falha):
+    def __init__(self, problemas):
+        self.problemas = list(dict.fromkeys(problemas))
+        super().__init__("; ".join(self.problemas))
+
+
+class ReferenciasInexistentes(RespostaCorrigivel):
     def __init__(self, referencias):
         self.referencias = sorted(referencias)
-        super().__init__(T["motivo_referencias"].format(referencias=", ".join(self.referencias)))
+        super().__init__([T["motivo_referencias"].format(referencias=", ".join(self.referencias))])
 
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -938,21 +950,9 @@ def validar_resposta(resposta, esquema, mensagens_validas, itens_existentes, mig
     refs = {i["ref"] for i in resposta["itens_novos"]}
     if len(refs) != len(resposta["itens_novos"]):
         raise Falha(T["motivo_esquema"])
-    tipos = {i["ref"]: i["tipo"] for i in resposta["itens_novos"]}
     for item in resposta["itens_novos"]:
         if not item["texto"].strip():
             raise Falha(T["motivo_esquema"])
-        if not situacao_permitida(item["tipo"], item["situacao"]):
-            raise Falha(T["motivo_situacao"].format(situacao=item["situacao"]))
-    for mudanca in resposta["mudancas"]:
-        alvo = mudanca["id"].strip()
-        tipo = tipos.get(alvo)
-        if alvo in itens_existentes:
-            m = re.match(r"^(PD|D|F)\d+-", alvo)
-            tipo = m.group(1) if m else None
-        # Identificadores inexistentes continuam para a lista de mudanças não aplicadas.
-        if tipo and not situacao_permitida(tipo, mudanca["situacao"]):
-            raise Falha(T["motivo_situacao"].format(situacao=mudanca["situacao"]))
     if migracao:
         for item in resposta["itens_novos"] + resposta["handoffs_antigos"]:
             if not re.fullmatch(r"[A-Za-z0-9-]+", item["conversa"]):
@@ -964,16 +964,39 @@ def validar_resposta(resposta, esquema, mensagens_validas, itens_existentes, mig
                 dt.date.fromisoformat(h["data"])
             except ValueError:
                 raise Falha(T["motivo_esquema"] + " (data)")
+
+    problemas = []
+    tipos = {i["ref"]: i["tipo"] for i in resposta["itens_novos"]}
+    for item in resposta["itens_novos"]:
+        if not situacao_permitida(item["tipo"], item["situacao"]):
+            problemas.append(T["motivo_situacao"].format(situacao=item["situacao"]))
+    for mudanca in resposta["mudancas"]:
+        alvo = mudanca["id"].strip()
+        tipo = tipos.get(alvo)
+        if alvo in itens_existentes:
+            m = re.match(r"^(PD|D|F)\d+-", alvo)
+            tipo = m.group(1) if m else None
+        # Identificadores inexistentes continuam para a lista de mudanças não aplicadas.
+        if tipo and not situacao_permitida(tipo, mudanca["situacao"]):
+            problemas.append(T["motivo_situacao"].format(situacao=mudanca["situacao"]))
+    if migracao:
         if any(n not in (arquivos_validos or set()) for n in resposta["sem_conteudo"]):
-            raise Falha(T["motivo_origem"].format(origem="sem_conteudo"))
+            problemas.append(T["motivo_origem"].format(origem="sem_conteudo"))
     elif not resposta["nada_relevante"] and not resposta["conversa_simplificada"].startswith(T["assunto"]):
-        raise Falha(T["motivo_esquema"] + " (conversa_simplificada)")
+        problemas.append(T["motivo_assunto"])
+    origem_invalida = False
     for item in resposta["itens_novos"] + resposta["mudancas"]:
         for origem in item["origem"]:
             valida = origem.strip() in (arquivos_validos or set()) if migracao else origem_valida(
                 origem, mensagens_validas, itens_existentes, refs)
             if not valida:
-                raise Falha(T["motivo_origem"].format(origem=origem))
+                origem_invalida = True
+                chave = "motivo_origem_fora" if not migracao and (
+                    re.fullmatch(r"M\d+-[A-Za-z0-9-]+", origem.strip()) or RE_INTERVALO.fullmatch(origem.strip())) else "motivo_origem"
+                problemas.append(T[chave].format(origem=origem))
+    if origem_invalida and not migracao and mensagens_validas:
+        ordenadas = sorted(mensagens_validas, key=lambda m: int(m.split("-", 1)[0][1:]))
+        problemas.append(T["regra_origem"].format(inicio=ordenadas[0], fim=ordenadas[-1]))
     textos = [i[c] for i in resposta["itens_novos"] for c in ("texto", "situacao", "recomendacao", "depende_de")]
     textos += [m["situacao"] for m in resposta["mudancas"]]
     if migracao:
@@ -998,7 +1021,12 @@ def validar_resposta(resposta, esquema, mensagens_validas, itens_existentes, mig
         if not m or int(m.group(2)) > maiores.get((m.group(1), m.group(3)), -1):
             inexistentes.add(referencia)
     if inexistentes:
-        raise ReferenciasInexistentes(inexistentes)
+        erro = ReferenciasInexistentes(inexistentes)
+        if not problemas:
+            raise erro
+        problemas.extend(erro.problemas)
+    if problemas:
+        raise RespostaCorrigivel(problemas)
     for item in resposta["itens_novos"]:
         if item["tipo"] != "PD":
             item["recomendacao"], item["depende_de"] = "", ""
@@ -1081,18 +1109,18 @@ def chamar_redator(entrada, esquema):
 
 
 def chamar_redator_validado(entrada, esquema, mensagens_validas, itens_existentes, registro, **opcoes):
-    """Repete só a falha de referências, 1 vez, e registra o uso das respostas descartadas."""
+    """Repete falhas corrigíveis da conferência, 1 vez, e registra as respostas descartadas."""
     for tentativa in range(2):
         bruto, modelos = chamar_redator(entrada, esquema)
         try:
             resposta = validar_resposta(bruto, esquema, mensagens_validas, itens_existentes, **opcoes)
         except Falha as erro:
-            if not isinstance(erro, ReferenciasInexistentes) and tentativa == 0:
+            if not isinstance(erro, RespostaCorrigivel) and tentativa == 0:
                 raise
             registrar(**registro, resultado="em andamento", motivo=str(erro), modelos=modelos)
-            if not isinstance(erro, ReferenciasInexistentes) or tentativa == 1:
+            if not isinstance(erro, RespostaCorrigivel) or tentativa == 1:
                 raise
-            entrada += T["nova_tentativa_referencias"].format(referencias=", ".join(erro.referencias)) + "\n"
+            entrada += T["nova_tentativa"].format(problemas=" ".join(str(erro).splitlines())) + "\n"
         else:
             return resposta, modelos
 
