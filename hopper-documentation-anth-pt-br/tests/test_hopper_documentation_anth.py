@@ -523,5 +523,203 @@ class RegressoesDaTarefa02(unittest.TestCase):
         self.assertFalse(list((programa.pasta_de_dados() / "diarios").glob("*.json")))
 
 
+class RegressoesDaTarefa05(unittest.TestCase):
+    setUp = RegressoesDaTarefa01.setUp
+    gravar_historico = RegressoesDaTarefa01.gravar_historico
+    resposta = RegressoesDaTarefa02.resposta
+    preparar_rodada = RegressoesDaTarefa02.preparar_rodada
+    preparar_migracao = RegressoesDaTarefa02.preparar_migracao
+
+    def validar(self, resposta, itens=()):
+        return programa.validar_resposta(resposta, programa.ESQUEMA_RODADA,
+                                         {f"M{n}-3f9c2a71" for n in range(1, 7)}, set(itens))
+
+    def campos_de_texto(self, resposta):
+        resposta["mudancas"] = [{"id": "N3", "situacao": T["situacoes"]["PD"][1] + "M1-3f9c2a71 (fim)",
+                                  "origem": ["M1-3f9c2a71"]}]
+        return ([(resposta, "conversa_simplificada")] +
+                [(resposta["handoff"], k) for k in programa.ESQUEMA_HANDOFF] +
+                [(i, k) for i in resposta["itens_novos"] for k in ("texto", "recomendacao", "depende_de")] +
+                [(resposta["mudancas"][0], "situacao")])
+
+    def test_mensagem_inexistente_e_rejeitada_em_todos_os_campos(self):
+        for indice in range(len(self.campos_de_texto(self.resposta()))):
+            r = self.resposta()
+            objeto, campo = self.campos_de_texto(r)[indice]
+            objeto[campo] += " M19-3f9c2a71"
+            with self.subTest(indice=indice, campo=campo), self.assertRaisesRegex(programa.Falha, "M19-3f9c2a71"):
+                self.validar(r)
+
+    def test_item_futuro_ou_codigo_inexistente_e_rejeitado_em_todos_os_campos(self):
+        itens = {"D7-3f9c2a71", "F2-antigo-abcd", "PD3-outraconversa",
+                 "F30-3f9c2a71", "D30-antigo-abcd", "D30-outraconversa"}
+        for identificador in ("D8-3f9c2a71", "F3-antigo-abcd", "PD4-outraconversa",
+                              "D1-ausente", "F1-ausente", "PD1-ausente", "F1-outraconversa"):
+            for indice in range(len(self.campos_de_texto(self.resposta()))):
+                r = self.resposta()
+                objeto, campo = self.campos_de_texto(r)[indice]
+                objeto[campo] += " " + identificador
+                with self.subTest(id=identificador, indice=indice), self.assertRaisesRegex(programa.Falha, identificador):
+                    self.validar(r, itens)
+
+    def test_item_apagado_a_mao_continua_aceito(self):
+        pasta_doc = self.projeto / programa.PASTA_DOC
+        pasta_doc.mkdir()
+        apagados = set()
+        for tipo, caminho in programa.documentos_da_pasta(pasta_doc).items():
+            texto = ""
+            for codigo in ("3f9c2a71", "antigo-abcd"):
+                apagados.add(f"{tipo}1-{codigo}")
+                texto += f"### {tipo}1-{codigo}\nItem apagado.\n\n### {tipo}2-{codigo}\nItem preservado.\n\n"
+            caminho.write_text(texto)
+            for identificador in apagados:
+                texto = texto.replace(f"### {identificador}\nItem apagado.\n\n", "")
+            caminho.write_text(texto)
+        itens = {i["id"] for i in programa.todos_os_itens(pasta_doc)}
+        self.assertEqual(itens, {f"{tipo}2-{codigo}" for tipo in ("D", "F", "PD")
+                                 for codigo in ("3f9c2a71", "antigo-abcd")})
+        self.assertTrue(apagados.isdisjoint(itens))
+        r = self.resposta()
+        for objeto, campo in self.campos_de_texto(r):
+            objeto[campo] += " " + " ".join(sorted(apagados))
+        r["itens_novos"][0]["situacao"] = T["situacoes"]["D"][1] + "D1-3f9c2a71"
+        self.assertIs(self.validar(r, itens), r)
+
+    def test_N1_e_itens_existentes_continuam_aceitos(self):
+        r = self.resposta()
+        itens = {"D7-outraconversa", "F2-antigo-abcd", "PD3-outraconversa"}
+        for objeto, campo in self.campos_de_texto(r):
+            objeto[campo] += " N1 " + " ".join(sorted(itens))
+        self.assertIs(self.validar(r, itens), r)
+        r["itens_novos"][0]["situacao"] = T["situacoes"]["D"][1] + "N1"
+        self.validar(r, itens)
+
+    def test_referencia_N_inexistente_e_situacao_de_item_novo_sao_conferidas(self):
+        for identificador in ("N99", "D19-3f9c2a71"):
+            r = self.resposta()
+            r["itens_novos"][0]["situacao"] = T["situacoes"]["D"][1] + identificador
+            with self.subTest(id=identificador), self.assertRaisesRegex(programa.Falha, identificador):
+                self.validar(r)
+
+    def test_rodada_repete_uma_vez_e_registra_as_duas_chamadas(self):
+        pasta_doc, pasta, *_ = self.preparar_rodada()
+        invalida = self.resposta()
+        invalida["handoff"]["proximo_passo"] = "A próxima rodada deve cobrir M19-3f9c2a71 em diante."
+        with patch.object(programa, "chamar_redator", side_effect=[(invalida, {programa.MODELO: 11}),
+                                                                 (self.resposta(), {programa.MODELO: 23})]) as redator:
+            codigo, _ = programa.rodada(self.sessao, caminho_historico=self.historico)
+        self.assertEqual(codigo, 0)
+        self.assertEqual(redator.call_count, 2)
+        entrada = redator.call_args_list[0].args[0]
+        linha = ("Referências inexistentes na resposta anterior: M19-3f9c2a71. Cite só mensagens e itens que já existem."
+                 if programa.LANGUAGE == "pt-br" else
+                 "Nonexistent references in the previous response: M19-3f9c2a71. Cite only messages and items that already exist.")
+        self.assertEqual(redator.call_args_list[1].args, (entrada + linha + "\n", programa.ESQUEMA_RODADA))
+        registros = [r for r in programa.registros_de_rodadas() if r["etapa"] == "escrita"]
+        self.assertEqual([r["modelos"] for r in registros], [{programa.MODELO: 11}, {programa.MODELO: 23}])
+        self.assertEqual([r["resultado"] for r in registros], ["em andamento", "concluída"])
+        self.assertIn("M19-3f9c2a71", registros[0]["motivo"])
+        self.assertNotIn("M19-3f9c2a71", "\n".join(p.read_text() for p in pasta_doc.rglob("*.md")))
+        self.assertTrue((pasta / T["d7"]).exists())
+
+    def test_segunda_resposta_invalida_falha_sem_gravar_documentos_3_a_7(self):
+        pasta_doc, pasta, *_ = self.preparar_rodada()
+        invalida = self.resposta()
+        invalida["handoff"]["proximo_passo"] += " M19-3f9c2a71"
+        with patch.object(programa, "chamar_redator", side_effect=[(invalida, {programa.MODELO: 11}),
+                                                                 (invalida, {programa.MODELO: 23})]) as redator:
+            codigo, linha = programa.rodada(self.sessao, caminho_historico=self.historico)
+        self.assertEqual(codigo, 1)
+        self.assertIn("M19-3f9c2a71", linha)
+        self.assertEqual(redator.call_count, 2)
+        self.assertFalse((pasta / T["d3"]).exists())
+        self.assertFalse((pasta / T["d7"]).exists())
+        self.assertFalse(any(p.exists() for p in programa.documentos_da_pasta(pasta_doc).values()))
+        self.assertFalse(list((programa.pasta_de_dados() / "diarios").glob("*.json")))
+        registros = [r for r in programa.registros_de_rodadas() if r["etapa"] == "escrita"]
+        self.assertEqual([r["modelos"] for r in registros if r["modelos"]],
+                         [{programa.MODELO: 11}, {programa.MODELO: 23}])
+        self.assertEqual(registros[-1]["resultado"], "falhou")
+        self.assertIn("M19-3f9c2a71", programa.ler(pasta_doc / T["d1"]))
+
+    def test_outros_erros_nao_acionam_nova_tentativa(self):
+        pasta_doc, pasta, codigo, *_ = self.preparar_rodada()
+        for erro in ("esquema", "origem", "situacao"):
+            r = self.resposta()
+            r["handoff"]["proximo_passo"] += " M19-3f9c2a71"
+            if erro == "esquema":
+                r["extra"] = True
+            elif erro == "origem":
+                r["itens_novos"][0]["origem"] = ["M19-3f9c2a71"]
+            else:
+                r["itens_novos"][0]["situacao"] = "invalida"
+            with self.subTest(erro=erro), patch.object(programa, "chamar_redator", return_value=(r, {})) as redator:
+                with self.assertRaises(programa.Falha):
+                    programa.escrever(self.sessao, self.projeto, pasta_doc, pasta, codigo, "pedido")
+                self.assertEqual(redator.call_count, 1)
+
+    def test_textos_aceitam_mensagens_anteriores_e_de_outra_conversa(self):
+        pasta_doc, pasta, codigo, *_ = self.preparar_rodada()
+        outra = pasta_doc / T["conversas"] / "2026-03-13-abc12345"
+        outra.mkdir()
+        (outra / T["d2"]).write_text(programa.ler(pasta / T["d2"]).replace(codigo, "abc12345"))
+        r = self.resposta()
+        for i in r["itens_novos"]:
+            i["origem"] = ["M4-3f9c2a71"]
+        r["handoff"]["objetivo"] += " M1-abc12345"
+        with patch.object(programa, "ultimo_coberto", return_value=3), \
+                patch.object(programa, "chamar_redator", return_value=(r, {})) as redator:
+            programa.escrever(self.sessao, self.projeto, pasta_doc, pasta, codigo, "pedido")
+        self.assertEqual(redator.call_count, 1)
+        self.assertIn("M1-abc12345", programa.ler(pasta / T["d7"]))
+
+    def test_mensagem_ja_copiada_depois_do_fim_do_trecho_e_rejeitada(self):
+        pasta_doc, pasta, codigo, *_ = self.preparar_rodada()
+        mensagens = programa.Documento2(pasta / T["d2"]).mensagens()
+        r = self.resposta()
+        r["itens_novos"] = []
+        r["conversa_simplificada"] = T["assunto"] + "teste.** (M2-3f9c2a71)"
+        r["handoff"] = {k: "M1-3f9c2a71" for k in programa.ESQUEMA_HANDOFF}
+        with patch.object(programa, "partes_do_trecho", return_value=[mensagens[:1]]), \
+                patch.object(programa, "chamar_redator", return_value=(r, {})) as redator:
+            with self.assertRaisesRegex(programa.Falha, "M2-3f9c2a71"):
+                programa.escrever(self.sessao, self.projeto, pasta_doc, pasta, codigo, "pedido")
+        self.assertEqual(redator.call_count, 2)
+
+    def test_migracao_rejeita_mensagens_e_itens_inexistentes_antes_de_gravar(self):
+        pasta = self.preparar_migracao()
+        antes = {p: p.read_bytes() for p in pasta.rglob("*") if p.is_file()}
+        for identificador in ("M1-3f9c2a71", "PD19-antigo-abcd"):
+            for destino in ("item", *programa.ESQUEMA_HANDOFF):
+                r = self.resposta("migracao-b3-anth")
+                if destino == "item":
+                    r["itens_novos"][0]["texto"] += " " + identificador
+                else:
+                    r["handoffs_antigos"][0]["handoff"][destino] += " " + identificador
+                with self.subTest(id=identificador, destino=destino), \
+                        patch.object(programa, "chamar_redator", return_value=(r, {})) as redator:
+                    with self.assertRaisesRegex(programa.Falha, identificador):
+                        programa.migrar(self.projeto)
+                    self.assertEqual(redator.call_count, 2)
+                self.assertEqual({p: p.read_bytes() for p in pasta.rglob("*") if p.is_file()}, antes)
+        self.assertFalse(list((programa.pasta_de_dados() / "diarios").glob("*.json")))
+
+    def test_migracao_repete_e_aceita_N1(self):
+        pasta = self.preparar_migracao()
+        invalida = self.resposta("migracao-b3-anth")
+        invalida["handoffs_antigos"][0]["handoff"]["objetivo"] += " M1-3f9c2a71"
+        valida = self.resposta("migracao-b3-anth")
+        valida["itens_novos"][1]["texto"] += " Conforme N1."
+        with patch.object(programa, "chamar_redator", side_effect=[(invalida, {programa.MODELO: 11}),
+                                                                 (valida, {programa.MODELO: 23})]) as redator:
+            self.assertEqual(programa.migrar(self.projeto), 3)
+        self.assertEqual(redator.call_count, 2)
+        self.assertEqual(programa.arquivos_antigos(pasta), [])
+        self.assertIn("Conforme D1-3f9c2a71.", programa.ler(pasta / T["d5"]))
+        registros = [r for r in programa.registros_de_rodadas() if r["etapa"] == "migracao"]
+        self.assertEqual(registros[0]["modelos"], {programa.MODELO: 11})
+        self.assertEqual(registros[-1]["modelos"], {programa.MODELO: 23})
+
+
 if __name__ == "__main__":
     unittest.main()

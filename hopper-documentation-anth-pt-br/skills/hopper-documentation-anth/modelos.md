@@ -2,6 +2,8 @@
 
 O programa grava os cabeçalhos, os títulos dos blocos e os identificadores finais. Você escreve o conteúdo. Use `N1`, `N2`… para os itens novos em qualquer campo; o programa troca essas referências pelos identificadores finais.
 
+Cite só mensagens do trecho novo ou anteriores a ele e itens existentes na pasta. Use `N1`, `N2`… para itens novos desta resposta. Para falar do que vem depois do trecho novo, escreva sem identificador. Na migração, cite arquivos antigos e itens, pois as mensagens não existem.
+
 ## Documento 3, conversa simplificada
 
 O campo `conversa_simplificada` é o corpo de 1 bloco. Ele começa com a linha de assunto e segue com parágrafos curtos. Cada parágrafo termina com as mensagens de origem entre parênteses, separadas por vírgula. Um intervalo usa a forma `M3-e4bad083 a M7-e4bad083`.

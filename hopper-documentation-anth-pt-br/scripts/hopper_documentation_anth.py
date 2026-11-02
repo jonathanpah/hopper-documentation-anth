@@ -83,6 +83,8 @@ TEXTOS = {
         "motivo_esquema": "resposta do redator fora do esquema", "motivo_modelo": "resposta de outro modelo que não o {modelo}",
         "motivo_tempo": "o redator não respondeu em {min} minutos", "motivo_situacao": "situação não permitida: {situacao}",
         "motivo_origem": "origem inválida: {origem}", "motivo_verificacao": "verificação interna da migração reprovou: {detalhe}",
+        "motivo_referencias": "referências inexistentes: {referencias}",
+        "nova_tentativa_referencias": "Referências inexistentes na resposta anterior: {referencias}. Cite só mensagens e itens que já existem.",
         "motivo_gravacao": "a pasta do projeto não aceita gravação", "motivo_interrompida": "interrompida em {etapa}",
         "aviso_ponto": "o registro da última mensagem copiada não existe mais no histórico; a cópia seguiu pela data e hora",
     },
@@ -131,6 +133,8 @@ TEXTOS = {
         "motivo_esquema": "writer response outside the schema", "motivo_modelo": "response from a model other than {modelo}",
         "motivo_tempo": "the writer did not answer in {min} minutes", "motivo_situacao": "status not allowed: {situacao}",
         "motivo_origem": "invalid source: {origem}", "motivo_verificacao": "internal migration check failed: {detalhe}",
+        "motivo_referencias": "nonexistent references: {referencias}",
+        "nova_tentativa_referencias": "Nonexistent references in the previous response: {referencias}. Cite only messages and items that already exist.",
         "motivo_gravacao": "the project folder does not accept writes", "motivo_interrompida": "interrupted at {etapa}",
         "aviso_ponto": "the record of the last copied message no longer exists in the transcript; the copy continued by date and time",
     },
@@ -181,6 +185,12 @@ def esquema_de_migracao():
 
 class Falha(Exception):
     pass
+
+
+class ReferenciasInexistentes(Falha):
+    def __init__(self, referencias):
+        self.referencias = sorted(referencias)
+        super().__init__(T["motivo_referencias"].format(referencias=", ".join(self.referencias)))
 
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -826,7 +836,9 @@ RE_ITEM = re.compile(r"^### ((D|F|PD)(\d+)-([A-Za-z0-9-]+))$", re.M)
 RE_BLOCO = re.compile(r"^## M(\d+)-([A-Za-z0-9-]+) a M(\d+)-([A-Za-z0-9-]+)$", re.M)
 RE_REF = re.compile(r"(?<![A-Za-z0-9-])N(\d+)(?![A-Za-z0-9-])")
 RE_ID_MENSAGEM = re.compile(r"^M(\d+)-([A-Za-z0-9-]+)$")
+RE_ID_ITEM = re.compile(r"^(D|F|PD)(\d+)-([A-Za-z0-9-]+)$")
 RE_INTERVALO = re.compile(r"^M(\d+)-([A-Za-z0-9-]+) a M(\d+)-([A-Za-z0-9-]+)$")
+RE_REFERENCIA = re.compile(r"\b(?:M|D|F|PD)\d+-[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*\b")
 
 
 def documentos_da_pasta(pasta_doc):
@@ -919,7 +931,8 @@ def validar_esquema(valor, esquema):
             raise Falha(T["motivo_esquema"])
 
 
-def validar_resposta(resposta, esquema, mensagens_validas, itens_existentes, migracao=False, arquivos_validos=None):
+def validar_resposta(resposta, esquema, mensagens_validas, itens_existentes, migracao=False, arquivos_validos=None,
+                     mensagens_existentes=None):
     """Confere o esquema completo e as regras do Anexo D antes do diário e da gravação."""
     validar_esquema(resposta, esquema)
     refs = {i["ref"] for i in resposta["itens_novos"]}
@@ -931,8 +944,6 @@ def validar_resposta(resposta, esquema, mensagens_validas, itens_existentes, mig
             raise Falha(T["motivo_esquema"])
         if not situacao_permitida(item["tipo"], item["situacao"]):
             raise Falha(T["motivo_situacao"].format(situacao=item["situacao"]))
-        if item["tipo"] != "PD":
-            item["recomendacao"], item["depende_de"] = "", ""
     for mudanca in resposta["mudancas"]:
         alvo = mudanca["id"].strip()
         tipo = tipos.get(alvo)
@@ -963,6 +974,34 @@ def validar_resposta(resposta, esquema, mensagens_validas, itens_existentes, mig
                 origem, mensagens_validas, itens_existentes, refs)
             if not valida:
                 raise Falha(T["motivo_origem"].format(origem=origem))
+    textos = [i[c] for i in resposta["itens_novos"] for c in ("texto", "situacao", "recomendacao", "depende_de")]
+    textos += [m["situacao"] for m in resposta["mudancas"]]
+    if migracao:
+        textos += [h["handoff"][c] for h in resposta["handoffs_antigos"] for c in ESQUEMA_HANDOFF]
+        mensagens = set()
+    else:
+        textos += [resposta["conversa_simplificada"], *resposta["handoff"].values()]
+        mensagens = mensagens_validas if mensagens_existentes is None else mensagens_existentes
+    permitidas = mensagens | itens_existentes | refs
+    citadas = {r for texto in textos for r in RE_REFERENCIA.findall(texto)}
+    citadas.update("N" + n for texto in textos for n in RE_REF.findall(texto))
+    maiores = {}
+    for identificador in itens_existentes:
+        m = RE_ID_ITEM.fullmatch(identificador)
+        if m:
+            chave = (m.group(1), m.group(3))
+            maiores[chave] = max(maiores.get(chave, 0), int(m.group(2)))
+    inexistentes = set()
+    for referencia in citadas - permitidas:
+        m = RE_ID_ITEM.fullmatch(referencia)
+        # R14: uma exclusão manual não pode invalidar citações abaixo do maior número existente.
+        if not m or int(m.group(2)) > maiores.get((m.group(1), m.group(3)), -1):
+            inexistentes.add(referencia)
+    if inexistentes:
+        raise ReferenciasInexistentes(inexistentes)
+    for item in resposta["itens_novos"]:
+        if item["tipo"] != "PD":
+            item["recomendacao"], item["depende_de"] = "", ""
     return resposta
 
 
@@ -1039,6 +1078,23 @@ def chamar_redator(entrada, esquema):
         raise Falha(T["motivo_esquema"])
     modelos = conferir_modelos(envelope.get("modelUsage"))
     return envelope["structured_output"], modelos
+
+
+def chamar_redator_validado(entrada, esquema, mensagens_validas, itens_existentes, registro, **opcoes):
+    """Repete só a falha de referências, 1 vez, e registra o uso das respostas descartadas."""
+    for tentativa in range(2):
+        bruto, modelos = chamar_redator(entrada, esquema)
+        try:
+            resposta = validar_resposta(bruto, esquema, mensagens_validas, itens_existentes, **opcoes)
+        except Falha as erro:
+            if not isinstance(erro, ReferenciasInexistentes) and tentativa == 0:
+                raise
+            registrar(**registro, resultado="em andamento", motivo=str(erro), modelos=modelos)
+            if not isinstance(erro, ReferenciasInexistentes) or tentativa == 1:
+                raise
+            entrada += T["nova_tentativa_referencias"].format(referencias=", ".join(erro.referencias)) + "\n"
+        else:
+            return resposta, modelos
 
 
 def arquivo_da_skill(nome):
@@ -1303,8 +1359,13 @@ def escrever(sessao, projeto, pasta_doc, pasta, codigo, acionamento):
         trecho = "\n\n".join(bloco_de_mensagem_gravada(m) for m in parte)
         with Trava(f"pasta-{nome_curto(pasta_doc)}", 60):
             entrada = entrada_do_redator(sessao, codigo, intervalo, pasta_doc, pasta, trecho)
-        bruto, modelos = chamar_redator(entrada, ESQUEMA_RODADA)
-        resposta = validar_resposta(bruto, ESQUEMA_RODADA, mensagens_validas, itens_existentes)
+            mensagens_existentes = {f"M{m['n']}-{m['codigo']}"
+                                    for caminho in (pasta_doc / T["conversas"]).glob(f"*/{T['d2']}")
+                                    for m in Documento2(caminho).mensagens() if m["n"] <= b}
+        registro = dict(conversa=sessao, pasta_do_projeto=projeto, acionamento=acionamento,
+                        etapa="escrita", intervalo=intervalo)
+        resposta, modelos = chamar_redator_validado(entrada, ESQUEMA_RODADA, mensagens_validas, itens_existentes,
+                                                    registro, mensagens_existentes=mensagens_existentes)
         for m, v in modelos.items():
             modelos_total[m] = modelos_total.get(m, 0) + v
         inexistentes = gravar_rodada(pasta_doc, pasta, codigo, sessao, projeto, resposta, a, b, diario=diario, modelos=modelos)
@@ -1413,9 +1474,9 @@ def migrar(projeto, acionamento="migrar"):
             with Trava(f"pasta-{nome_curto(pasta_doc)}", 60):
                 entrada = entrada_da_migracao(pasta_doc, arquivos)
                 itens_existentes = {i["id"] for i in todos_os_itens(pasta_doc)}
-            bruto, modelos = chamar_redator(entrada, esquema_de_migracao())
-            resposta = validar_resposta(bruto, esquema_de_migracao(), set(), itens_existentes, migracao=True,
-                                       arquivos_validos={a.name for a in arquivos})
+            registro = dict(conversa="", pasta_do_projeto=projeto, acionamento=acionamento, etapa="migracao")
+            resposta, modelos = chamar_redator_validado(entrada, esquema_de_migracao(), set(), itens_existentes,
+                                                        registro, migracao=True, arquivos_validos={a.name for a in arquivos})
             resposta = ocultar_campos(resposta)
             mapa = None
         with Trava(f"pasta-{nome_curto(pasta_doc)}", 60):
