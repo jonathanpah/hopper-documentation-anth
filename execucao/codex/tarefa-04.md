@@ -1,6 +1,8 @@
 # Tarefa 04 para o Codex: roteiro de aceite em A1 e A3 e avaliações de acionamento (U8)
 
-Você roda os testes reais da versão 2.0.0, já instalada pelo verificador nas 3 contas a partir do commit congelado `e737aca` (critérios congelados, tag `criterios-congelados`). Nesta tarefa você precisa de rede e de gravar fora do repositório, então ela roda sem o isolamento das tarefas anteriores. Leia antes: `SPEC.md`, Anexo F (passos F-C, F-A, F-K e F-V) e decisão C27; `execucao/decisoes.md`, D-10, D-11, D-14, D-15, D-17 e D-18; `execucao/verificacoes.md`, V-U1-05 (calibração) e V-U8-02.
+**Alcance revisto (D-22): esta tarefa cobre só A3.** O isolamento do Codex não lê o Chaves do macOS, onde fica o login do Claude Code do Terminal, então A1 e as avaliações rodam pelo verificador, no painel de Terminal. Ignore abaixo o que fala de A1 e das avaliações.
+
+Você roda os testes reais da versão 2.0.0, já instalada pelo verificador nas 3 contas a partir do commit congelado `e737aca` (critérios congelados, tag `criterios-congelados`). Nesta tarefa você tem rede (para o SSH) e pode gravar também em `~/hopper-sonda`. Leia antes: `SPEC.md`, Anexo F (passos F-C, F-A, F-K e F-V) e decisão C27; `execucao/decisoes.md`, D-10, D-11, D-14, D-15, D-17 e D-18; `execucao/verificacoes.md`, V-U1-05 (calibração) e V-U8-02.
 
 ## Ambientes
 
