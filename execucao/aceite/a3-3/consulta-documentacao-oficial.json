@@ -1,0 +1,248 @@
+{
+  "env-vars": {
+    "consultado_em": "2026-11-02T18:31:08.131934+00:00",
+    "url": "https://code.claude.com/docs/en/env-vars.md",
+    "sha256": "c6af9335007280dfe50572702d0025e0d4bb8dc28554f607cb739614b7b5c096",
+    "trechos": [
+      {
+        "linha": 190,
+        "texto": "| `CLAUDE_ASYNC_AGENT_STALL_TIMEOUT_MS` | Stall timeout in milliseconds for subagents. Also covers [workflow agents](https://code.claude.com/docs/en/workflows.md#when-an-agent-stalls-and-restarts) on Claude Code v2.1.286 or later. Default `600000` (10 minutes); if you raise `CLAUDE_STREAM_IDLE_TIMEOUT_MS` while the stream watchdog is on, the default rises with it, as [Handle slow or stalled API responses](https://code.claude.com/docs/en/agent-sdk/typescript.md#handle-slow-or-stalled-api-responses) describes |"
+      },
+      {
+        "linha": 191,
+        "texto": "| `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` | Set the percentage (1-100) of the auto-compact window at which auto-compaction triggers. Use lower values like `50` to compact earlier; the variable can't raise the threshold, so values above the default percentage are ignored. It applies only in sessions that [compact before the model's context limit](https://code.claude.com/docs/en/model-config.md#context-window-and-auto-compaction). Applies to both main conversations and subagents |"
+      },
+      {
+        "linha": 192,
+        "texto": "| `CLAUDE_AUTO_BACKGROUND_TASKS` | Set to `1` to force-enable automatic backgrounding of long-running agent tasks. When enabled, a [subagent](https://code.claude.com/docs/en/sub-agents.md#run-subagents-in-foreground-or-background) moves to the background after running for approximately two minutes. If Claude queued a tool call such as a file edit behind the subagent, the subagent finishes in the foreground before that call starts. Also enables [automatic backgrounding of long MCP tool calls](https://code.claude.com/docs/en/mcp.md#automatic-backgrounding-of-long-tool-calls) in non-interactive mode on Claude Code v2.1.212 or later |"
+      },
+      {
+        "linha": 193,
+        "texto": "| `CLAUDE_AX_PREPARK_MS` | In [screen reader mode](https://code.claude.com/docs/en/accessibility.md), how many milliseconds Claude Code waits before it writes a new or changed line. Default `0`, so Claude Code doesn't wait. Before v2.1.287, the default was `50`. Claude Code caps the wait at `5000`. Ignored in [project and local settings](https://code.claude.com/docs/en/settings-reference.md#variables-claude-code-ignores-in-env). Requires Claude Code v2.1.233 or later |"
+      },
+      {
+        "linha": 194,
+        "texto": "| `CLAUDE_AX_SCREEN_READER` | Set to `1` to render screen-reader friendly output: flat text without decorative borders or animations. Set to `0` to force screen-reader mode off even when [`axScreenReader`](https://code.claude.com/docs/en/settings-reference#axscreenreader) is `true`. The [`--ax-screen-reader`](https://code.claude.com/docs/en/cli-reference#cli-flags) flag takes precedence. Ignored in [project and local settings](https://code.claude.com/docs/en/settings-reference.md#variables-claude-code-ignores-in-env). Requires Claude Code v2.1.181 or later |"
+      },
+      {
+        "linha": 209,
+        "texto": "| `CLAUDE_CODE_AUTO_BACKGROUND_WORKER_CHECKIN_SECONDS` | Removed in v2.1.283. Use `CLAUDE_CODE_WORKER_CHECKIN_SCHEDULE` instead |"
+      },
+      {
+        "linha": 210,
+        "texto": "| `CLAUDE_CODE_AUTO_COMPACT_WINDOW` | Set the auto-compact window, how full the context gets before compaction, from `100000` to `1000000` tokens. Suffixed values such as `200k` require v2.1.304 or later. For precedence over the other ways to set the window and the effect on the status line's `used_percentage`, see [Set the auto-compact window](https://code.claude.com/docs/en/model-config.md#set-the-auto-compact-window) |"
+      },
+      {
+        "linha": 211,
+        "texto": "| `CLAUDE_CODE_AUTO_CONNECT_IDE` | Override automatic [IDE connection](https://code.claude.com/docs/en/vs-code.md). By default, Claude Code connects automatically when launched inside a supported IDE's integrated terminal. Set to `false` to prevent this. Set to `true` to force a connection attempt when auto-detection fails, such as when tmux obscures the parent terminal. Takes precedence over the [`autoConnectIde`](https://code.claude.com/docs/en/settings-reference#autoconnectide) global config setting |"
+      },
+      {
+        "linha": 212,
+        "texto": "| `CLAUDE_CODE_AUTO_MODE_MODEL` | Sets the model for the classifier requests Claude Code sends in [auto mode](https://code.claude.com/docs/en/permission-modes.md#eliminate-prompts-with-auto-mode). Use a full model ID such as `claude-sonnet-4-6`. For the cases where Claude Code ignores it, see [Choose the classifier model](https://code.claude.com/docs/en/permission-modes.md#choose-the-classifier-model). Requires Claude Code v2.1.302 or later |"
+      },
+      {
+        "linha": 213,
+        "texto": "| `CLAUDE_CODE_AUTO_MODE_SERVER` | Controls whether Claude Code asks the server to [review auto mode actions](https://code.claude.com/docs/en/permission-modes.md#server-side-classifier-review). Set to `0` to use Claude Code's own classifier requests instead. On a direct connection to the Anthropic API, requires v2.1.281 or later. The linked section lists which sessions ask the server when the variable is unset, and from which version. Requires Claude Code v2.1.271 or later |"
+      },
+      {
+        "linha": 316,
+        "texto": "| `CLAUDE_CODE_IDE_SKIP_VALID_CHECK` | Set to `1` to skip validation of IDE lockfile entries during connection. Use when auto-connect fails to find your IDE despite it running |"
+      },
+      {
+        "linha": 317,
+        "texto": "| `CLAUDE_CODE_IDLE_COMPACT_MIN_TOKENS` | Context size, in tokens, at which [idle compaction](https://code.claude.com/docs/en/settings-reference.md#idlecompaction) applies to a conversation (default: `200000`). Accepts a positive whole number, and anything else is ignored. Values below `100000` are raised to `100000`, the lowest threshold. Idle compaction is on by default for conversations that meet its conditions. To turn it off, set `idleCompaction` to `false`. Requires Claude Code v2.1.290 or later |"
+      },
+      {
+        "linha": 318,
+        "texto": "| `CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS` | How many [subagents](https://code.claude.com/docs/en/sub-agents.md#concurrent-subagent-limit) can be running in one session before the Agent tool refuses to spawn another (default: 20). Accepts a positive whole number in plain digits; anything else is ignored, so the variable can adjust the cap but can't disable it. Requires Claude Code v2.1.217 or later |"
+      },
+      {
+        "linha": 319,
+        "texto": "| `CLAUDE_CODE_MAX_CONTEXT_TOKENS` | Override the context window size Claude Code assumes for the active model. As of v2.1.193, how it applies depends on how Claude Code resolves the model ID; see [Correct the window for a gateway or custom model ID](https://code.claude.com/docs/en/model-config.md#correct-the-window-for-a-gateway-or-custom-model-id). Use this when routing to a model through `ANTHROPIC_BASE_URL` whose context window does not match the built-in size for its name |"
+      },
+      {
+        "linha": 320,
+        "texto": "| `CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH` | Maximum length in characters of MCP tool descriptions and MCP server instructions that Claude Code sends to the model. The value you set replaces both [default limits](https://code.claude.com/docs/en/mcp.md#for-mcp-server-authors): 4096, and 16384 for the description of a tool that Claude loads through tool search. Accepts a positive whole number in plain digits. Anything else is ignored and the defaults apply. Requires Claude Code v2.1.280 or later |"
+      },
+      {
+        "linha": 492,
+        "texto": "| `MCP_TIMEOUT` | Timeout in milliseconds for MCP server startup (default: 30000, or 30 seconds) |"
+      },
+      {
+        "linha": 493,
+        "texto": "| `MCP_TOOL_TIMEOUT` | Timeout in milliseconds for MCP tool execution (default: 100000000, about 28 hours). For an HTTP, SSE, or claude.ai connector server, each request also times out after 60 seconds by default; set this variable, or the per-server `timeout`, above 60000 to raise that per-request limit. A lower value still shortens the overall tool-execution timeout but leaves the per-request limit at 60 seconds. Stdio and WebSocket servers have no per-request timer. A per-server `timeout` field in `.mcp.json` overrides this for that server. A per-server `timeout` of at least 1000 also sets the minimum idle window for that server's tool calls, so `CLAUDE_CODE_MCP_TOOL_IDLE_TIMEOUT` never aborts them sooner; this floor requires Claude Code v2.1.203 or later. For the env variable, values below 1000 are floored to one second; for the per-server field, values below 1000 are ignored |"
+      },
+      {
+        "linha": 494,
+        "texto": "| `NO_PROXY` | List of domains and IPs to which requests will be directly issued, bypassing proxy |"
+      },
+      {
+        "linha": 495,
+        "texto": "| `OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT` | Standard OpenTelemetry SDK limit on attribute value length. Claude Code caps content-bearing telemetry attributes at the smaller of this and `CLAUDE_CODE_OTEL_CONTENT_MAX_LENGTH`, so the truncation marker stays within the SDK limit. Claude Code reads the `OTEL_LOGRECORD_ATTRIBUTE_VALUE_LENGTH_LIMIT` and `OTEL_SPAN_ATTRIBUTE_VALUE_LENGTH_LIMIT` variants the same way, and the smallest set value applies to all signals. Requires Claude Code v2.1.214 or later. See [Monitoring](https://code.claude.com/docs/en/monitoring-usage.md#common-configuration-variables) |"
+      },
+      {
+        "linha": 496,
+        "texto": "| `OTEL_LOG_ASSISTANT_RESPONSES` | Set to `1` to include the model's response text on `assistant_response` OpenTelemetry log events. When unset, Claude Code uses the value of `OTEL_LOG_USER_PROMPTS` instead. Set to `0` to keep responses redacted even when `OTEL_LOG_USER_PROMPTS` is set. Set it in your shell, user settings, or managed settings. Ignored in [project and local settings](https://code.claude.com/docs/en/settings-reference.md#variables-claude-code-ignores-in-env). Requires Claude Code v2.1.193 or later. See [Monitoring](https://code.claude.com/docs/en/monitoring-usage.md#assistant-response-event) |"
+      }
+    ]
+  },
+  "model-config": {
+    "consultado_em": "2026-11-02T18:31:08.234959+00:00",
+    "url": "https://code.claude.com/docs/en/model-config.md",
+    "sha256": "7180ba5975ee6529caebbd3a7847e4bcb5851d0a795efaba3a6f558d226b5842",
+    "trechos": [
+      {
+        "linha": 787,
+        "texto": ""
+      },
+      {
+        "linha": 788,
+        "texto": "If you set `ANTHROPIC_BASE_URL` to an [LLM gateway](https://code.claude.com/docs/en/llm-gateway) or another proxy, Claude Code gives each model it recognizes the same context window the model has on the Anthropic API. Fable 5.1, Fable 5, Sonnet 5 and later, Haiku 5.5, and Opus 4.7 and later get the 1M window with no `[1m]` variant to select, and a model that reaches 1M only through its `[1m]` variant, such as Opus 4.6, runs at 200K without it. Claude Code can't detect a lower limit that the gateway or the server behind it enforces. If your gateway rejects requests above 200K tokens, set [`CLAUDE_CODE_AUTO_COMPACT_WINDOW=200000`](https://code.claude.com/docs/en/env-vars) in the environment that starts Claude Code, so sessions on every model [compact at that boundary](#set-the-auto-compact-window)."
+      },
+      {
+        "linha": 789,
+        "texto": ""
+      },
+      {
+        "linha": 790,
+        "texto": "#### Turn off 1M context"
+      },
+      {
+        "linha": 791,
+        "texto": ""
+      },
+      {
+        "linha": 808,
+        "texto": ""
+      },
+      {
+        "linha": 809,
+        "texto": "### Set the auto-compact window"
+      },
+      {
+        "linha": 810,
+        "texto": ""
+      },
+      {
+        "linha": 811,
+        "texto": "> [!NOTE]"
+      },
+      {
+        "linha": 812,
+        "texto": ">"
+      },
+      {
+        "linha": 813,
+        "texto": "> If Claude Code warned about the value of `CLAUDE_CODE_AUTO_COMPACT_WINDOW`, see [the variable's values and warnings](#claude_code_auto_compact_window-values)."
+      },
+      {
+        "linha": 814,
+        "texto": ""
+      },
+      {
+        "linha": 815,
+        "texto": "You can set the auto-compact window in these places:"
+      },
+      {
+        "linha": 816,
+        "texto": ""
+      },
+      {
+        "linha": 819,
+        "texto": "* **For one launch**: pass [`--autocompact`](https://code.claude.com/docs/en/cli-reference#cli-flags) when starting Claude Code. The flag overrides your saved setting for that launch without changing it, and `claude --autocompact auto` runs the session at the tuned window even if your saved setting has a value. Unlike `/autocompact`, the flag isn't preempted by a higher-priority settings scope such as managed settings."
+      },
+      {
+        "linha": 820,
+        "texto": "* **In scripts and cloud environments**: set [`CLAUDE_CODE_AUTO_COMPACT_WINDOW`](https://code.claude.com/docs/en/env-vars) to a token count such as `200000`. Unless Claude Code [ignores the value](#claude_code_auto_compact_window-values), the variable takes precedence over the command, the flag, and the `autoCompactWindow` setting. `/autocompact` then reports the override without saving. The status line's `used_percentage` measures against the model's full context window, so while the variable is set, that percentage doesn't indicate when compaction will run."
+      },
+      {
+        "linha": 821,
+        "texto": "* **For one subagent**: see [Set the auto-compact window for one subagent](https://code.claude.com/docs/en/sub-agents.md#subagent-auto-compact-window)."
+      },
+      {
+        "linha": 822,
+        "texto": ""
+      },
+      {
+        "linha": 823,
+        "texto": "The command and the flag accept a window size from 100K to 1M tokens, in any of these forms:"
+      },
+      {
+        "linha": 824,
+        "texto": ""
+      },
+      {
+        "linha": 830,
+        "texto": ""
+      },
+      {
+        "linha": 831,
+        "texto": "#### Values and warnings for `CLAUDE_CODE_AUTO_COMPACT_WINDOW`"
+      },
+      {
+        "linha": 832,
+        "texto": ""
+      },
+      {
+        "linha": 833,
+        "texto": "A warning that quotes your `CLAUDE_CODE_AUTO_COMPACT_WINDOW` value means the value falls outside 100,000 to 1,000,000 or isn't a token count. To stop the warning, set a number in that range, such as `CLAUDE_CODE_AUTO_COMPACT_WINDOW=200000`. On Claude Code v2.1.304 or later, you can also write the number with `k` for thousands or `M` for millions, as in `200k` or `1M`."
+      },
+      {
+        "linha": 834,
+        "texto": ""
+      },
+      {
+        "linha": 835,
+        "texto": "Find your warning's wording in the first column, then read across for the window your session uses and what to change:"
+      },
+      {
+        "linha": 836,
+        "texto": ""
+      },
+      {
+        "linha": 838,
+        "texto": "| :- | :- | :- |"
+      },
+      {
+        "linha": 839,
+        "texto": "| `reads as <N> tokens, so Claude Code treats it as the 100k minimum` | The smaller of 100,000 tokens and your model's context window | Set at least `100000`, such as `200000`, or `200k` if you meant `200` as thousands |"
+      },
+      {
+        "linha": 840,
+        "texto": "| `is too large, so Claude Code treats it as the 1M maximum` | The smaller of 1,000,000 tokens and your model's context window | You already have the largest window. To stop the warning, set `1M` or `1000000` |"
+      },
+      {
+        "linha": 841,
+        "texto": "| `isn't a usable size, so Claude Code ignores it` | The window from `--autocompact`, `/autocompact`, or `autoCompactWindow`, or the [default](#default-auto-compact-thresholds) when none is set | Set a number such as `200000`, or unset the variable |"
+      },
+      {
+        "linha": 842,
+        "texto": ""
+      },
+      {
+        "linha": 843,
+        "texto": "A number with no suffix is read as that many tokens, so `CLAUDE_CODE_AUTO_COMPACT_WINDOW=200` means 200 tokens even though `/autocompact 200` means 200,000."
+      },
+      {
+        "linha": 844,
+        "texto": ""
+      },
+      {
+        "linha": 845,
+        "texto": "### Default auto-compact thresholds"
+      },
+      {
+        "linha": 846,
+        "texto": ""
+      },
+      {
+        "linha": 847,
+        "texto": "If you don't set an auto-compact window, Claude Code compacts when the conversation reaches the model's context limit, except in these sessions:"
+      },
+      {
+        "linha": 848,
+        "texto": ""
+      }
+    ]
+  }
+}

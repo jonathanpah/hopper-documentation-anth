@@ -201,3 +201,11 @@ Relatório em `execucao/codex/tarefa-04-relatorio.md`; dados em `execucao/aceite
 ## V-CODEX-05-06 · Tarefas 05 e 06 do Codex (R20 e caso de borda de R14) · 2026-11-02 18:29 · aprovado pelo verificador
 
 Tarefa 05: o programa confere os identificadores citados nos campos de texto da resposta e pede 1 nova resposta ao redator quando só essa conferência falha; `modelos.md` e `templates.md` ganharam a regra de citação. Ela reprovou T14 (congelado), porque recusava a citação de um item apagado à mão. Tarefa 06: aceita item de número até o maior já usado do tipo e do código (caso de borda de R14), e mantém a exigência de que a mensagem citada exista. Conferência própria: aceite 42 de 42 nos 2 pacotes; executor 43 de 43 nos 2; programas iguais exceto `LANGUAGE`; manifesto 129 de 129 OK.
+
+## V-U8-04 · U8 · Roteiro de aceite em A1 (Terminal do MacBook) · 2026-11-02 18:47 · aprovado
+
+Rodado pelo verificador no painel de Terminal (D-22), com o commit `715b229` instalado. Sessão `91348fa6`, pasta `~/hopper-teste-a1`, Sonnet, janela de 100 mil e 85% (contexto inicial 58.874 tokens). Conferidor com o roteiro: **10 de 10**. Registro de rodadas (`execucao/aceite/a1/rodadas.jsonl`): 2 rodadas a pedido concluídas (M1 a M2 e M3 a M12); 1ª compactação às 18:36:41 UTC com cópia concluída às 18:36:43 e escrita concluída às 18:37:17 (M13 a M16); 2ª compactação às 18:38:37, cópia às 18:38:38, Claude Code fechado às 18:38:43 e **escrita concluída às 18:39:11 (M17 a M18), 28 s depois do fechamento**, no macOS (R23 e K10). Dados em `execucao/aceite/a1/`.
+
+## V-U8-05 · U8 · Roteiro de aceite em A3, 3ª execução (tarefa 07 do Codex) · 2026-11-02 18:47 · reprovado em R23
+
+Relatório em `execucao/codex/tarefa-07-relatorio.md`. Conferidor 10 de 10, mas a escrita da 2ª passagem falhou com "origem inválida: M17-958e55b3": o redator citou como origem de um item uma mensagem do trecho anterior, e o Anexo D exige origem no trecho novo ou em item existente. A nova tentativa da tarefa 05 vale só para referências inexistentes, e não para origem fora do trecho. R22 (1ª passagem) e R25 aprovados.

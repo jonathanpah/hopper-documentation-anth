@@ -1,0 +1,9 @@
+{
+  "contexto_inicial_medido_na_tarefa_04": 58979,
+  "sessao_medicao": "c0dffe69-605c-45ee-a94b-53c6a19da451",
+  "fonte": "execucao/aceite/a3-2/resultado-a3-medir-u8-2.json",
+  "regra": "min(100, ceil((contexto_inicial + 6000) / 765))",
+  "percentual_calculado": 85,
+  "percentual_exigido_tarefa_07": 85,
+  "nova_medicao": false
+}
