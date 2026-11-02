@@ -185,3 +185,7 @@ Relatório em `execucao/codex/tarefa-02-relatorio.md` (o Codex obteve 41 de 42 n
 ## V-CODEX-03 · Tarefa 03 do Codex (T38 e T04 nos executores do GitHub) · 2026-11-02 16:33 · aprovado pelo verificador
 
 A 1ª execução da tarefa ficou parada por cerca de 2h20 esperando a entrada padrão (o comando do Codex foi encadeado sem `< /dev/null`), sem alterar arquivos; foi encerrada e repetida com a entrada fechada. Mudanças: T38 usa o próprio interpretador como processo de `CLAUDE_PID` no Linux e um script como candidato de `~/.local/bin/claude`; T04 usa escala 0,5. Conferência própria: 42 de 42 nos 2 pacotes; os 2 testes alterados passaram em 3 repetições seguidas; programa sem alteração.
+
+## V-U2-03 · U2 · Congelamento dos critérios (C18) · 2026-11-02 16:44
+
+Verificação do GitHub do commit `cae0d61`: os 8 jobs de testes (Ubuntu 24.04 e macOS, Python 3.9 e 3.13, 2 pacotes) e o job do conferidor e do inventário aprovados; só o job de critérios congelados reprovado, por falta do manifesto, como esperado antes do congelamento. Manifesto `aceite/MANIFESTO.sha256` gerado com `shasum -a 256` sobre `git ls-files aceite .github/workflows/verificar.yml SPEC.md` (sem o próprio manifesto): 129 arquivos, conferência local 129 OK. Tag `criterios-congelados` no commit do manifesto, com o "sim" antecipado de D-08.
