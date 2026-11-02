@@ -18,4 +18,4 @@
 | U1 | Item 4, provas das regras | 2 | 2026-11-02 02:42 | Sessão movida para a cópia de trabalho com `change_directory` | `deny` aprovado em parte; `ask` reprovado (V-U1-04) |
 | U1 | Item 4, provas das regras `deny` | 3 | 2026-11-02 03:50 | 4 provas a mais, pela revisão U1-passada-1 | aprovado |
 | U1 | Item 5, processo separado (C08) | 1 | 2026-11-02 03:30 | Sonda v2: fork duplo com setsid no lugar de Popen(start_new_session=True) | aprovado (V-U1-05, passagem 3) |
-| U1 | Item 5, valor de CLAUDE_AUTOCOMPACT_PCT_OVERRIDE | 1 | 2026-11-02 03:52 | 85 no lugar de 70, com contagem de mensagens | em andamento |
+| U1 | Item 5, valor de CLAUDE_AUTOCOMPACT_PCT_OVERRIDE | 1 | 2026-11-02 03:52 | 85 no lugar de 70, com contagem de mensagens; valor derivado: 90 | aprovado para A3 (V-U1-05, calibração) |
