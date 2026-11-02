@@ -18,7 +18,7 @@ Início: 2026-11-02 02:36 UTC.
 | 5. Plugin de sonda | em andamento: instalada em A1, A2 (mesma instalação) e A3; A3 em prova; A1 bloqueado por login do Terminal (P-02); A2 bloqueado por pasta não confiada (P-03) | V-U1-05 (a gravar) |
 | 6. Chamada real ao redator | pronto | V-U1-06 |
 | 7. Retomada | pronto | V-U1-07 |
-| 8. Avaliações | pendente | |
+| 8. Avaliações | pronto | V-U1-08 |
 | 9. Limpeza | pendente | |
 
 ## Unidades

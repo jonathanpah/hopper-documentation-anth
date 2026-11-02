@@ -47,3 +47,7 @@ Comando de C03 completo (`claude -p --model claude-sonnet-5-5 --effort high --to
 ## V-U1-07 · U1, item 7 · Retomada (C21) · 2026-11-02 03:26 · aprovado
 
 Comando: `claude -p 'Leia SPEC.md e a pasta execucao/. Diga em que unidade o trabalho está e qual é o próximo passo. Responda em até 8 linhas, em português.' --model sonnet --max-turns 20 --output-format json`, na cópia de trabalho, em sessão nova sem o contexto do executor. Resultado: 8 turnos, 23 s, US$ 0,18, `modelUsage` só `claude-sonnet-5-5`. A resposta disse U1 em andamento; itens 1, 2, 3 e 6 prontos; item 4 com `deny` aprovado e `ask` substituído por D-06; item 5 em andamento com A3 em prova, A1 dependente de P-02 e A2 de P-03; itens 7, 8 e 9 pendentes; próximo passo: destravar o item 5 e gravar V-U1-05. Igual a `estado.md` no momento da chamada. Chamada contada à parte das chamadas ao redator.
+
+## V-U1-08 · U1, item 8 · Avaliação de acionamento com `claude plugin eval` · 2026-11-02 03:27 · aprovado
+
+Comando: `claude plugin eval ./hopper-documentation-anth-pt-br --case '*sim-pede-handoff*' --ablation none --trust-plugin --model sonnet --output-dir <scratchpad>/eval-u1`, no ambiente da sessão do executor. Resultado: caso `sim-pede-handoff`, 3 execuções, nota 1,00 em todas (grader `skill-acionada`: Skill chamada 1 vez), 23 s, US$ 0,11. `--ablation none` e `--case` funcionam na CLI 2.1.296. Execução parcial, fora da contagem das execuções completas (C20).
