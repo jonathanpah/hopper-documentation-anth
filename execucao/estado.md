@@ -37,3 +37,4 @@ R01 a R42: pendentes. Bloqueados: nenhum.
 | Data (UTC) | Ação | Palavras do proprietário | Registro |
 | --- | --- | --- | --- |
 | 2026-11-02 01:25 | Incorporar o PR #2 à `main` (commit `b2954f2`) | "Faça o merge, mas antes de iniciar, quero que o Fable faça uma avaliação da SPEC." | `decisoes.md`, D-01 |
+| 2026-11-02 02:48 | Autorizações antecipadas para U1 (sonda), U2 a U7, U8 e U9 (até 60 chamadas); U10 com pergunta na hora | 4 respostas "Sim (Recomendado)" e "U9 sim, U10 pergunte (Recomendado)" no chat | `decisoes.md`, D-08 |
