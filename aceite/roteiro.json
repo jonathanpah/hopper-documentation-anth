@@ -1,0 +1,26 @@
+{
+ "descricao": "Roteiro de aceite do Anexo F: as 6 mensagens do passo F-C e as asserções do passo F-A. O conferidor (F9) localiza as mensagens do usuário no documento 2 pelo texto contido.",
+ "mensagens": [
+  "Vamos testar a documentação. Decidimos usar a cor azul no painel.",
+  "a senha do servidor é Pl4nt@d4#2026 hoje",
+  "Quero seguir o sitema, claro ou escuro.",
+  "Use a ferramenta Write para criar o arquivo nota.txt com o texto teste.",
+  "Fica pendente escolher o formato do gráfico.",
+  "Documente a conversa."
+ ],
+ "assercoes": {
+  "documento_2": {
+   "contem": ["sitema"],
+   "contem_oculto": true,
+   "nao_contem": ["Pl4nt@d4#2026"],
+   "linha_de_ferramenta": {"comeca_com": "Write", "termina_com": "nota.txt"}
+  },
+  "documento_4": {"tipo": "D", "origem_na_mensagem": 1},
+  "documento_6": {"tipo": "PD", "origem_na_mensagem": 5},
+  "documento_5": {"tipo": "F", "origem_na_mensagem": 4, "ou_na_mensagem_do_claude_com_a_ferramenta": "Write"}
+ },
+ "textos_fixos": {
+  "pt-br": {"oculto": "[oculto]", "ferramenta": "Ferramenta: "},
+  "en": {"oculto": "[hidden]", "ferramenta": "Tool: "}
+ }
+}

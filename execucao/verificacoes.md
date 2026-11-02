@@ -87,3 +87,42 @@ Correção de cronologia (achado 6): os horários de V-U1-04 foram estimados. Or
 - Item 8 (achado 15): rodou no ambiente da sessão do executor (A2) com o executável 2.1.296 de A1; repetir em A1 quando o Terminal tiver login (P-02).
 - Item 1 (achado 1): o Python do ambiente do gatilho em A2 fica provado quando a sonda registrar o gatilho em A2 (`executavel` e `sys.executable` no registro).
 - C08 e `setsid` (fora do escopo 2): `os.setsid()` existe no macOS; o que não existe é o programa `setsid`. A prova de D-10 no macOS depende de A1 (P-02).
+
+## V-U2-01 · U2 · Testes de aceite no código da versão atual (G04) · 2026-11-02 03:56 · reprovações registradas
+
+Comando: `HOPPER_DOCUMENTATION_ANTH_PACOTE=hopper-documentation-anth-pt-br TZ=UTC python3 -m unittest discover -s aceite/testes -p 'test_*.py' -v`, na cópia de trabalho com o código da versão 0.1.4 (commit `fb208df`). Resultado: `Ran 31 tests`, `FAILED (failures=29, errors=2)`; nenhum teste passa. Os 2 erros (T24 e T31) são `IndexError` ao ler o registro de rodadas, que a versão atual não grava. Saída completa em `execucao/avaliacoes/u2/aceite-versao-atual-pt-br.log`. Casos do conferidor: `valida` aprova F1 a F8 e F10 (F9 reprova sem a conversa de teste, como esperado), e cada `invalida-F<n>` reprova em F<n> (F1 também em F5 e F2 também em F8, por falta do mesmo objeto, como o Anexo F admite).
+
+| Teste | Resultado no código atual |
+| --- | --- |
+| test_R01_primeira_rodada_cria_a_pasta_de_documentacao | FAIL |
+| test_R02_pasta_da_conversa_com_a_data_da_primeira_mensagem | FAIL |
+| test_R03_grava_so_na_pasta_de_documentacao_e_na_pasta_de_dados | FAIL |
+| test_R04_acrescenta_so_o_novo | FAIL |
+| test_R04_espera_o_arquivo_de_historico_parar_de_crescer | FAIL |
+| test_R05_cabecalhos_comentarios_e_texto_do_caso_b1 | FAIL |
+| test_R06_uma_linha_por_ferramenta_sem_resultado | FAIL |
+| test_R07_oculta_senhas_tokens_e_chaves | FAIL |
+| test_R08_inclui_usuario_claude_respostas_planos_mensagens_de_agente_interrupcoes_e_anexos | FAIL |
+| test_R09_exclui_lembretes_gatilhos_notificacoes_resumos_subagentes_raciocinio_e_resultados | FAIL |
+| test_R10_conta_uma_vez_registros_repetidos | FAIL |
+| test_R11_envia_so_o_trecho_novo_e_os_documentos_atuais | FAIL |
+| test_R12_chama_o_redator_com_as_opcoes_de_C03_e_descarta_resposta_invalida | FAIL |
+| test_R13_acrescenta_um_bloco_por_intervalo | FAIL |
+| test_R14_numera_com_o_proximo_numero_livre | FAIL |
+| test_R16_aplica_mudancas_de_situacao_e_registra_as_inexistentes | FAIL |
+| test_R17_reescreve_o_documento_7_inteiro | FAIL |
+| test_R18_reescreve_o_documento_1 | FAIL |
+| test_R22_gatilho_de_copia_termina_em_60_segundos_e_sai_com_0 | FAIL |
+| test_R24_falha_de_rodada_fica_no_registro_no_documento_1_e_no_aviso | ERROR |
+| test_R27_uma_rodada_por_conversa_por_vez | FAIL |
+| test_R28_nada_novo_nao_chama_o_redator_nem_altera_os_documentos | FAIL |
+| test_R29_rodada_interrompida_e_concluida_pela_seguinte | FAIL |
+| test_R30_migra_handoffs_do_anth_e_do_clone_de_leitura | FAIL |
+| test_R31_so_apaga_depois_da_verificacao_interna | ERROR |
+| test_R32_inventario_da_main | FAIL |
+| test_R35_dois_pacotes_com_o_mesmo_programa | FAIL |
+| test_R37_encontra_o_historico_pela_pasta_de_configuracao | FAIL |
+| test_R38_encontra_o_executavel_do_claude_code | FAIL |
+| test_R41_skill_md_com_as_secoes_e_menos_de_500_linhas | FAIL |
+| test_R42_migracao_automatica_desligada | FAIL |
+| total | 31 testes, todos reprovados (31) |

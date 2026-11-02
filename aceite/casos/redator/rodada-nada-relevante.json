@@ -1,0 +1,20 @@
+{
+ "structured_output": {
+  "nada_relevante": true,
+  "resumo": "Sem conteúdo novo relevante",
+  "conversa_simplificada": "",
+  "itens_novos": [],
+  "mudancas": [],
+  "handoff": {
+   "objetivo": "Criar o arquivo nota.txt e definir o gráfico. (M1-3f9c2a71 a M4-3f9c2a71)",
+   "pautas_e_estado": "Sem mudança. (M1-3f9c2a71 a M7-3f9c2a71)",
+   "proximo_passo": "Escolher o formato do gráfico. (M4-3f9c2a71)",
+   "decisoes_e_autorizacoes": "Sem mudança. (M1-3f9c2a71 a M7-3f9c2a71)",
+   "restricoes": "Nenhuma restrição registrada. (M1-3f9c2a71 a M7-3f9c2a71)",
+   "descobertas": "Nenhuma tentativa descartada. (M1-3f9c2a71 a M7-3f9c2a71)",
+   "pendencias": "Sem mudança. (M1-3f9c2a71 a M7-3f9c2a71)",
+   "lacunas": "Nenhuma lacuna nova. (M1-3f9c2a71 a M7-3f9c2a71)",
+   "como_retomar": "Ler as pendências. (M4-3f9c2a71)"
+  }
+ }
+}

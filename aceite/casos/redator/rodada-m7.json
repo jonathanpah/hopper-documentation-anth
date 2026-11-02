@@ -1,0 +1,24 @@
+{
+ "structured_output": {
+  "nada_relevante": false,
+  "resumo": "Cor azul decidida para o painel",
+  "conversa_simplificada": "**Assunto: cor do painel.**\n\nO usuário decidiu usar a cor azul no painel. (M7-3f9c2a71)",
+  "itens_novos": [
+   {"ref": "N1", "tipo": "D", "texto": "Usar a cor azul no painel.", "origem": ["M7-3f9c2a71"], "situacao": "vigente", "recomendacao": "", "depende_de": ""}
+  ],
+  "mudancas": [
+   {"id": "PD1-3f9c2a71", "situacao": "encerrada em M7-3f9c2a71 (formato escolhido)", "origem": ["M7-3f9c2a71"]}
+  ],
+  "handoff": {
+   "objetivo": "Criar o arquivo nota.txt e definir o painel. (M1-3f9c2a71 a M7-3f9c2a71)",
+   "pautas_e_estado": "O arquivo nota.txt existe, e o painel vai ser azul. (M2-3f9c2a71, M7-3f9c2a71)",
+   "proximo_passo": "Aplicar a cor azul no painel. (M7-3f9c2a71)",
+   "decisoes_e_autorizacoes": "D1-3f9c2a71 e N1 vigentes. (M1-3f9c2a71, M7-3f9c2a71)",
+   "restricoes": "Nenhuma restrição registrada. (M1-3f9c2a71 a M7-3f9c2a71)",
+   "descobertas": "Nenhuma tentativa descartada. (M1-3f9c2a71 a M7-3f9c2a71)",
+   "pendencias": "PD1-3f9c2a71 encerrada. (M7-3f9c2a71)",
+   "lacunas": "A senha do servidor foi ocultada na conversa integral. (M3-3f9c2a71)",
+   "como_retomar": "Ler N1 e aplicar a cor no painel. (M7-3f9c2a71)"
+  }
+ }
+}

@@ -1,0 +1,25 @@
+{
+ "structured_output": {
+  "nada_relevante": false,
+  "resumo": "Migração incompleta: um arquivo antigo sem destino",
+  "itens_novos": [
+   {"ref": "N1", "tipo": "D", "conversa": "3f9c2a71-5b8e-4d0a-9c61-2e7f4b1a8d05", "texto": "O limite do frete grátis vale para o total depois dos descontos.", "origem": ["handoff-20260314-184207-3f9c2a71.md"], "situacao": "vigente", "recomendacao": "", "depende_de": ""}
+  ],
+  "mudancas": [],
+  "handoffs_antigos": [
+   {"conversa": "3f9c2a71-5b8e-4d0a-9c61-2e7f4b1a8d05", "data": "2026-03-14", "resumo": "Correção do cálculo de frete no checkout",
+    "handoff": {
+     "objetivo": "Corrigir o frete. (handoff-20260314-184207-3f9c2a71.md)",
+     "pautas_e_estado": "Regra corrigida. (handoff-20260314-184207-3f9c2a71.md)",
+     "proximo_passo": "Aguardar o arredondamento. (handoff-20260314-184207-3f9c2a71.md)",
+     "decisoes_e_autorizacoes": "N1 vigente. (handoff-20260314-184207-3f9c2a71.md)",
+     "restricoes": "Sem merge na main. (handoff-20260314-184207-3f9c2a71.md)",
+     "descobertas": "Nenhuma. (handoff-20260314-184207-3f9c2a71.md)",
+     "pendencias": "Nenhuma. (handoff-20260314-184207-3f9c2a71.md)",
+     "lacunas": "Nenhuma. (handoff-20260314-184207-3f9c2a71.md)",
+     "como_retomar": "Conferir o commit. (handoff-20260314-184207-3f9c2a71.md)"
+    }}
+  ],
+  "sem_conteudo": []
+ }
+}

@@ -1,0 +1,24 @@
+{
+ "structured_output": {
+  "nada_relevante": false,
+  "resumo": "Arquivo nota.txt criado e formato do gráfico pendente",
+  "conversa_simplificada": "**Assunto: criação do arquivo nota.txt e pendência do gráfico.**\n\nO usuário quer seguir o tema do sistema, claro ou escuro. (M1-3f9c2a71)\n\nO Claude criou o arquivo nota.txt com o texto teste. (M2-3f9c2a71)\n\nFica pendente escolher o formato do gráfico. (M4-3f9c2a71)",
+  "itens_novos": [
+   {"ref": "N1", "tipo": "D", "texto": "Seguir o tema do sistema, claro ou escuro.", "origem": ["M1-3f9c2a71"], "situacao": "vigente", "recomendacao": "", "depende_de": ""},
+   {"ref": "N2", "tipo": "F", "texto": "Arquivo nota.txt criado com o texto teste.", "origem": ["M2-3f9c2a71"], "situacao": "concluída", "recomendacao": "", "depende_de": ""},
+   {"ref": "N3", "tipo": "PD", "texto": "Escolher o formato do gráfico.", "origem": ["M4-3f9c2a71"], "situacao": "aberta", "recomendacao": "Definir o formato na próxima conversa.", "depende_de": "Decisão do usuário."}
+  ],
+  "mudancas": [],
+  "handoff": {
+   "objetivo": "Criar o arquivo nota.txt e definir o gráfico. (M1-3f9c2a71 a M4-3f9c2a71)",
+   "pautas_e_estado": "O arquivo nota.txt existe. O formato do gráfico está em aberto. (M2-3f9c2a71, M4-3f9c2a71)",
+   "proximo_passo": "Escolher o formato do gráfico. (M4-3f9c2a71)",
+   "decisoes_e_autorizacoes": "N1 vigente. (M1-3f9c2a71)",
+   "restricoes": "Nenhuma restrição registrada. (M1-3f9c2a71 a M6-3f9c2a71)",
+   "descobertas": "Nenhuma tentativa descartada. (M1-3f9c2a71 a M6-3f9c2a71)",
+   "pendencias": "N3 aberta. (M4-3f9c2a71)",
+   "lacunas": "A senha do servidor foi ocultada na conversa integral. (M3-3f9c2a71)",
+   "como_retomar": "Ler N3 e perguntar o formato ao usuário. (M4-3f9c2a71)"
+  }
+ }
+}
