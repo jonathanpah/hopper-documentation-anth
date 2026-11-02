@@ -1,0 +1,23 @@
+{
+ "structured_output": {
+  "nada_relevante": false,
+  "resumo": "Cor azul decidida para o painel",
+  "conversa_simplificada": "**Assunto: cor do painel.**\n\nO usuário decidiu usar a cor azul no painel. (M7-3f9c2a71)",
+  "itens_novos": [],
+  "mudancas": [
+   {"id": "PD99-3f9c2a71", "situacao": "encerrada em M7-3f9c2a71 (formato escolhido)", "origem": ["M7-3f9c2a71"]},
+   {"id": "PD1-3f9c2a71", "situacao": "encerrada em M7-3f9c2a71 (formato escolhido)", "origem": ["M7-3f9c2a71"]}
+  ],
+  "handoff": {
+   "objetivo": "Definir o painel. (M7-3f9c2a71)",
+   "pautas_e_estado": "O painel vai ser azul. (M7-3f9c2a71)",
+   "proximo_passo": "Aplicar a cor azul. (M7-3f9c2a71)",
+   "decisoes_e_autorizacoes": "D1-3f9c2a71 vigente. (M1-3f9c2a71)",
+   "restricoes": "Nenhuma restrição registrada. (M1-3f9c2a71 a M7-3f9c2a71)",
+   "descobertas": "Nenhuma tentativa descartada. (M1-3f9c2a71 a M7-3f9c2a71)",
+   "pendencias": "PD1-3f9c2a71 encerrada. (M7-3f9c2a71)",
+   "lacunas": "Nenhuma lacuna nova. (M7-3f9c2a71)",
+   "como_retomar": "Aplicar a cor no painel. (M7-3f9c2a71)"
+  }
+ }
+}

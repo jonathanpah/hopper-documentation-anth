@@ -1,0 +1,21 @@
+{
+ "structured_output": {
+  "nada_relevante": false,
+  "resumo": "Resposta escrita por outro modelo",
+  "conversa_simplificada": "**Assunto: criação do arquivo nota.txt.**\n\nO Claude criou o arquivo nota.txt. (M2-3f9c2a71)",
+  "itens_novos": [],
+  "mudancas": [],
+  "handoff": {
+   "objetivo": "Criar o arquivo nota.txt. (M1-3f9c2a71)",
+   "pautas_e_estado": "O arquivo existe. (M2-3f9c2a71)",
+   "proximo_passo": "Nenhum. (M2-3f9c2a71)",
+   "decisoes_e_autorizacoes": "Nenhuma. (M1-3f9c2a71)",
+   "restricoes": "Nenhuma. (M1-3f9c2a71)",
+   "descobertas": "Nenhuma. (M1-3f9c2a71)",
+   "pendencias": "Nenhuma. (M1-3f9c2a71)",
+   "lacunas": "Nenhuma. (M1-3f9c2a71)",
+   "como_retomar": "Nada a retomar. (M1-3f9c2a71)"
+  }
+ },
+ "modelUsage": {"claude-opus-5-5": {"inputTokens": 10, "outputTokens": 900}, "claude-sonnet-5-5": {"inputTokens": 10, "outputTokens": 100}}
+}

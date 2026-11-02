@@ -1,0 +1,27 @@
+{
+ "structured_output": {
+  "nada_relevante": false,
+  "resumo": "Migração dos handoffs do frete",
+  "itens_novos": [
+   {"ref": "N1", "tipo": "D", "conversa": "3f9c2a71-5b8e-4d0a-9c61-2e7f4b1a8d05", "texto": "O limite do frete grátis vale para o total depois dos descontos.", "origem": ["handoff-20260314-151203-3f9c2a71.md", "handoff-20260314-184207-3f9c2a71.md"], "situacao": "vigente", "recomendacao": "", "depende_de": ""},
+   {"ref": "N2", "tipo": "F", "conversa": "3f9c2a71-5b8e-4d0a-9c61-2e7f4b1a8d05", "texto": "Regra de frete grátis corrigida em frete/calculo.py, commit a41e9d2 na branch corrige-frete.", "origem": ["handoff-20260314-184207-3f9c2a71.md"], "situacao": "concluída", "recomendacao": "", "depende_de": ""},
+   {"ref": "N3", "tipo": "PD", "conversa": "3f9c2a71-5b8e-4d0a-9c61-2e7f4b1a8d05", "texto": "Atualizar docs/regras-de-frete.md depois da decisão sobre o arredondamento.", "origem": ["handoff-20260314-184207-3f9c2a71.md"], "situacao": "aberta", "recomendacao": "Esperar a decisão da usuária sobre o arredondamento.", "depende_de": "Decisão da usuária sobre o arredondamento."}
+  ],
+  "mudancas": [],
+  "handoffs_antigos": [
+   {"conversa": "3f9c2a71-5b8e-4d0a-9c61-2e7f4b1a8d05", "data": "2026-03-14", "resumo": "Correção do cálculo de frete no checkout",
+    "handoff": {
+     "objetivo": "Corrigir o frete cobrado em pedidos acima de R$ 300,00, que deveria ser zero. (handoff-20260314-184207-3f9c2a71.md)",
+     "pautas_e_estado": "A regra foi corrigida e os 14 testes passaram. O arredondamento aguarda a usuária. (handoff-20260314-184207-3f9c2a71.md)",
+     "proximo_passo": "Aguardar a decisão sobre o arredondamento. (handoff-20260314-184207-3f9c2a71.md)",
+     "decisoes_e_autorizacoes": "N1 vigente. Autorização de commit só na branch corrige-frete. (handoff-20260314-184207-3f9c2a71.md)",
+     "restricoes": "Sem merge na main e sem publicar. Mensagens de commit em português. (handoff-20260314-184207-3f9c2a71.md)",
+     "descobertas": "Mover a regra para pedido/total.py foi descartado. (handoff-20260314-184207-3f9c2a71.md)",
+     "pendencias": "N3 aberta. (handoff-20260314-184207-3f9c2a71.md)",
+     "lacunas": "Os testes de integração não foram rodados. (handoff-20260314-184207-3f9c2a71.md)",
+     "como_retomar": "Conferir o commit a41e9d2 e perguntar o arredondamento à usuária. (handoff-20260314-184207-3f9c2a71.md)"
+    }}
+  ],
+  "sem_conteudo": ["index.md"]
+ }
+}

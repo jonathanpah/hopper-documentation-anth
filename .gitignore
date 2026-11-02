@@ -1,6 +1,7 @@
 .DS_Store
 .env
 .env.*
+.claude/
 docs-by-hopper-documentation/
 evals/results/
 __pycache__/

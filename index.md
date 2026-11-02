@@ -1,10 +1,9 @@
-# Document index / Índice documental
+# Index
 
-- [English](hopper-documentation-anth-en/index.md): skill, writer rules, example, program, hook, tests, installation, use, and supporting documentation.
-- [Português (Brasil)](hopper-documentation-anth-pt-br/index.md): skill, regras do redator, exemplo, programa, gatilho, testes, instalação, uso e documentação de apoio.
-- [README](README.md): language selection / escolha do idioma.
-- [Contributing](CONTRIBUTING.md): contribution and release process.
-- [Security Policy](SECURITY.md): private vulnerability reporting.
-- [Code of Conduct](CODE_OF_CONDUCT.md): participation and moderation.
-- [License](LICENSE): MIT terms and copyright.
-- [Bug report](.github/ISSUE_TEMPLATE/bug-report.yml), [change proposal](.github/ISSUE_TEMPLATE/change-proposal.yml), and [pull request template](.github/pull_request_template.md): shared GitHub templates.
+- `README.md`: what the plugin does and how to install one of the 2 packages.
+- `SPEC.md`: the spec of version 2, with requirements, verifiers, decisions and annexes.
+- `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, `LICENSE`: community files.
+- `aceite/`: frozen acceptance criteria of the spec: `testes/` (acceptance tests), `casos/` (test cases), `conferir.py` (documentation folder checker), `roteiro.json` (acceptance script) and `MANIFESTO.sha256`.
+- `.github/workflows/verificar.yml`: GitHub verification on every push and pull request.
+- `hopper-documentation-anth-pt-br/`: the plugin in Portuguese (Brazil), with its own README, tests and evals.
+- `hopper-documentation-anth-en/`: the plugin in English, with its own README, tests and evals.

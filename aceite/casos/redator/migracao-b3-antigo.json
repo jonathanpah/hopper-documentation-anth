@@ -1,0 +1,42 @@
+{
+ "structured_output": {
+  "nada_relevante": false,
+  "resumo": "Migração dos handoffs do relatório e do MallMetrics",
+  "itens_novos": [
+   {"ref": "N1", "tipo": "D", "conversa": "antigo-a2f1", "texto": "O relatório semanal vai por e-mail, e não pelo painel.", "origem": ["handoff-20260929-041132.md"], "situacao": "vigente", "recomendacao": "", "depende_de": ""},
+   {"ref": "N2", "tipo": "F", "conversa": "antigo-a2f1", "texto": "Script enviar.py criado e testado com 1 envio.", "origem": ["handoff-20260929-041132.md"], "situacao": "concluída", "recomendacao": "", "depende_de": ""},
+   {"ref": "N3", "tipo": "PD", "conversa": "antigo-a2f1", "texto": "Confirmar os 3 destinatários do relatório com a usuária.", "origem": ["handoff-20260929-041132.md"], "situacao": "aberta", "recomendacao": "Perguntar os nomes.", "depende_de": "Resposta da usuária."},
+   {"ref": "N4", "tipo": "D", "conversa": "01a0ead4-38ab-73a1-acef-976ae64a57ed", "texto": "Os achados da rodada 3 são corrigidos na branch rodada-3, sem merge na main.", "origem": ["handoff-20260929-102703-01a0ead4.md"], "situacao": "vigente", "recomendacao": "", "depende_de": ""},
+   {"ref": "N5", "tipo": "F", "conversa": "01a0ead4-38ab-73a1-acef-976ae64a57ed", "texto": "Achados A1 a A4 corrigidos, commit 9f1c2d3.", "origem": ["handoff-20260929-102703-01a0ead4.md"], "situacao": "concluída", "recomendacao": "", "depende_de": ""},
+   {"ref": "N6", "tipo": "PD", "conversa": "01a0ead4-38ab-73a1-acef-976ae64a57ed", "texto": "Escolher o tipo de gráfico do achado A5.", "origem": ["handoff-20260929-102703-01a0ead4.md"], "situacao": "aberta", "recomendacao": "Propor 2 tipos ao usuário.", "depende_de": "Escolha do usuário."}
+  ],
+  "mudancas": [],
+  "handoffs_antigos": [
+   {"conversa": "antigo-a2f1", "data": "2026-09-29", "resumo": "Relatório semanal: regra de envio",
+    "handoff": {
+     "objetivo": "Enviar o relatório semanal toda segunda-feira. (handoff-20260929-041132.md)",
+     "pautas_e_estado": "O script enviar.py está pronto. Os destinatários aguardam confirmação. (handoff-20260929-041132.md)",
+     "proximo_passo": "Confirmar os 3 destinatários. (handoff-20260929-041132.md)",
+     "decisoes_e_autorizacoes": "N1 vigente. (handoff-20260929-041132.md)",
+     "restricoes": "Nenhuma restrição registrada. (handoff-20260929-041132.md)",
+     "descobertas": "Nenhuma tentativa descartada. (handoff-20260929-041132.md)",
+     "pendencias": "N3 aberta. (handoff-20260929-041132.md)",
+     "lacunas": "O handoff não traz o identificador da conversa. (handoff-20260929-041132.md)",
+     "como_retomar": "Perguntar os destinatários à usuária. (handoff-20260929-041132.md)"
+    }},
+   {"conversa": "01a0ead4-38ab-73a1-acef-976ae64a57ed", "data": "2026-09-29", "resumo": "MallMetrics v1: correções da rodada 3",
+    "handoff": {
+     "objetivo": "Concluir a correção da rodada 3 do app local. (handoff-20260929-102703-01a0ead4.md)",
+     "pautas_e_estado": "A1 a A4 corrigidos. A5 aguarda a escolha do gráfico. (handoff-20260929-102703-01a0ead4.md)",
+     "proximo_passo": "Escolher o tipo de gráfico de A5. (handoff-20260929-102703-01a0ead4.md)",
+     "decisoes_e_autorizacoes": "N4 vigente. Autorização de 29/09/2026 para corrigir sem publicar. (handoff-20260929-102703-01a0ead4.md)",
+     "restricoes": "Sem merge na main. (handoff-20260929-102703-01a0ead4.md)",
+     "descobertas": "Nenhuma tentativa descartada. (handoff-20260929-102703-01a0ead4.md)",
+     "pendencias": "N6 aberta. (handoff-20260929-102703-01a0ead4.md)",
+     "lacunas": "Nenhuma lacuna registrada. (handoff-20260929-102703-01a0ead4.md)",
+     "como_retomar": "Conferir o commit 9f1c2d3 e perguntar o tipo de gráfico. (handoff-20260929-102703-01a0ead4.md)"
+    }}
+  ],
+  "sem_conteudo": ["index.md"]
+ }
+}

@@ -1,0 +1,96 @@
+# Verificação do GitHub (decisão C17 da spec). Roda em todo envio de commits a qualquer branch e em todo PR.
+# Critério congelado da U2 (C18): este arquivo entra no manifesto aceite/MANIFESTO.sha256.
+name: verificar
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  criterios-congelados:
+    name: critérios congelados (C18)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Conferir o manifesto e a tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -f aceite/MANIFESTO.sha256 ]; then echo "sem manifesto"; exit 1; fi
+          git ls-files aceite .github/workflows/verificar.yml SPEC.md | LC_ALL=C sort | sed '/^aceite\/MANIFESTO\.sha256$/d' > /tmp/criterios-versionados.txt
+          sed -E 's/^[0-9a-fA-F]{64} [ *]//' aceite/MANIFESTO.sha256 | LC_ALL=C sort > /tmp/criterios-manifesto.txt
+          if ! diff -u /tmp/criterios-manifesto.txt /tmp/criterios-versionados.txt; then echo "CRITÉRIO ALTERADO: a lista de caminhos difere do manifesto"; exit 1; fi
+          if ! sha256sum --check --strict aceite/MANIFESTO.sha256; then echo "CRITÉRIO ALTERADO: um critério congelado não confere com o manifesto"; exit 1; fi
+          if git rev-parse -q --verify refs/tags/criterios-congelados >/dev/null; then
+            if ! git diff --quiet criterios-congelados -- aceite/MANIFESTO.sha256; then echo "CRITÉRIO ALTERADO: o manifesto difere do manifesto da tag criterios-congelados"; exit 1; fi
+          else
+            echo "CRITÉRIO ALTERADO: a tag criterios-congelados não existe"; exit 1
+          fi
+          echo "critérios congelados conferem"
+
+  testes:
+    name: testes (${{ matrix.os }}, Python ${{ matrix.python }}, ${{ matrix.pacote }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-latest]
+        python: ["3.9", "3.13"]
+        pacote: [hopper-documentation-anth-pt-br, hopper-documentation-anth-en]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Testes de aceite
+        env:
+          HOPPER_DOCUMENTATION_ANTH_PACOTE: ${{ matrix.pacote }}
+          TZ: UTC
+        shell: bash
+        run: |
+          set -o pipefail
+          cd aceite/testes && python3 -m unittest discover -s . -p 'test_*.py' -v 2>&1 | tee ../../aceite-${{ matrix.pacote }}.log
+      - name: Testes do executor
+        if: always()
+        shell: bash
+        run: |
+          cd ${{ matrix.pacote }} && if ls tests/test_*.py >/dev/null 2>&1; then python3 -m unittest discover -s tests -v; else echo "sem testes do executor ainda"; fi
+      - name: Lista de reprovações com o ID do requisito
+        if: always()
+        shell: bash
+        run: |
+          grep -E '^(FAIL|ERROR): test_R[0-9]+' aceite-${{ matrix.pacote }}.log | sed -E 's/^(FAIL|ERROR): (test_R[0-9]+)[^ ]* .*/\1 \2/' | sort -u || true
+
+  conferidor:
+    name: conferidor e inventário
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Casos do conferidor
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 aceite/conferir.py aceite/casos/conferidor/valida --idioma pt-br
+          python3 aceite/conferir.py aceite/casos/conferidor/valida-roteiro --idioma pt-br --roteiro aceite/roteiro.json
+          for pasta in aceite/casos/conferidor/invalida-*; do
+            nome="${pasta##*/}"
+            n="${nome#invalida-}"
+            n="${n%%-*}"
+            opcoes=()
+            if [ "$n" = F9 ]; then opcoes=(--roteiro aceite/roteiro.json); fi
+            saida=$(python3 aceite/conferir.py "$pasta" --idioma pt-br "${opcoes[@]}" || true)
+            echo "$saida" | grep -q "^$n: reprovada" || { echo "$pasta: $n deveria reprovar"; echo "$saida"; exit 1; }
+            echo "$pasta: ok"
+          done
+      - name: Teste de inventário (T32)
+        env:
+          HOPPER_DOCUMENTATION_ANTH_PACOTE: hopper-documentation-anth-pt-br
+        shell: bash
+        run: cd aceite/testes && python3 -m unittest test_repositorio.Repositorio.test_R32_inventario_da_main -v

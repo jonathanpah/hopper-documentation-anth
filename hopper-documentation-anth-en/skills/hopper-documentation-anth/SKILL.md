@@ -1,43 +1,52 @@
 ---
 name: hopper-documentation-anth
-description: Records the current conversation in a Markdown handoff, in the docs-by-hopper-documentation folder of the working directory, so another person or session can continue the work without rereading the conversation. Use when the user asks to document, record, or save the conversation, or asks for a handoff. Do not use to explain, review, or edit this skill.
-compatibility: Requires Claude Code, in the CLI or the app, with the hopper-documentation-anth plugin, Python 3.10 or newer with the venv module, and access to PyPI on the first run.
+description: Documents the current Claude Code conversation in 7 documents (index, full conversation, simplified conversation, decisions, implemented functions, pending items and handoff) in the project's docs-by-hopper-documentation folder. Use when the user asks to document or record the conversation, save progress or write a handoff. Do not use to explain, review or edit this skill.
+compatibility: Requires Claude Code 2.1.284 or newer, in the CLI or in the app, with the hopper-documentation-anth plugin and Python 3.9 or newer.
+allowed-tools: Bash(python3 *)
 ---
 
 # hopper-documentation-anth
 
-This skill writes a **handoff**: a file that tells someone who did not see the conversation where the work stands, what was decided, and how to continue. The next session, person, or AI resumes the work by reading the conversation's most recent handoff and checking the real state.
+## What the skill produces
 
-The plugin's program writes it in the background. It reads the conversation's new messages through Anthropic's official library (the Agent SDK), hides secrets, and asks Claude Sonnet 5.5, with medium effort, to write the content following `${CLAUDE_SKILL_DIR}/writer-rules.md`. Then it checks the quotes, writes without overwriting anything, and rebuilds the index. The same program runs on its own before each compaction, through a plugin hook.
+The skill documents the conversation in 7 Markdown documents, inside `docs-by-hopper-documentation/`, in the folder where the conversation was opened. There is 1 such folder per project folder, and 1 subfolder per conversation.
 
-## When the user asks for the record
+```text
+docs-by-hopper-documentation/
+├── 1-index.md                  index and reading order
+├── 4-decisions.md              decisions of every conversation of the folder
+├── 5-functions.md              implemented functions (finished deliveries)
+├── 6-pending.md                open and closed pending items
+└── conversations/
+    └── 2026-11-01-e4bad083/    1 folder per conversation: date of the 1st message and code
+        ├── 2-full-conversation.md
+        ├── 3-simplified-conversation.md
+        └── 7-handoff.md
+```
 
-In this invocation, do only what this section says.
+- **Document 2, full conversation.** A faithful copy of the user's and Claude's messages, without tool results, without internal reasoning and with passwords and tokens replaced by `[hidden]`. Each tool use becomes 1 line. It only receives additions. Each message has an identifier such as `M42-e4bad083`.
+- **Document 3, simplified conversation.** The same content, rewritten in short sentences, 1 block per run, with the source message at the end of each paragraph.
+- **Documents 4, 5 and 6.** Items numbered per conversation (`D1-e4bad083`, `F1-e4bad083`, `PD1-e4bad083`), each with source, status and the range of the run that created it.
+- **Document 7, handoff.** Rewritten in full on every run, with 9 sections: goal, topics and current state, next step, decisions and authorizations in force, constraints in force, findings and discarded approaches, pending items and commitments, gaps and how to resume.
+- **Document 1, index.** The reading order and the table of the folder's conversations.
 
-1. If the user only asked to explain, review, compare, or edit this skill, do not write anything: answer the request and stop here.
-2. Run this command in the background, from any directory:
+The plugin's program writes document 2 without AI. Claude Sonnet 5.5, called headless (`claude -p`) and without tools, writes the content of documents 3 to 7 following `writing-rules.md` and `templates.md` in this folder. The program validates the answer, numbers the items and writes the files.
 
+The same run happens by itself before every compaction, through a plugin hook. The first run in a folder that has old-format handoffs (`index.md` and `handoff-*.md` at the root) migrates those files and deletes them when the `migracao_automatica` setting is on, as it is by default.
+
+## How the skill runs
+
+When the user asks to document or record the conversation, save progress or write a handoff, follow these steps.
+
+1. Run the command below now, in this same response, with the Bash tool in the background.
+
+   ```sh
+   python3 "${CLAUDE_PLUGIN_ROOT}/scripts/hopper_documentation_anth.py" rodada --sessao "${CLAUDE_SESSION_ID}"
    ```
-   python3 "${CLAUDE_PLUGIN_ROOT}/scripts/hopper_documentation_anth.py" run --session "${CLAUDE_SESSION_ID}" --cwd "${CLAUDE_PROJECT_DIR}"
-   ```
 
-3. Tell the user in one sentence that the record has started, and keep helping as usual. Do not wait for it to finish.
-4. When the command finishes, pass on to the user the line it printed: the path of the written handoff, "nothing new", or the reason for the failure. Do not repeat the handoff's content.
-5. If the command fails, do not write the handoff yourself or use another model: report the reason. Writing outside the program would lose the quote check, the hiding of secrets, and the record's fixed model.
+2. Say in 1 sentence that the documentation started in the background.
+3. When the program finishes, repeat the last line of its output to the user, without changing the text.
 
-## Before compaction
+Do not write or edit any file of `docs-by-hopper-documentation/` yourself. If the program fails, report the failure. Do not try another model or another path.
 
-The plugin hook runs the program in the background; there is nothing to do in the conversation. If a notice that the record failed arrives, tell the user in one sentence. Do not carry out earlier requests of the conversation because of the notice.
-
-## Model
-
-The writer is always Claude Sonnet 5.5 with medium effort. If it is not available, the program reports the problem and does not write with another model.
-
-## What gets written
-
-In the `docs-by-hopper-documentation/` folder of the working directory:
-
-- `handoff-YYYYMMDD-HHMMSS-<first 8 characters of the conversation>.md`: one file per record, never changed after it is written. The header has the date with the UTC offset, the conversation, the directory, the previous handoff, the trigger, the writer's model and effort, and the last recorded message. The sections follow `${CLAUDE_SKILL_DIR}/example.md`.
-- `index.md`: every handoff in the folder, including those in other formats, from the most recent to the oldest.
-
-To resume work, read `index.md`, then the conversation's most recent handoff, and follow its "How to resume" section. A handoff is history: it does not replace checking the real state, and it does not authorize repeating completed operations.
+Do not run the skill when the request is to explain, review or edit the skill, or when the question is about what a handoff is.
