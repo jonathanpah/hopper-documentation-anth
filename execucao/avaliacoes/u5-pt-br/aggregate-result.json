@@ -1,0 +1,2071 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.316",
+  "startedAt": "2026-11-02T10:00:30.126Z",
+  "durationSeconds": 571,
+  "costUsd": 1.9304202,
+  "partial": true,
+  "partialReason": "interrupted",
+  "suite": {
+    "root": "/Users/jonathan/Library/CloudStorage/Dropbox/5-ai/5-claude/hopper-documentation-anth/hopper-documentation-anth-pt-br",
+    "ablation": "none",
+    "modelOverride": "sonnet",
+    "threshold": 1,
+    "concurrency": 1,
+    "plugins": [
+      {
+        "name": "hopper-documentation-anth",
+        "version": "2.0.0",
+        "path": "/Users/jonathan/Library/CloudStorage/Dropbox/5-ai/5-claude/hopper-documentation-anth/hopper-documentation-anth-pt-br"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "nao-changelog",
+      "dir": "evals/acionamento/nao-changelog",
+      "source": "prose",
+      "promptMarkdown": "Crie um CHANGELOG.md vazio no formato Keep a Changelog.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 300,
+      "maxTurns": 15,
+      "graders": [
+        {
+          "name": "sem-handoff",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "docs-by-hopper-documentation/**",
+            "exists": false,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "skill-nao-acionada",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "hopper-documentation-anth",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 2,
+            "costUsd": 0.030060399999999998,
+            "judgeCostUsd": 0,
+            "durationSeconds": 6,
+            "startedAt": "2026-11-02T10:00:30.195Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-eoJF4t/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "sem-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs-by-hopper-documentation/** absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-nao-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 2,
+            "costUsd": 0.0297341,
+            "judgeCostUsd": 0,
+            "durationSeconds": 7,
+            "startedAt": "2026-11-02T10:00:36.432Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-igkLfr/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "sem-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs-by-hopper-documentation/** absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-nao-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 2,
+            "costUsd": 0.0295944,
+            "judgeCostUsd": 0,
+            "durationSeconds": 6,
+            "startedAt": "2026-11-02T10:00:43.740Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-pvz43Y/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "sem-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs-by-hopper-documentation/** absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-nao-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "nao-claude-md",
+      "dir": "evals/acionamento/nao-claude-md",
+      "source": "prose",
+      "promptMarkdown": "Crie um CLAUDE.md para este projeto dizendo que os testes rodam com pytest.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 300,
+      "maxTurns": 15,
+      "graders": [
+        {
+          "name": "sem-handoff",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "docs-by-hopper-documentation/**",
+            "exists": false,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "skill-nao-acionada",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "hopper-documentation-anth",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0309662,
+            "judgeCostUsd": 0,
+            "durationSeconds": 9,
+            "startedAt": "2026-11-02T10:00:49.868Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-ENm9gU/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "sem-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs-by-hopper-documentation/** absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-nao-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 2,
+            "costUsd": 0.0269552,
+            "judgeCostUsd": 0,
+            "durationSeconds": 10,
+            "startedAt": "2026-11-02T10:00:58.479Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-tS7Y0E/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "sem-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs-by-hopper-documentation/** absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-nao-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.030407000000000003,
+            "judgeCostUsd": 0,
+            "durationSeconds": 11,
+            "startedAt": "2026-11-02T10:01:08.676Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-seD52w/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "sem-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs-by-hopper-documentation/** absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-nao-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "nao-commit",
+      "dir": "evals/acionamento/nao-commit",
+      "source": "prose",
+      "promptMarkdown": "Explique a diferença entre git commit e git push.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 300,
+      "maxTurns": 15,
+      "graders": [
+        {
+          "name": "sem-handoff",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "docs-by-hopper-documentation/**",
+            "exists": false,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "skill-nao-acionada",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "hopper-documentation-anth",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.025509999999999998,
+            "judgeCostUsd": 0,
+            "durationSeconds": 6,
+            "startedAt": "2026-11-02T10:01:19.456Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-uh8uYB/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "sem-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs-by-hopper-documentation/** absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-nao-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.02563,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-02T10:01:25.024Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-YFHW2c/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "sem-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs-by-hopper-documentation/** absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-nao-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.025708,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-02T10:01:30.006Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-R3smdR/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "sem-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs-by-hopper-documentation/** absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-nao-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "nao-docstrings",
+      "dir": "evals/acionamento/nao-docstrings",
+      "source": "prose",
+      "promptMarkdown": "Explique como escrever boas docstrings em funções Python.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 300,
+      "maxTurns": 15,
+      "graders": [
+        {
+          "name": "sem-handoff",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "docs-by-hopper-documentation/**",
+            "exists": false,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "skill-nao-acionada",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "hopper-documentation-anth",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.038402000000000006,
+            "judgeCostUsd": 0,
+            "durationSeconds": 12,
+            "startedAt": "2026-11-02T10:01:34.418Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-M7EJ19/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "sem-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs-by-hopper-documentation/** absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-nao-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.035679999999999996,
+            "judgeCostUsd": 0,
+            "durationSeconds": 13,
+            "startedAt": "2026-11-02T10:01:46.224Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-m2hONn/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "sem-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs-by-hopper-documentation/** absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-nao-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.039914000000000005,
+            "judgeCostUsd": 0,
+            "durationSeconds": 15,
+            "startedAt": "2026-11-02T10:01:59.624Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-IJ6tzt/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "sem-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs-by-hopper-documentation/** absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-nao-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "nao-edita-skill",
+      "dir": "evals/acionamento/nao-edita-skill",
+      "source": "prose",
+      "promptMarkdown": "Sugira um nome melhor para a seção Lacunas da skill hopper-documentation-anth. Só a sugestão.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 300,
+      "maxTurns": 15,
+      "graders": [
+        {
+          "name": "sem-handoff",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "docs-by-hopper-documentation/**",
+            "exists": false,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 2,
+            "costUsd": 0.029961699999999997,
+            "judgeCostUsd": 0,
+            "durationSeconds": 13,
+            "startedAt": "2026-11-02T10:02:14.303Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-6rhfQb/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "sem-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs-by-hopper-documentation/** absent as expected",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.022828,
+            "judgeCostUsd": 0,
+            "durationSeconds": 10,
+            "startedAt": "2026-11-02T10:02:27.532Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-wH40QF/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "sem-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs-by-hopper-documentation/** absent as expected",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.022544,
+            "judgeCostUsd": 0,
+            "durationSeconds": 3,
+            "startedAt": "2026-11-02T10:02:37.681Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-ZZ3YNr/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "sem-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs-by-hopper-documentation/** absent as expected",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "nao-explica-skill",
+      "dir": "evals/acionamento/nao-explica-skill",
+      "source": "prose",
+      "promptMarkdown": "Como a skill hopper-documentation-anth decide onde gravar os arquivos? Só explique.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 300,
+      "maxTurns": 15,
+      "graders": [
+        {
+          "name": "sem-handoff",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "docs-by-hopper-documentation/**",
+            "exists": false,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 2,
+            "costUsd": 0.0320706,
+            "judgeCostUsd": 0,
+            "durationSeconds": 8,
+            "startedAt": "2026-11-02T10:02:40.477Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-4MjK61/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "sem-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs-by-hopper-documentation/** absent as expected",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 2,
+            "costUsd": 0.0316026,
+            "judgeCostUsd": 0,
+            "durationSeconds": 21,
+            "startedAt": "2026-11-02T10:02:48.912Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-cF83zS/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "sem-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs-by-hopper-documentation/** absent as expected",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 2,
+            "costUsd": 0.0307946,
+            "judgeCostUsd": 0,
+            "durationSeconds": 7,
+            "startedAt": "2026-11-02T10:03:09.907Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-vMJWip/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "sem-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs-by-hopper-documentation/** absent as expected",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "nao-memoria",
+      "dir": "evals/acionamento/nao-memoria",
+      "source": "prose",
+      "promptMarkdown": "Lembre que eu prefiro respostas curtas.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 300,
+      "maxTurns": 15,
+      "graders": [
+        {
+          "name": "sem-handoff",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "docs-by-hopper-documentation/**",
+            "exists": false,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "skill-nao-acionada",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "hopper-documentation-anth",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.021798,
+            "judgeCostUsd": 0,
+            "durationSeconds": 2,
+            "startedAt": "2026-11-02T10:03:16.661Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-OVkdkx/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "sem-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs-by-hopper-documentation/** absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-nao-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.021810000000000003,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-02T10:03:18.517Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-Q2Prdj/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "sem-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs-by-hopper-documentation/** absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-nao-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.021798,
+            "judgeCostUsd": 0,
+            "durationSeconds": 2,
+            "startedAt": "2026-11-02T10:03:23.164Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-RzmF6t/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "sem-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs-by-hopper-documentation/** absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-nao-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "nao-o-que-e-handoff",
+      "dir": "evals/acionamento/nao-o-que-e-handoff",
+      "source": "prose",
+      "promptMarkdown": "O que é um handoff entre turnos numa equipe de plantão? Responda em duas frases.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 300,
+      "maxTurns": 15,
+      "graders": [
+        {
+          "name": "sem-handoff",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "docs-by-hopper-documentation/**",
+            "exists": false,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "skill-nao-acionada",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "hopper-documentation-anth",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.02296,
+            "judgeCostUsd": 0,
+            "durationSeconds": 3,
+            "startedAt": "2026-11-02T10:03:25.655Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-hjNTP1/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "sem-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs-by-hopper-documentation/** absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-nao-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.022642000000000002,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-02T10:03:28.278Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-cs8FzQ/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "sem-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs-by-hopper-documentation/** absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-nao-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.0228,
+            "judgeCostUsd": 0,
+            "durationSeconds": 3,
+            "startedAt": "2026-11-02T10:03:32.142Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-9xMqp1/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "sem-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs-by-hopper-documentation/** absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-nao-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "nao-readme",
+      "dir": "evals/acionamento/nao-readme",
+      "source": "prose",
+      "promptMarkdown": "Escreva um README.md para um projeto Python chamado conversor-de-unidades, com instalação e uso.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 300,
+      "maxTurns": 15,
+      "graders": [
+        {
+          "name": "sem-handoff",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "docs-by-hopper-documentation/**",
+            "exists": false,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "skill-nao-acionada",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "hopper-documentation-anth",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 3,
+            "costUsd": 0.0507969,
+            "judgeCostUsd": 0,
+            "durationSeconds": 16,
+            "startedAt": "2026-11-02T10:03:35.257Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-KOUMFJ/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "sem-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs-by-hopper-documentation/** absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-nao-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 3,
+            "costUsd": 0.0497081,
+            "judgeCostUsd": 0,
+            "durationSeconds": 16,
+            "startedAt": "2026-11-02T10:03:51.672Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-aOq8uk/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "sem-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs-by-hopper-documentation/** absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-nao-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 3,
+            "costUsd": 0.047492299999999994,
+            "judgeCostUsd": 0,
+            "durationSeconds": 15,
+            "startedAt": "2026-11-02T10:04:07.432Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-SeHDzq/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "sem-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs-by-hopper-documentation/** absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-nao-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "nao-resumo-no-chat",
+      "dir": "evals/acionamento/nao-resumo-no-chat",
+      "source": "prose",
+      "promptMarkdown": "Resuma esta conversa em três linhas, aqui mesmo na resposta. Não grave arquivos.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 300,
+      "maxTurns": 15,
+      "graders": [
+        {
+          "name": "sem-handoff",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "docs-by-hopper-documentation/**",
+            "exists": false,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "skill-nao-acionada",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "hopper-documentation-anth",
+            "min": 0,
+            "max": 0,
+            "arm": "both"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.023059999999999997,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-02T10:04:22.037Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-SW3hUX/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "sem-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs-by-hopper-documentation/** absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-nao-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.023922000000000002,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-02T10:04:26.389Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-JYF9Fi/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "sem-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs-by-hopper-documentation/** absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-nao-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.023028,
+            "judgeCostUsd": 0,
+            "durationSeconds": 4,
+            "startedAt": "2026-11-02T10:04:31.417Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-InnjWA/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "sem-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "docs-by-hopper-documentation/** absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-nao-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "sim-antes-do-clear",
+      "dir": "evals/acionamento/sim-antes-do-clear",
+      "source": "prose",
+      "promptMarkdown": "Antes de eu dar /clear, guarde o contexto desta conversa num registro.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 600,
+      "maxTurns": 25,
+      "graders": [
+        {
+          "name": "skill-acionada",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"(?:[\\w-]+:)?hopper-documentation-anth\""
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0378754,
+            "judgeCostUsd": 0,
+            "durationSeconds": 19,
+            "startedAt": "2026-11-02T10:04:35.159Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-baQRAs/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "skill-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.037844499999999996,
+            "judgeCostUsd": 0,
+            "durationSeconds": 14,
+            "startedAt": "2026-11-02T10:04:53.866Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-NxRGxP/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "skill-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.03763609999999999,
+            "judgeCostUsd": 0,
+            "durationSeconds": 11,
+            "startedAt": "2026-11-02T10:05:08.246Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-fHmlw1/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "skill-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "sim-continuar-amanha",
+      "dir": "evals/acionamento/sim-continuar-amanha",
+      "source": "prose",
+      "promptMarkdown": "Vou parar agora. Salve o que for preciso para eu continuar amanhã numa sessão nova.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 600,
+      "maxTurns": 25,
+      "graders": [
+        {
+          "name": "skill-acionada",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"(?:[\\w-]+:)?hopper-documentation-anth\""
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0394784,
+            "judgeCostUsd": 0,
+            "durationSeconds": 13,
+            "startedAt": "2026-11-02T10:05:19.101Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-7YwUMO/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "skill-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 1,
+            "costUsd": 0.025866,
+            "judgeCostUsd": 0,
+            "durationSeconds": 5,
+            "startedAt": "2026-11-02T10:05:31.918Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-4HMN4i/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "skill-acionada",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.039943400000000004,
+            "judgeCostUsd": 0,
+            "durationSeconds": 12,
+            "startedAt": "2026-11-02T10:05:37.122Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-MTWb01/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "skill-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0.6666666666666666,
+        "passRate": 0.6666666666666666
+      }
+    },
+    {
+      "name": "sim-documenta-conversa",
+      "dir": "evals/acionamento/sim-documenta-conversa",
+      "source": "prose",
+      "promptMarkdown": "Documente esta conversa.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 600,
+      "maxTurns": 25,
+      "graders": [
+        {
+          "name": "skill-acionada",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"(?:[\\w-]+:)?hopper-documentation-anth\""
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.03746580000000001,
+            "judgeCostUsd": 0,
+            "durationSeconds": 12,
+            "startedAt": "2026-11-02T10:05:49.581Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-YS49fu/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "skill-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.03669769999999999,
+            "judgeCostUsd": 0,
+            "durationSeconds": 22,
+            "startedAt": "2026-11-02T10:06:01.555Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-SLpLsd/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "skill-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.036709,
+            "judgeCostUsd": 0,
+            "durationSeconds": 8,
+            "startedAt": "2026-11-02T10:06:23.135Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-RMZ3cK/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "skill-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "sim-encerrando",
+      "dir": "evals/acionamento/sim-encerrando",
+      "source": "prose",
+      "promptMarkdown": "Estou encerrando a sessão. Deixe tudo documentado para a próxima.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 600,
+      "maxTurns": 25,
+      "graders": [
+        {
+          "name": "skill-acionada",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"(?:[\\w-]+:)?hopper-documentation-anth\""
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0377266,
+            "judgeCostUsd": 0,
+            "durationSeconds": 10,
+            "startedAt": "2026-11-02T10:06:31.048Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-fSTKUi/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "skill-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0373051,
+            "judgeCostUsd": 0,
+            "durationSeconds": 12,
+            "startedAt": "2026-11-02T10:06:41.071Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-Y0Bmh2/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "skill-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0376342,
+            "judgeCostUsd": 0,
+            "durationSeconds": 16,
+            "startedAt": "2026-11-02T10:06:53.004Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-tQuSLt/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "skill-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "sim-grava-registro",
+      "dir": "evals/acionamento/sim-grava-registro",
+      "source": "prose",
+      "promptMarkdown": "Grave um registro do que fizemos até agora nesta conversa.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 600,
+      "maxTurns": 25,
+      "graders": [
+        {
+          "name": "skill-acionada",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"(?:[\\w-]+:)?hopper-documentation-anth\""
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0377946,
+            "judgeCostUsd": 0,
+            "durationSeconds": 12,
+            "startedAt": "2026-11-02T10:07:09.056Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-O0xFC0/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "skill-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.037433499999999995,
+            "judgeCostUsd": 0,
+            "durationSeconds": 12,
+            "startedAt": "2026-11-02T10:07:21.362Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-FC0Cmn/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "skill-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.037272099999999996,
+            "judgeCostUsd": 0,
+            "durationSeconds": 13,
+            "startedAt": "2026-11-02T10:07:33.066Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-KY55WY/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "skill-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "sim-ingles",
+      "dir": "evals/acionamento/sim-ingles",
+      "source": "prose",
+      "promptMarkdown": "Please document this conversation so another session can continue.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 600,
+      "maxTurns": 25,
+      "graders": [
+        {
+          "name": "skill-acionada",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"(?:[\\w-]+:)?hopper-documentation-anth\""
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.0799701,
+            "judgeCostUsd": 0,
+            "durationSeconds": 19,
+            "startedAt": "2026-11-02T10:07:45.572Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-CsGZqS/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "skill-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.060820099999999995,
+            "judgeCostUsd": 0,
+            "durationSeconds": 14,
+            "startedAt": "2026-11-02T10:08:04.616Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-A2p9KA/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "skill-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.037341,
+            "judgeCostUsd": 0,
+            "durationSeconds": 12,
+            "startedAt": "2026-11-02T10:08:18.236Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-vdeWiu/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "skill-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "sim-outra-ia",
+      "dir": "evals/acionamento/sim-outra-ia",
+      "source": "prose",
+      "promptMarkdown": "Prepare a passagem para outra IA continuar este trabalho.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 600,
+      "maxTurns": 25,
+      "graders": [
+        {
+          "name": "skill-acionada",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"(?:[\\w-]+:)?hopper-documentation-anth\""
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.038241,
+            "judgeCostUsd": 0,
+            "durationSeconds": 9,
+            "startedAt": "2026-11-02T10:08:30.330Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-EmnIlB/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "skill-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0394637,
+            "judgeCostUsd": 0,
+            "durationSeconds": 13,
+            "startedAt": "2026-11-02T10:08:39.086Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-Y4uTH8/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "skill-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.06881570000000001,
+            "judgeCostUsd": 0,
+            "durationSeconds": 26,
+            "startedAt": "2026-11-02T10:08:52.517Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-OmaY97/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "skill-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "sim-outra-pessoa",
+      "dir": "evals/acionamento/sim-outra-pessoa",
+      "source": "prose",
+      "promptMarkdown": "Quero deixar registrado o andamento desta sessão para um colega continuar.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 600,
+      "maxTurns": 25,
+      "graders": [
+        {
+          "name": "skill-acionada",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"(?:[\\w-]+:)?hopper-documentation-anth\""
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.062018899999999995,
+            "judgeCostUsd": 0,
+            "durationSeconds": 17,
+            "startedAt": "2026-11-02T10:09:18.540Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-g3TcmI/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "skill-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.038516499999999995,
+            "judgeCostUsd": 0,
+            "durationSeconds": 12,
+            "startedAt": "2026-11-02T10:09:35.139Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-li3If6/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "skill-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.0386127,
+            "judgeCostUsd": 0,
+            "durationSeconds": 8,
+            "startedAt": "2026-11-02T10:09:47.562Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-i60j32/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "skill-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "sim-pede-handoff",
+      "dir": "evals/acionamento/sim-pede-handoff",
+      "source": "prose",
+      "promptMarkdown": "Faça um handoff desta sessão.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 600,
+      "maxTurns": 25,
+      "graders": [
+        {
+          "name": "skill-acionada",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"(?:[\\w-]+:)?hopper-documentation-anth\""
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.021759999999999998,
+            "judgeCostUsd": 0,
+            "durationSeconds": 6,
+            "startedAt": "2026-11-02T10:09:55.455Z",
+            "error": "interrupted",
+            "tracePath": "/private/tmp/e-k4ZVv2/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "skill-acionada",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 19,
+    "casesPassed": 18,
+    "overallScore": 0.982456140350877,
+    "overallPassRate": 0.982456140350877
+  }
+}

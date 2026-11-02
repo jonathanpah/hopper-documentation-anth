@@ -21,6 +21,10 @@ Início: 2026-11-02 02:36 UTC.
 | 8. Avaliações | pronto | V-U1-08 |
 | 9. Limpeza | pendente | |
 
+## Pausa
+
+Pausada em 2026-11-02 ~10:15 UTC a pedido do proprietário. Próximo passo na retomada: corrigir F2 (leitura do documento 2 no programa e no conferidor) e F9 (roteiro com a senha oculta), repetir os testes, retomar as 3 revisões, congelar os critérios (U2) e seguir com A1 (pelo painel de Terminal) e A2.
+
 ## Unidades
 
 | Unidade | Situação |

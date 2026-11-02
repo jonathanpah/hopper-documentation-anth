@@ -154,3 +154,16 @@ A desinstalação da 0.1.4 apagou a pasta de dados e o `config.json` gravado ant
 ## V-U1-02 (correção de A1) · 2026-11-02 10:08 · A1 desbloqueado
 
 O bloqueio de A1 (P-02) estava errado. No painel de Terminal do app, que roda o shell de login do proprietário fora do isolamento da ferramenta Bash, `claude auth status` mostra `"loggedIn": true` e `"authMethod": "claude.ai"`, e `claude -p 'Responda so com a palavra ok.' --model haiku` respondeu "ok". O registro do Chaves do macOS (`Claude Code-credentials`) tem data de alteração 2026-11-02 03:17:03 UTC, o horário em que o proprietário informou o login. Causa do falso bloqueio: a ferramenta Bash da sessão do executor roda isolada e não lê o Chaves do macOS, então o `claude` iniciado por ela aparece sem login. Consequência para o método: os testes de A1 rodam pelo painel de Terminal (ferramenta `run_in_terminal`), e não pela ferramenta Bash. P-02 retirada sem resposta do proprietário.
+
+## V-U8-02 · U8 · Roteiro de aceite em A3 (F-C, F-A, F-K, F-V) · 09:59 a 10:09 · reprovado em F2 e F9
+
+Sessão `9a0a7706` em `~/hopper-teste-a3`, Sonnet, janela de 100 mil e 90%. Resultados reais da versão 2.0.0:
+- F-C: as 6 mensagens enviadas; a skill rodou a pedido 2 vezes (a mensagem 1, "Vamos testar a documentação…", também acionou a skill), com escrita concluída M1 a M4 e M5 a M13, só `claude-sonnet-5-5` em `modelos`.
+- F-K passagem 1: compactação automática às 10:02:36; cópia concluída às 10:02:37; rodada do gatilho concluída às 10:03:17 (M14 a M15). Uma 2ª compactação às 10:03:01 (o contexto depois da 1ª continuou acima do limite de teste) terminou em "nada novo".
+- F-K passagem 2: compactação às 10:08:20, cópia às 10:08:22, Claude Code fechado às 10:08:27, **rodada concluída às 10:08:57 (M16 a M18), 30 s depois do fechamento**. R23 provado em A3 com o plugin real.
+- F-V (conferidor com roteiro): 8 aprovadas, 2 reprovadas. **F2**: uma resposta do Claude contém linhas que começam com "## " (títulos copiados do SKILL.md), e a leitura do documento 2 por "\n## " as toma por cabeçalhos de mensagem. O mesmo defeito existe na leitura do documento 2 pelo programa (`Documento2.mensagens`). **F9**: a mensagem 2 do roteiro tem a senha, que o documento 2 grava como "[oculto]", e a busca pelo texto literal não a encontra. Os 2 defeitos são de critério (conferidor e roteiro) e de entrega (leitura do documento 2), a corrigir antes do congelamento.
+Pasta de documentação e resultado bruto em `execucao/aceite/a3/`.
+
+## Pausa · 2026-11-02 10:10
+
+Execução pausada a pedido do proprietário ("pause"). Interrompidos: avaliações de acionamento completas do pacote em português (sem resultado), 3 revisões independentes (U2, U3-U4-U6, U5-U7; retomáveis) e a medição de A1 no painel de Terminal. Observação: depois do falso bloqueio de A1, o arquivo `.claude/settings.local.json` recebeu regras `allow` gravadas pelo app a partir de aprovações do proprietário, o que indica que pedidos de permissão chegaram a ele; D-06 precisa ser revista na retomada.
