@@ -126,8 +126,7 @@ class Localizacao(CasoDeAceite):
         pasta = Path(tempfile.mkdtemp(prefix="claude-falso-"))
         self.addCleanup(shutil.rmtree, pasta, True)
         falso = pasta / "claude"
-        shutil.copy(shutil.which("sleep") or "/bin/sleep", falso)
-        falso.chmod(0o755)
+        os.symlink(shutil.which("sleep") or "/bin/sleep", falso)  # uma cópia de binário do sistema é morta no macOS
         processo = subprocess.Popen([str(falso), "30"])
         self.addCleanup(processo.kill)
         env = self.amb.ambiente()
@@ -144,7 +143,7 @@ class Localizacao(CasoDeAceite):
         casa = Path(tempfile.mkdtemp(prefix="casa-"))
         self.addCleanup(shutil.rmtree, casa, True)
         (casa / ".local" / "bin").mkdir(parents=True)
-        shutil.copy(falso, casa / ".local" / "bin" / "claude")
+        os.symlink(shutil.which("sleep") or "/bin/sleep", casa / ".local" / "bin" / "claude")
         env["HOME"] = str(casa)
         r = subprocess.run([sys.executable, str(PROGRAMA), "executavel"], capture_output=True, text=True, env=env)
         self.assertEqual(Path(r.stdout.strip()).resolve(), (casa / ".local" / "bin" / "claude").resolve())

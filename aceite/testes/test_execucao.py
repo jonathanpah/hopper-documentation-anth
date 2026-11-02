@@ -6,7 +6,7 @@ import threading
 import time
 import unittest
 
-from apoio import CASOS, CODIGO_B1, PROGRAMA, SESSAO_B1, CasoDeAceite, TEXTO, blocos_do_documento_3, itens, le, registros_de, sha256, ultima_linha
+from apoio import CASOS, CODIGO_B1, PROGRAMA, SESSAO_B1, CasoDeAceite, TEXTO, blocos_do_documento_3, corpo_do_documento_2, itens, le, registros_de, sha256, ultima_linha
 
 
 class Execucao(CasoDeAceite):
@@ -95,7 +95,8 @@ class Execucao(CasoDeAceite):
         arquivo2.write_text(json.dumps(lenta, ensure_ascii=False), encoding="utf-8")
 
         def primeira2():
-            resultados["b"] = amb.roda("rodada", "--sessao", SESSAO_B1, respostas=(), escala="0.001",
+            # a 1ª rodada mantém a escala 0,01 (tempo-limite do redator de 9 s) e segura a trava por 3 s
+            resultados["b"] = amb.roda("rodada", "--sessao", SESSAO_B1, respostas=(), escala="0.01",
                                        extra={"HOPPER_DOCUMENTATION_ANTH_SIMULADO": str(arquivo2)})
 
         t = threading.Thread(target=primeira2)
@@ -126,7 +127,7 @@ class Execucao(CasoDeAceite):
         self.addCleanup(referencia.limpa)
         referencia.historico_b1()
         self.assertEqual(referencia.rodada().returncode, 0)
-        esperado_d2 = referencia.d(2).read_bytes()
+        esperado_d2 = corpo_do_documento_2(le(referencia.d(2)))  # o cabeçalho traz a pasta do projeto, que muda por ambiente
         for etapa in ("meio-da-copia", "depois-da-copia", "depois-do-diario", "meio-da-gravacao"):
             amb = type(self.amb)()
             self.addCleanup(amb.limpa)
@@ -135,7 +136,7 @@ class Execucao(CasoDeAceite):
             self.assertNotEqual(r.returncode, 0, etapa)
             r = amb.rodada(respostas=("rodada-b1", "rodada-b1"))
             self.assertEqual(r.returncode, 0, f"{etapa}: {r.stderr}")
-            self.assertEqual(amb.d(2).read_bytes(), esperado_d2, etapa)
+            self.assertEqual(corpo_do_documento_2(le(amb.d(2))), esperado_d2, etapa)
             self.assertEqual(blocos_do_documento_3(le(amb.d(3))), [f"M1-{CODIGO_B1} a M6-{CODIGO_B1}"], etapa)
             self.assertEqual([i["id"] for i in itens(le(amb.d(4)))], [f"D1-{CODIGO_B1}"], etapa)
             self.assertEqual([i["id"] for i in itens(le(amb.d(5)))], [f"F1-{CODIGO_B1}"], etapa)

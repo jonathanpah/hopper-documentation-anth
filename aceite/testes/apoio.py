@@ -99,7 +99,7 @@ class Ambiente:
     """Pasta temporária com a pasta de configuração, a pasta do projeto e o redator simulado."""
 
     def __init__(self):
-        self.raiz = Path(tempfile.mkdtemp(prefix="aceite-"))
+        self.raiz = Path(tempfile.mkdtemp(prefix="aceite-")).resolve()
         self.config = self.raiz / "config"
         self.projeto = self.raiz / "projeto"
         self.projeto.mkdir(parents=True)
