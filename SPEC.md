@@ -3,6 +3,7 @@
 - Proprietário: Jonathan Honorio (@jonathanpah).
 - Autor da spec: Claude Opus 5.5, em uma sessão do Claude Code na nuvem, em 2026-11-01.
 - Skill usada para escrever: `hopper-spec-anth`, versão `0.2.0`.
+- Revisão antes da aprovação: Claude Fable 5.1, na sessão do executor (A2), em 2026-11-02. As correções estão na seção 17.
 - Situação: em aprovação. A spec passa a valer quando o PR #2, que a acrescenta à `main`, é incorporado com o "sim" do proprietário.
 - Horários: as datas e horas das decisões estão em UTC.
 
@@ -24,7 +25,7 @@
 | --- | --- |
 | Proprietário | Jonathan Honorio. Aprova esta spec. Durante a execução, só responde "sim" ou "não" aos pedidos de permissão das ações da seção 10 e às perguntas previstas na garantia G07. Não executa nenhuma outra tarefa (decisão P18). |
 | Autor da spec | Claude Opus 5.5. Escreveu esta spec. Não executa. |
-| Executor | Uma sessão do Claude Code no MacBook, aberta na aba Code do Claude Desktop, em sessão local. Faz todo o trabalho: código, testes, instalação nos 3 ambientes, aceite, migração e incorporação. Acessa a VPS por SSH a partir do MacBook. A sessão fica aberta durante toda a execução. |
+| Executor | Uma sessão do Claude Code no MacBook, aberta na aba Code do Claude Desktop, em sessão local, na cópia de trabalho. Faz todo o trabalho: código, testes, instalação nos 3 ambientes, aceite, migração e incorporação. Acessa a VPS por SSH a partir do MacBook. A sessão fica aberta durante toda a execução. |
 | Verificadores | Os programas e roteiros da coluna "Verificador" da seção 5. O executor roda os verificadores, mas não altera os critérios congelados (G03). |
 | Revisor | Um subagente sem o contexto do executor, aberto pelo executor no fim de cada unidade de trabalho (G09). |
 
@@ -62,13 +63,17 @@ Cada coisa tem um único nome nesta spec.
 | Formato antigo | Os arquivos `index.md` e `handoff-*.md` gravados na raiz da pasta de documentação pelas versões anteriores do anth e pelo plugin `hopper-documentation`. |
 | Verificação interna | A função do programa que confere a migração antes de apagar arquivos do formato antigo (R31). |
 | Conferidor | O programa `aceite/conferir.py` do repositório. Confere uma pasta de documentação contra os requisitos (Anexo F). Não faz parte do plugin instalado. |
-| Testes de aceite | Os testes T01 a T42 da seção 5, em `aceite/testes/`. Cada nome de teste traz o ID do requisito, por exemplo `test_R04_acrescenta_so_o_novo`. |
+| Testes de aceite | Os testes T<n> citados na seção 5, em `aceite/testes/`, numerados pelo requisito que cobrem. Nem todo requisito tem teste. Alguns são verificados pelo conferidor, pelo roteiro de aceite ou pela verificação do GitHub. Cada nome de teste traz o ID do requisito, por exemplo `test_R04_acrescenta_so_o_novo`. |
 | Testes do executor | Os testes que o executor escreve em `<pacote>/tests/`. Podem mudar durante a execução. |
 | Critérios congelados | Os arquivos de `aceite/`, o arquivo `.github/workflows/verificar.yml` e o `SPEC.md`, protegidos pela decisão C18. |
 | Regras de escrita | A lista do Anexo A. |
 | A1 | Claude Code no terminal do MacBook. |
 | A2 | Claude Desktop no MacBook, aba Code, sessão local. |
-| A3 | Claude Code no terminal da VPS (Linux). |
+| A3 | Claude Code no terminal da VPS `hopper` (Linux), na conta `jpah`, pelo alias `hopper-jpah` do `~/.ssh/config` do MacBook (IP Tailscale 100.127.183.39, porta 41822). A conta `jonathan` da mesma VPS, alias `hopper-jonathan`, recebe a mesma instalação (C16), sem roteiro de aceite. Os 2 hosts do `~/.ssh/config` respondem `hostname` igual a `hopper`, então a identificação é pelo alias e pelo IP. |
+| Cópia de trabalho | O clone do anth em `/Users/jonathan/Library/CloudStorage/Dropbox/5-ai/5-claude/hopper-documentation-anth`, pasta da sessão do executor a partir de U1. |
+| Raiz de produção | `~/Library/Application Support/hopper-documentation-anth` no MacBook e `/opt/hopper-documentation-anth` na VPS, pela convenção de instalação do proprietário (C16). |
+| Pasta de produção | `<raiz de produção>/releases/<versão>/pt-br`, a pasta de onde o Claude Code instala o plugin. |
+| Ferramentas de sessão | As ferramentas da sessão do executor que abrem outra sessão local da aba Code em uma pasta, enviam mensagens a ela, leem os eventos dela e a encerram. Observadas na sessão do executor em 2026-11-02. |
 | Branch de trabalho | A branch `versao-2` do anth, criada a partir da `main` logo depois da incorporação do PR #2. |
 | Integrar | Enviar commits à branch de trabalho no GitHub. |
 | Incorporar à main | Fazer o merge de uma branch na `main`, com o "sim" do proprietário. |
@@ -83,7 +88,7 @@ Cada coisa tem um único nome nesta spec.
 | Plugin de sonda | O plugin temporário de U1, descrito no Anexo G. |
 | Pasta de teste | Uma pasta nova, criada pelo executor para o roteiro de aceite, como `~/hopper-teste-a1`. |
 | Conversa de teste | A conversa do roteiro de aceite (Anexo F, passo F-C). |
-| Lista de hooks | A lista que o comando `/hooks` do Claude Code mostra. |
+| Lista de hooks | A lista que o comando `/hooks` do Claude Code mostra, em A1 e A3. Em A2, o comando não existe, porque os comandos que abrem um painel no terminal respondem `isn't available in this environment` na aba Code (fonte: `code.claude.com/docs/en/desktop.md`, seção "What's not available in Desktop", lida em 2026-11-02). |
 | Roteiro de aceite | O roteiro do Anexo F, executado em cada ambiente. |
 
 **Os 7 documentos.**
@@ -131,14 +136,14 @@ As palavras estão copiadas da conversa de 2026-11-01. "[…]" marca um corte.
 
 ## 5. Requisitos
 
-Cada requisito tem 1 verificador. Os testes de aceite T01 a T42 ficam em `aceite/testes/` e são escritos em U2 a partir desta spec e dos anexos (G04). Os casos de borda estão na seção 6.
+Cada requisito tem 1 verificador. Os testes de aceite citados nas tabelas abaixo ficam em `aceite/testes/` e são escritos em U2 a partir desta spec e dos anexos (G04). Os casos de borda estão na seção 6.
 
 ### 5.1 Estrutura
 
 | ID | Requisito | Verificador |
 | --- | --- | --- |
 | R01 | Na primeira rodada em uma pasta do projeto, o programa cria a pasta de documentação com os documentos 1, 4, 5 e 6 e a subpasta de conversas. | T01, com pasta vazia e a árvore esperada do Anexo E. |
-| R02 | Para cada conversa, o programa cria a pasta da conversa com os documentos 2, 3 e 7, com a data da primeira mensagem no fuso da máquina. | T02. |
+| R02 | Para cada conversa, o programa cria a pasta da conversa, com a data da primeira mensagem no fuso da máquina, e grava nela o documento 2. Os documentos 3 e 7 entram na primeira rodada com trecho novo. | T02. |
 | R03 | O programa grava só dentro da pasta de documentação e da pasta de dados. | T03: 1 rodada inteira em pasta temporária. A lista de arquivos criados ou alterados fora dessas 2 pastas fica vazia. |
 
 ### 5.2 Conversa integral (documento 2)
@@ -186,10 +191,10 @@ Cada requisito tem 1 verificador. Os testes de aceite T01 a T42 ficam em `aceite
 
 | ID | Requisito | Verificador |
 | --- | --- | --- |
-| R30 | Com o comando `migrar --pasta <pasta do projeto>`, ou na primeira rodada em uma pasta com arquivos do formato antigo quando `migracao_automatica` é verdadeira, o programa grava nos documentos 4, 5 e 6 os itens extraídos pelo redator, com a origem igual ao nome do arquivo antigo, e grava o último handoff de cada conversa antiga como documento 7 da pasta dessa conversa. | T30, com os casos B3. |
+| R30 | Com o comando `migrar --pasta <pasta do projeto>`, ou na primeira rodada em uma pasta com arquivos do formato antigo quando `migracao_automatica` é verdadeira, o programa grava nos documentos 4, 5 e 6 os itens extraídos pelo redator, com a origem igual ao nome do arquivo antigo, e grava, como documento 7 da pasta de cada conversa antiga, o handoff que o redator reescreve a partir do último handoff dela (campo `handoffs_antigos` do Anexo D). | T30, com os casos B3. |
 | R31 | O programa apaga os arquivos do formato antigo só depois de gravar a migração e de a verificação interna aprovar as 3 condições do Anexo E. | T31: com uma condição reprovada, nenhum arquivo é apagado. |
-| R32 | A branch `main` contém só os arquivos do inventário do Anexo C, e nenhum arquivo, exceto o `SPEC.md`, contém `claude_agent_sdk`, `get_session_messages` ou `unverified_quotes`. | T32, teste de inventário. |
-| R33 | Nos ambientes A1, A2 e A3, a pasta de dados não contém a pasta `venv` da versão atual, e o plugin `hopper-documentation` não está instalado. | Roteiro de aceite, passo F-L. |
+| R32 | A branch `main` contém só os arquivos do inventário do Anexo C, e nenhum arquivo, exceto o `SPEC.md` e o próprio teste de inventário, contém `claude_agent_sdk`, `get_session_messages` ou `unverified_quotes`. | T32, teste de inventário. |
+| R33 | Nos ambientes A1, A2 e A3, a pasta de dados não contém a pasta `venv` da versão atual, a pasta `plugins/data` da pasta de configuração não contém outra pasta cujo nome começa com `hopper-documentation`, a pasta `releases/` da raiz de produção contém só a release instalada, e o plugin `hopper-documentation` não está instalado. | Roteiro de aceite, passo F-L. |
 | R34 | O PR #1 está fechado sem incorporação, e a branch `fix/conferencia-de-citacoes` não existe no GitHub. | `gh pr view 1 --json state` mostra `CLOSED`. `git ls-remote origin fix/conferencia-de-citacoes` não devolve nada. |
 | R42 | Com `migracao_automatica` falsa, a rodada não migra nem apaga arquivos do formato antigo. | T42. |
 
@@ -197,11 +202,11 @@ Cada requisito tem 1 verificador. Os testes de aceite T01 a T42 ficam em `aceite
 
 | ID | Requisito | Verificador |
 | --- | --- | --- |
-| R35 | O repositório tem 2 pacotes completos, `hopper-documentation-anth-pt-br` e `hopper-documentation-anth-en`, e o programa é o mesmo arquivo nos 2, exceto a linha `LANGUAGE`. | T35: a comparação dos 2 arquivos mostra só essa linha. |
+| R35 | O repositório tem 2 pacotes de plugin completos, `hopper-documentation-anth-pt-br` e `hopper-documentation-anth-en`, cada um com `plugin.json`, catálogo, gatilho, programa, skill, testes e avaliações, e o programa é o mesmo arquivo nos 2, exceto a linha `LANGUAGE`. Os arquivos da comunidade em português (CODE_OF_CONDUCT, CONTRIBUTING, SECURITY e `.github/`) ficam só no pacote em português, como no inventário do Anexo C. | T35: a comparação dos 2 arquivos mostra só essa linha. |
 | R36 | O programa roda com Python 3.9 ou mais novo, só com a biblioteca padrão. | Verificação do GitHub com Python 3.9 e 3.13. Versões registradas em U1. |
 | R37 | O programa encontra o arquivo de histórico pela pasta de configuração, inclusive com `CLAUDE_CONFIG_DIR` definida. | T37. |
 | R38 | O programa encontra o executável do Claude Code que iniciou o gatilho nos 3 ambientes, inclusive a cópia própria do Claude Desktop. | T38. U1 e U8 em A2. |
-| R39 | Nos ambientes A1, A2 e A3, o plugin aparece como instalado e ativo, a skill aparece na lista de comandos, e os 2 comandos do gatilho aparecem na lista de hooks. | Roteiro de aceite, passo F-I, com as saídas registradas. |
+| R39 | Nos ambientes A1, A2 e A3, o plugin aparece como instalado e ativo, a skill aparece na lista de comandos, e os 2 comandos do gatilho aparecem na lista de hooks. Em A2, onde a lista de hooks não existe, a prova dos 2 comandos é o registro de rodadas da conversa de teste, com 1 linha de acionamento `gatilho-copia` e 1 linha `gatilho-escrita`. | Roteiro de aceite, passos F-I e F-K, com as saídas registradas. |
 | R40 | Em cada ambiente, a conversa de teste gera uma pasta de documentação aprovada pelo conferidor depois de 1 rodada a pedido e de 1 compactação automática. | Conferidor, verificações F1 a F10, com o roteiro. |
 | R41 | O SKILL.md de cada pacote tem as seções "O que a skill produz" e "Como a skill roda" (no inglês, "What the skill produces" e "How the skill runs"), com menos de 500 linhas. | T41. |
 
@@ -209,7 +214,7 @@ Cada requisito tem 1 verificador. Os testes de aceite T01 a T42 ficam em `aceite
 
 | Requisito | Caso de borda | Comportamento esperado |
 | --- | --- | --- |
-| R01 | A pasta do projeto não aceita gravação. | A rodada falha com o motivo, nada é gravado na pasta do projeto, e o aviso de R24 é enviado. |
+| R01 | A pasta do projeto não aceita gravação. | A rodada falha com o motivo, nada é gravado na pasta do projeto, a falha fica só no registro de rodadas, e o aviso de R24 é enviado. O documento 1 não é gravado nesse caso. |
 | R02 | A conversa começa perto da meia-noite. | A data da pasta é a da primeira mensagem, e não a da rodada. |
 | R02 | 2 conversas da mesma pasta têm os mesmos 8 primeiros caracteres. | A conversa mais nova usa como código os 12 primeiros caracteres hexadecimais do identificador, sem o hífen (exemplo: `3f9c2a715b8e`). O fato entra no registro de rodadas. |
 | R04 | O arquivo de histórico ainda está sendo gravado. | O copiador espera pela regra de C09. Mensagens gravadas depois entram na rodada seguinte. |
@@ -226,7 +231,7 @@ Cada requisito tem 1 verificador. Os testes de aceite T01 a T42 ficam em `aceite
 | R13 | O redator devolve `nada_relevante` igual a `true`. | O bloco segue o formato "sem conteúdo novo" do Anexo E, e o intervalo fica coberto. |
 | R14 | Um item foi apagado à mão de um documento. | O programa não detecta itens apagados à mão. O próximo número é o maior número existente mais 1. |
 | R16 | O redator pede mudança de um identificador que não existe. | O pedido não é aplicado e entra no registro de rodadas. |
-| R17 | O redator devolve `nada_relevante` igual a `true`. | O documento 7 não muda. |
+| R17 | O redator devolve `nada_relevante` igual a `true`. | O documento 7 não muda. Se ele ainda não existe, o programa o grava com o campo `handoff` da resposta. |
 | R18 | A pasta tem uma conversa migrada do formato antigo. | A tabela mostra o texto fixo "sem conversa integral" na coluna "Última mensagem". |
 | R19 | O texto tem títulos, tabelas, linhas de metadados ou blocos de código. | Esses trechos ficam fora da contagem (verificação F7). |
 | R20 | Um documento cita um item de outra conversa da mesma pasta. | A citação é válida. |
@@ -250,7 +255,7 @@ Os demais requisitos não têm caso de borda além do comportamento descrito no 
 | N01 | Alterar ou apagar uma mensagem já gravada no documento 2. |
 | N02 | Gravar fora da pasta de documentação e da pasta de dados. |
 | N03 | Reaproveitar um número de mensagem ou de item. |
-| N04 | Gravar nos documentos texto escrito por outro modelo que não o Claude Sonnet 5.5. |
+| N04 | Gravar nos documentos uma resposta cujo modelo responsável não é o Claude Sonnet 5.5, pela regra de modelo de C04. |
 | N05 | Gravar uma senha ou um token nos formatos do caso B2 sem ocultar. |
 | N06 | Apagar um arquivo do formato antigo antes de a migração estar gravada e aprovada pela verificação interna. |
 | N07 | O gatilho de cópia sair com código 2. Esse código bloqueia a compactação. |
@@ -268,7 +273,7 @@ Os demais requisitos não têm caso de borda além do comportamento descrito no 
 - Os documentos 2 e 3 de conversas que só existem no formato antigo.
 - Windows, WSL e sessões na nuvem do Claude Desktop, porque o Desktop não carrega plugins nelas (fonte: `code.claude.com/docs/en/desktop.md`, lida em 2026-11-01).
 - O chat do claude.ai fora do Claude Code.
-- Publicar release no GitHub.
+- Publicar release no GitHub. A tag `v2.0.0`, origem da instalação final, entra (U10, C16).
 
 ## 9. Unidades de trabalho e ordem
 
@@ -283,42 +288,47 @@ Os demais requisitos não têm caso de borda além do comportamento descrito no 
 | U5 | **Gatilho e skill.** R22 a R26, R38 e R41. | U4 |
 | U6 | **Migração.** R30, R31 e R42. | U4 |
 | U7 | **Repositório e documentação.** R32, R35 e R36. Apagar o código e a documentação da versão atual. Atualizar README, CONTRIBUTING, SECURITY, `index.md` e avaliações nos 2 idiomas. | U5, U6 |
-| U8 | **Instalação e aceite nos 3 ambientes,** a partir da branch de trabalho. Em cada ambiente, nesta ordem: desinstalar o plugin `hopper-documentation`, se estiver instalado; gravar `migracao_automatica` falsa na configuração do plugin; instalar a versão nova; rodar os passos F-I, F-C, F-A, F-K e F-V do roteiro de aceite. R39, R40, R22 e R23 com dados reais. | U7 |
-| U9 | **Migração real e limpeza.** Rodar o passo F-M do roteiro de aceite: procurar as pastas do formato antigo, contar as chamadas ao redator necessárias e pedir o "sim". Depois, gravar `migracao_automatica` verdadeira, rodar `migrar` em cada pasta, apagar a `venv` antiga e rodar o passo F-L. R30, R31 e R33 com dados reais. | U8 |
-| U10 | **Incorporação à main.** Abrir o PR da branch de trabalho. Gravar na descrição do PR o resumo do registro de execução e apagar a pasta `execucao/` da branch. Rodar a verificação completa com o roteiro de aceite e as avaliações. Incorporar à `main` com o "sim". Atualizar a instalação nos 3 ambientes a partir da `main` e rodar o passo F-I em cada um. Fechar o PR #1 (R34). Apagar as pastas de teste com 1 único pedido de permissão. | U9 |
+| U8 | **Instalação e aceite nos 3 ambientes,** a partir da branch de trabalho. Em cada ambiente, nesta ordem: desinstalar o plugin `hopper-documentation`, se estiver instalado, e o plugin `hopper-documentation-anth` 0.1.4; remover o catálogo `hopper-documentation-anth` que aponta para a release 0.1.4; gravar `migracao_automatica` falsa na configuração do plugin de cada conta que recebe a instalação (`jonathan` no MacBook, `jpah` e `jonathan` na VPS); criar a pasta de produção da versão nova a partir da branch de trabalho e instalar pelo Anexo H; rodar os passos F-I, F-C, F-A, F-K e F-V do roteiro de aceite. R39, R40, R22 e R23 com dados reais. Até U8, a versão 0.1.4 continua ativa na sessão do executor; depois, a versão nova. As rodadas que as compactações da sessão do executor disparam são operação normal do plugin, contadas à parte em `execucao/tentativas.md` e fora do limite de 40 chamadas de C20. | U7 |
+| U9 | **Migração real e limpeza.** Rodar o passo F-M do roteiro de aceite: procurar as pastas do formato antigo, contar as chamadas ao redator necessárias e pedir o "sim". Depois, gravar `migracao_automatica` verdadeira nas mesmas contas de U8, rodar `migrar` em cada pasta, apagar a `venv` antiga e rodar o passo F-L. R30, R31 e R33 com dados reais. | U8 |
+| U10 | **Incorporação à main.** Abrir o PR da branch de trabalho. Rodar a verificação completa com o roteiro de aceite e as avaliações. Gravar na descrição do PR o resumo do registro de execução. Apagar a pasta `execucao/` da branch no último commit, que só remove esses arquivos e não muda nenhum arquivo do inventário (Anexo G: `execucao/**` não tem verificador), e guardar uma cópia dela fora do repositório até o fim da unidade. Incorporar à `main` com o "sim". Criar a tag `v2.0.0` no commit incorporado e enviá-la, com o "sim" (seção 10). Atualizar a pasta de produção dos 3 ambientes a partir da tag, apagar a release de U8 se o nome for outro, e rodar os passos F-I e F-L em cada um. Fechar o PR #1 (R34). Apagar as pastas de teste com 1 único pedido de permissão. Acrescentar à descrição do PR os resultados dessas etapas finais. A descrição do PR é o registro final da seção 1, item 5. | U9 |
 
 **U1, em detalhe.** O executor prova cada item abaixo executando e grava o resultado em `execucao/versoes.md` e `execucao/verificacoes.md`.
 
-1. **Versões.** Claude Code em A1 e A3 e versão da aba Code do Desktop pelo `/status` em A2, todas iguais ou maiores que 2.1.284. Python 3 em A1, em A3 e no ambiente em que o gatilho roda no Desktop.
-2. **Acessos.** O endereço da VPS fica no `~/.ssh/config` do MacBook. O caminho `/home/jpah/projects/mallmetrics`, visto em 2026-10-31, indica o usuário `jpah`. Se existir mais de 1 candidato ou nenhum, A3 fica bloqueado e a pergunta vai ao proprietário. Conferir também `gh auth status`, com permissão de envio ao anth, e o uso do computador na sessão do executor.
+1. **Versões.** Claude Code em A1 e A3 e versão da aba Code do Desktop em A2, todas iguais ou maiores que 2.1.284. Em A2, a versão vem do `/status` em uma sessão de teste (fonte: `desktop.md`, seção "Check your version") ou do executável apontado por `CLAUDE_PID` na sessão do executor, com `"$(ps -o comm= -p "$CLAUDE_PID")" --version`. Python 3 em A1, em A3 e no ambiente em que o gatilho roda no Desktop. Leitura de 2026-11-02, a confirmar em U1: A1 2.1.296, A2 2.1.309, A3 2.1.316; Python 3.14.8 no MacBook e 3.13.5 na VPS.
+2. **Acessos.** A3 é o alias `hopper-jpah` do `~/.ssh/config` do MacBook (glossário). Evidência de 2026-11-02: `ssh hopper-jpah` encontrou `/home/jpah/projects/mallmetrics`, e `ssh hopper-old-jpah` não o tem. U1 repete essa conferência, confere `sudo -n true` em `hopper-jpah` (necessário para a pasta de produção em `/opt`) e o acesso a `hopper-jonathan`. Se a conferência falhar, A3 fica bloqueado e a pergunta vai ao proprietário. Conferir também `gh auth status`, com permissão de envio ao anth, as ferramentas de sessão e o uso do computador na sessão do executor.
 3. **Clone de leitura** do `hopper-documentation`, pela decisão C24.
-4. **Regras de permissão.** Criar `.claude/settings.local.json` com as regras da seção 10. Provar cada regra `ask` com um comando inofensivo que casa com ela, como `rm` de um arquivo vazio criado para isso. O proprietário responde "não" a esses pedidos de prova. Provar cada regra `deny` mostrando o bloqueio.
-5. **Plugin de sonda** do Anexo G, em A1, A2 e A3. Provar que:
+4. **Regras de permissão.** Mover a sessão do executor para a cópia de trabalho. Criar `.claude/settings.local.json` com as regras da seção 10. Provar cada regra `ask` com um comando inofensivo que casa com ela, como `rm` de um arquivo vazio criado para isso. O proprietário responde "não" a esses pedidos de prova. Provar cada regra `deny` mostrando o bloqueio.
+5. **Plugin de sonda** do Anexo G, em A1, A2 e A3, com a configuração de compactação do passo F-K. Provar que:
    - o gatilho síncrono roda antes da compactação, e a compactação espera por ele;
    - o processo separado continua depois do fechamento do Claude Code em A1 e A3, e depois do encerramento da sessão de teste em A2 (C25);
    - o JSON de entrada traz `session_id`, `transcript_path`, `cwd` e `trigger`;
    - a variável `CLAUDE_PID` aponta para o executável do Claude Code;
-   - o arquivo de histórico mantém as mensagens anteriores à compactação depois dela.
+   - o arquivo de histórico mantém as mensagens anteriores à compactação depois dela;
+   - em A1 e A3, a sessão de teste é conduzida por um pseudoterminal, com as mensagens enviadas e as respostas lidas por ele;
+   - em A2, a sessão de teste pode ser aberta na pasta de teste e conduzida pelas ferramentas de sessão; se não puder, pelo uso do computador (K08). O meio que funcionou fica registrado e vale para U8;
+   - o valor de `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` escolhido deixa a compactação automática acontecer depois de 6 mensagens curtas e de 1 criação de arquivo, e não antes. O valor e o número de mensagens até a compactação ficam registrados e valem para o passo F-K.
 6. **Chamada real ao redator,** com as opções da decisão C03, a partir do MacBook e da VPS. A resposta traz `structured_output` e `modelUsage` com `claude-sonnet-5-5`.
 7. **Retomada (C21).** Uma sessão nova, sem o contexto do executor, lê `SPEC.md` e `execucao/` e diz em que unidade o trabalho está e qual é o próximo passo. O resultado é comparado com `execucao/estado.md`.
-8. **Limpeza.** Remover o plugin de sonda dos 3 ambientes.
+8. **Avaliações.** Rodar `claude plugin eval` em A1 com 1 avaliação de acionamento herdada da versão atual e registrar a saída. Essa execução parcial não conta nas execuções completas de C20.
+9. **Limpeza.** Remover o plugin de sonda dos 3 ambientes.
 
 Se um item falhar em um ambiente, os requisitos que dependem dele ficam "bloqueados" naquele ambiente (G06). O executor leva a pergunta ao proprietário no fim de U1 (G07).
 
 ## 10. Ações que passam pelo proprietário
 
-O executor usa as credenciais do proprietário no MacBook (GitHub e Claude). Por isso, o limite vem de mecanismo do Claude Code: regras `ask` e `deny` no arquivo `.claude/settings.local.json` da cópia de trabalho, criado em U1 e não versionado. A sessão do executor não pode usar o modo `bypassPermissions`, e o executor não edita esse arquivo depois de U1. A sintaxe exata das regras segue `code.claude.com/docs/en/settings.md` na data da execução e fica registrada em `execucao/decisoes.md`. U1 prova cada regra.
+O executor usa as credenciais do proprietário no MacBook (GitHub e Claude). Por isso, o limite vem de mecanismo do Claude Code: regras `ask` e `deny` no arquivo `.claude/settings.local.json` da cópia de trabalho, criado em U1 e não versionado. Essas regras valem só quando a pasta da sessão do executor é a cópia de trabalho, porque o Claude Code lê as configurações de projeto da pasta da sessão (fonte: `code.claude.com/docs/en/settings.md`, lida em 2026-11-02). Por isso, U1 move a sessão do executor para a cópia de trabalho antes de criar o arquivo. A sessão do executor não pode usar o modo `bypassPermissions`. No modo `auto`, que a sessão do executor usa, as regras `ask` continuam pedindo e as regras `deny` continuam bloqueando (fonte: `code.claude.com/docs/en/permission-modes.md`, lida em 2026-11-02). O executor não edita esse arquivo depois de U1. A sintaxe exata das regras segue `code.claude.com/docs/en/settings.md` na data da execução e fica registrada em `execucao/decisoes.md`. U1 prova cada regra. Quando a sintaxe não expressa uma condição da tabela, a regra fica mais ampla, por exemplo `ask` para todo `git push*` ou para todo `ssh*`, e o fato entra em `execucao/decisoes.md`. Antes de U1, o pedido de permissão do PR #2 é a pergunta no chat da sessão do executor, e o "sim" fica registrado em `execucao/decisoes.md`. Outros comandos que casam com uma regra `ask` também pedem o "sim", como a criação da tag `criterios-congelados` em U2, a exclusão da branch descartável da prova de C18 e a limpeza da pasta temporária do `scp` na VPS. Cada "sim" fica registrado em `execucao/estado.md`.
 
 | Ação | Quem decide | Mecanismo |
 | --- | --- | --- |
 | Incorporar à `main` o PR #2 (antes de U1) e a branch de trabalho (U10) | Proprietário, com "sim" | Regra `ask` para `gh pr merge*` e para `git push*` com destino `main`. |
-| Desinstalar plugins nos ambientes | Proprietário, com "sim" | Regra `ask` para `claude plugin uninstall*` e para `ssh*` com `claude plugin uninstall`. |
-| Apagar arquivos não versionados, como a `venv` antiga e as pastas de teste | Proprietário, com "sim" | Regra `ask` para `rm *` e para `ssh*` com `rm`. Arquivos versionados saem com `git rm`, sem pedido. |
+| Criar e enviar a tag `v2.0.0` (U10) | Proprietário, com "sim" | Regra `ask` para `git push*` com `v2.0.0`. |
+| Desinstalar plugins nos ambientes, inclusive o anth 0.1.4 | Proprietário, com "sim" | Regra `ask` para `claude plugin uninstall*` e para `ssh*` com `claude plugin uninstall`. Remover um catálogo (`claude plugin marketplace remove`) é reversível e não pede. |
+| Apagar arquivos não versionados, como a `venv` antiga, a release 0.1.4 da raiz de produção, as pastas de dados antigas e as pastas de teste | Proprietário, com "sim" | Regra `ask` para `rm *` e para `ssh*` com `rm`. Arquivos versionados saem com `git rm`, sem pedido. |
 | Rodar o comando `migrar` em pasta real (U9), o que apaga os arquivos antigos | Proprietário, com "sim" | Regra `ask` para comandos com `hopper_documentation_anth.py migrar`, inclusive por `ssh`. Até U9, `migracao_automatica` falsa nos 3 ambientes (C23). |
 | Mover a tag `criterios-congelados` ou atualizar o manifesto | Proprietário, com "sim" | Regra `ask` para `git tag -f*` e para `git push*` com `criterios-congelados`. A verificação do GitHub detecta a mudança (C18). |
 | Fechar o PR #1 e apagar a branch dele | Proprietário, com "sim" (P24 pendente) | Regra `ask` para `gh pr close*` e para `git push*` com `--delete`. |
 | Apagar repositório ou reescrever histórico | Ninguém nesta spec | Regra `deny` para `gh repo delete*` e para `git push*` com `--force`. |
-| Alterar o repositório `hopper-documentation` | Ninguém nesta spec | Clone de leitura sem remote (C24). Regra `deny` para comandos `gh` que citem `jonathanpah/hopper-documentation` sem sufixo. |
+| Alterar o repositório `hopper-documentation` | Ninguém nesta spec | Clone de leitura sem remote (C24). Regras `deny` para `gh *jonathanpah/hopper-documentation` (nome no fim do comando) e `gh *jonathanpah/hopper-documentation *` (espaço depois do nome), que não casam com `hopper-documentation-anth`. |
 | Gastar cota do plano com chamadas reais | Proprietário, pela aprovação desta spec | Limites de C20. O registro de execução conta as chamadas. |
 
 O executor não faz nenhuma ação desta tabela pelo uso do computador em A2. Instalar o plugin pela interface do Desktop é reversível e não pede "sim".
@@ -503,7 +513,7 @@ Fontes lidas em 2026-11-01, salvo outra data indicada. As decisões valem durant
 - Alternativas: 1 comando síncrono que faz tudo; 1 comando assíncrono que faz tudo; gatilho `PostCompact`; gatilho `SessionStart`.
 - Fontes: `code.claude.com/docs/en/hooks.md` (gatilhos do mesmo evento rodam em paralelo; gatilho síncrono bloqueia até terminar; código 2 bloqueia a compactação no `PreCompact`; `asyncRewake` acorda o Claude com código 2; a página indica processo totalmente separado para trabalho que deve sobreviver).
 - Motivo: a cópia precisa acontecer antes da compactação. A escrita leva minutos e não pode atrasar a compactação.
-- Prova: U1, item 5, e T22 a T24.
+- Prova: U1, item 5, T22 e T24.
 
 **C03. Chamada ao redator.**
 - Atende a: R12, N04, N08.
@@ -527,7 +537,7 @@ Fontes lidas em 2026-11-01, salvo outra data indicada. As decisões valem durant
 - Alternativas: o redator edita os arquivos com as ferramentas Write e Edit.
 - Fontes: `anthropic.com/engineering/effective-harnesses-for-long-running-agents` (o modelo altera JSON por engano com menos frequência do que Markdown); `github.com/steveyegge/beads` e `github.com/github/spec-kit` (identificadores atribuídos por programa).
 - Motivo: números estáveis, nenhuma gravação fora das pastas permitidas e gravação repetível.
-- Prova: T13 a T18 e T29.
+- Prova: T13, T14, T16, T17, T18 e T29.
 
 **C06. Identificadores e numeração.**
 - Atende a: R05, R14, P12.
@@ -611,11 +621,11 @@ Fontes lidas em 2026-11-01, salvo outra data indicada. As decisões valem durant
 
 **C16. Pacotes e instalação.**
 - Atende a: R35, R39, P19.
-- Decisão: manter as 2 pastas de idioma, cada uma com plugin e catálogo (marketplace) completos, como hoje. A instalação clona o repositório e adiciona a pasta do idioma como catálogo (Anexo H). Em A2, o executor confere se o plugin instalado pela CLI aparece no Desktop. Se não aparecer, instala pelo botão "+" e pela opção "Add plugins" da aba Code, com o uso do computador. Se o Desktop não aceitar um catálogo local, o executor cria `.claude-plugin/marketplace.json` na raiz do repositório, apontando para a pasta em português, e registra a mudança.
-- Alternativas: 1 pacote só, com o idioma escolhido por configuração; catálogo só na raiz do repositório.
-- Fontes: `code.claude.com/docs/en/plugins/cli-reference.md` (`marketplace add` aceita pasta local e repositório do GitHub; `install`, `update`, `list`, `details`); `desktop.md` (instalação pelo "+"; plugins carregam em sessões locais); `support.claude.com/en/articles/13837440-use-plugins-in-claude`; README do anth na versão atual.
-- Motivo: o formato atual já foi instalado e usado no terminal e no Desktop, e o proprietário manteve os 2 idiomas (P19).
-- Prova: roteiro de aceite, passo F-I.
+- Decisão: manter as 2 pastas de idioma, cada uma com plugin e catálogo (marketplace) completos, como hoje. A instalação segue a convenção de instalação do proprietário: a pasta do pacote em português é copiada para a pasta de produção (`releases/<versão>/pt-br`), que entra como catálogo, e o plugin é instalado no escopo do usuário, nas contas `jpah` e `jonathan` da VPS e `jonathan` do MacBook (Anexo H). Na VPS, a pasta de produção pertence a `root:root`, com modos `0755` e `0644`. Em U8, a pasta de produção `releases/2.0.0/pt-br` é uma cópia do pacote da branch de trabalho no commit em teste, atualizada por nova cópia seguida de `claude plugin marketplace update` e `claude plugin update`. Depois de U10, ela vem da tag `v2.0.0`, e os arquivos instalados são conferidos contra a tag, arquivo a arquivo. Em A2, o executor confere se o plugin instalado pela CLI aparece no Desktop. Se não aparecer, abre uma sessão local nova em uma pasta vazia, porque o aplicativo recarrega o catálogo em sessão nova (OPERATIONS.md, seção 8.146); se ainda não aparecer, instala pelo botão "+" e pela opção "Add plugins" da aba Code, com o uso do computador. Se o Desktop não aceitar um catálogo local, o executor cria `.claude-plugin/marketplace.json` na raiz do repositório, apontando para a pasta em português, e registra a mudança.
+- Alternativas: clone do repositório em `~/.local/share` como catálogo, como o README da versão atual descreve; 1 pacote só, com o idioma escolhido por configuração; catálogo só na raiz do repositório.
+- Fontes: `claude plugin list` em A1 e A3 em 2026-11-02 (`Read from: …/releases/0.1.4/pt-br` nas 2 máquinas); `OPERATIONS.md` da VPS, seção 8.146, e `ACCESS.md`, cópias do MacBook em `Dropbox/5-ai/1-codex/vps-architecture`, lidas em 2026-11-02 (receita da instalação da `hopper-spec-anth` 0.1.0); `code.claude.com/docs/en/plugins/cli-reference.md` (`marketplace add` aceita pasta local; `marketplace remove` e `marketplace update`; `install`, `update`, `list`, `details`); `desktop.md` (instalação pelo "+"; plugins carregam em sessões locais); `support.claude.com/en/articles/13837440-use-plugins-in-claude`.
+- Motivo: as 3 instalações existentes do anth e dos outros plugins do proprietário seguem essa convenção, e o proprietário manteve os 2 idiomas (P19). O clone em `~/.local/share` criaria um segundo padrão de instalação nas mesmas máquinas.
+- Prova: roteiro de aceite, passos F-I e F-L.
 
 **C17. Verificadores e verificação completa.**
 - Atende a: G01, G05, R36.
@@ -643,7 +653,7 @@ Fontes lidas em 2026-11-01, salvo outra data indicada. As decisões valem durant
 
 **C20. Bloqueio e limites.**
 - Atende a: G06, K09.
-- Decisão: até 3 tentativas por falha, até 10 tentativas por unidade, até 2 passadas de revisão por unidade, até 40 chamadas reais ao redator de U1 a U8 e até 2 execuções completas das avaliações de acionamento por execução da spec. Em U9, o limite é o total contado no passo F-M, aprovado com o "sim". Com 2 unidades bloqueadas sem progresso, o executor para e leva as perguntas ao proprietário. O bloqueio é registrado em `execucao/estado.md` no formato `<ID> · bloqueado · motivo · evidência (comando e saída) · como reproduzir`.
+- Decisão: até 3 tentativas por falha, até 10 tentativas por unidade, até 2 passadas de revisão por unidade, até 40 chamadas reais ao redator de U1 a U8, fora as rodadas que as compactações da sessão do executor disparam (U8), e até 3 execuções completas das avaliações de acionamento por execução da spec (U5, U8 e U10; em U5, só as avaliações afetadas pelo Anexo G podem rodar no lugar da execução completa). Em U9, o limite é o total contado no passo F-M, aprovado com o "sim". Com 2 unidades bloqueadas sem progresso, o executor para e leva as perguntas ao proprietário. O bloqueio é registrado em `execucao/estado.md` no formato `<ID> · bloqueado · motivo · evidência (comando e saída) · como reproduzir`.
 - Alternativas: sem limite de chamadas reais; limite por tempo.
 - Fontes: garantia G06 da skill `hopper-spec-anth` 0.2.0.
 - Motivo: os limites param repetições sem progresso e mantêm previsível o gasto da cota.
@@ -651,7 +661,7 @@ Fontes lidas em 2026-11-01, salvo outra data indicada. As decisões valem durant
 
 **C21. Estado durável e retomada.**
 - Atende a: G08.
-- Decisão: a pasta `execucao/` da branch de trabalho guarda `estado.md` (plano e situação de cada requisito: pendente, em andamento, pronto com o verificador e o registro, ou bloqueado), `tentativas.md`, `decisoes.md`, `perguntas.md`, `fora-do-escopo.md`, `verificacoes.md` (só acréscimos), `versoes.md` e `revisoes/`. Cada item concluído tem um commit, que é o ponto de restauração. Uma sessão nova lê `SPEC.md` e `execucao/`, confere de novo o estado externo (git, verificação do GitHub e instalação nos 3 ambientes) e continua. A instalação e as rodadas são repetíveis sem efeito duplo (R29). Em U10, a pasta `execucao/` sai da branch depois que o resumo dela vai para a descrição do PR.
+- Decisão: a pasta `execucao/` da branch de trabalho guarda `estado.md` (plano e situação de cada requisito: pendente, em andamento, pronto com o verificador e o registro, ou bloqueado), `tentativas.md`, `decisoes.md`, `perguntas.md`, `fora-do-escopo.md`, `verificacoes.md` (só acréscimos), `versoes.md` e `revisoes/`. Cada item concluído tem um commit, que é o ponto de restauração. Uma sessão nova lê `SPEC.md` e `execucao/`, confere de novo o estado externo (git, verificação do GitHub e instalação nos 3 ambientes) e continua. A instalação e as rodadas são repetíveis sem efeito duplo (R29). Em U10, a pasta `execucao/` sai da branch depois que o resumo dela vai para a descrição do PR, e uma cópia fica fora do repositório até o fim da unidade.
 - Alternativas: estado só na descrição do PR no GitHub.
 - Fontes: garantia G08 da skill `hopper-spec-anth` 0.2.0; `headless.md` (`claude -p` abre uma sessão nova sem o contexto da anterior).
 - Motivo: arquivos na branch de trabalho sobrevivem ao fim da sessão e ficam junto do código.
@@ -689,6 +699,22 @@ Fontes lidas em 2026-11-01, salvo outra data indicada. As decisões valem durant
 - Motivo: o executor roda dentro do app.
 - Prova: U1, item 5, e U8, passo F-K, com o registro de rodadas.
 
+**C26. Condução da sessão de teste em A2.**
+- Atende a: R23, R39, R40, K08.
+- Decisão: o executor abre a sessão de teste de A2 na pasta de teste e a conduz pelas ferramentas de sessão. Ele envia as mensagens do passo F-C, lê os eventos e encerra a sessão. O uso do computador fica para o que essas ferramentas não alcançam, como a instalação pela interface (C16) e a captura da lista de comandos. Se U1 mostrar que as ferramentas de sessão não abrem a sessão na pasta de teste, o executor conduz tudo pelo uso do computador.
+- Alternativas: só o uso do computador.
+- Fontes: ferramentas de sessão observadas na sessão do executor em 2026-11-02; `desktop.md` (o uso do computador é pré-visualização de pesquisa e exige ativação e permissões do macOS).
+- Motivo: as ferramentas de sessão são determinísticas e não dependem do uso do computador, que pode estar desligado (K08).
+- Prova: U1, item 5.
+
+**C27. Configuração da compactação automática na conversa de teste.**
+- Atende a: R22, R23, R40, K09, passo F-K.
+- Decisão: a sessão de teste roda com `CLAUDE_CODE_AUTO_COMPACT_WINDOW=100000`, o menor valor documentado, e `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=<valor>`, com o valor escolhido e registrado em U1, item 5. Em A1 e A3, as 2 variáveis vão no ambiente do comando `claude` iniciado no pseudoterminal. Em A2, vão na chave `env` do arquivo `.claude/settings.json` da pasta de teste, que vale só para sessões abertas nessa pasta. Nenhuma das 2 entra em `~/.claude/settings.json`, porque atingiria a sessão do executor.
+- Alternativas: `/autocompact 100k` na sessão de teste, que grava a janela nas configurações do usuário e atingiria a sessão do executor; encher a conversa até a janela padrão, de cerca de 967 mil tokens em modelos com janela de 1 milhão, o que gastaria a cota (K09); compactação manual com `/compact`, que não é a compactação automática de R40.
+- Fontes: `code.claude.com/docs/en/model-config.md`, seções "Set the auto-compact window" e "Default auto-compact thresholds", e `env-vars.md` (`CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, de 1 a 100, só abaixa o limite), lidas em 2026-11-02; `settings.md` (chave `env` no escopo de projeto, que vale depois que a pasta é confiada).
+- Motivo: a compactação acontece em poucas mensagens, só na sessão de teste.
+- Prova: U1, item 5, e U8, passo F-K.
+
 ## 13. Riscos
 
 | ID | Risco | Tratamento |
@@ -700,7 +726,8 @@ Fontes lidas em 2026-11-01, salvo outra data indicada. As decisões valem durant
 | K05 | O Claude Code apaga arquivos de histórico com mais de 30 dias. | A cópia roda antes de toda compactação. O README avisa. A rodada a pedido em conversa antiga falha com motivo claro. |
 | K06 | O executor usa as credenciais do proprietário. | Regras `ask` e `deny` da seção 10, provadas em U1. Cada ação da seção 10 fica registrada em `execucao/estado.md`. |
 | K07 | A migração apaga informação útil. | R31, casos B3 com os 2 formatos antigos, `migracao_automatica` falsa até U9 (C23) e U9 só depois do aceite. |
-| K08 | O uso do computador não está disponível para conduzir o Desktop em A2. | U1 prova. Se faltar, os requisitos de A2 que dependem dele ficam bloqueados, e a pergunta vai ao proprietário. |
+| K08 | O uso do computador não está disponível para conduzir o Desktop em A2. | As ferramentas de sessão conduzem a conversa de teste (C26). U1 prova as 2 vias. Se as 2 faltarem, os requisitos de A2 que dependem delas ficam bloqueados, e a pergunta vai ao proprietário. |
+| K11 | A tag `v2.0.0` nasce de um commit que a verificação completa aprovou, mas a pasta de produção de U8 veio de um commit anterior da branch de trabalho. | U10 refaz a pasta de produção a partir da tag e confere os arquivos instalados contra ela, arquivo a arquivo (C16), antes do passo F-I final. |
 | K09 | As rodadas consomem a cota do plano do proprietário. | Limites de C20 durante a execução. Na operação, 1 rodada por compactação ou por pedido. |
 | K10 | Em A2, o fechamento do app durante uma rodada não é provado, porque o executor roda dentro dele. | C25. O mesmo mecanismo de processo separado é provado em A1, no mesmo macOS. |
 
@@ -750,6 +777,56 @@ Feita em 2026-11-01, no passo 5 da skill.
 | "Integrar" e "rodada" tinham 2 sentidos. | "Incorporar à main" e "Data da rodada" separados. Campo "Intervalo da rodada" nos itens. |
 | Faltavam os campos do registro de rodadas e o código de 12 caracteres tinha hífen. | Anexo E define o registro de rodadas e a saída bruta. Caso de borda de R02 corrigido. |
 | R01 a R03 não estavam em nenhuma unidade, e "tentativa" não tinha definição. | Unidades U3 e U4. "Tentativa" no glossário. U9 com o passo F-M e limite próprio. |
+
+### Revisão de 2026-11-02, antes da aprovação
+
+Feita pelo executor, na sessão de A2, a pedido do proprietário ("corrija a espec antes e faça avaliações novamente para ver se ela está ok"), só com leituras: documentação oficial do Claude Code, `claude plugin list` em A1 e A3, `~/.ssh/config` e as cópias de `ACCESS.md` e `OPERATIONS.md` da VPS no MacBook. Nenhuma ação da seção 10 foi feita.
+
+| Problema encontrado | Correção |
+| --- | --- |
+| O comando `/hooks` não existe na aba Code, então R39 não tinha prova em A2. O `/status` existe (seção "Check your version" de `desktop.md`). | Glossário "Lista de hooks", R39, F-I e U1, item 1. Em A2, a prova do gatilho é o registro de rodadas do passo F-K. |
+| 2 hosts do `~/.ssh/config` têm o usuário `jpah` (`hopper-jpah` e `hopper-old-jpah`), e os 2 respondem `hostname` igual a `hopper`. | Glossário A3 e U1, item 2, com a evidência: só `hopper-jpah` tem `/home/jpah/projects/mallmetrics`. |
+| O Anexo H instalava por um clone em `~/.local/share`, mas as 3 instalações existentes seguem a convenção de pastas de produção `releases/<versão>/pt-br` (Application Support no MacBook, `/opt` na VPS, contas `jpah` e `jonathan`), documentada em `OPERATIONS.md`, seção 8.146. U8 também não previa desinstalar o anth 0.1.4 nem trocar o catálogo de mesmo nome. | C16, Anexo H, U8, U10, seção 10, R33, F-L, glossário "Pasta de produção", tag `v2.0.0` (seção 8) e risco K11. |
+| O passo F-K não dizia como provocar a compactação automática, e a janela padrão dos modelos com 1 milhão de tokens exigiria encher a conversa (K09). | C27 e U1, item 5: janela de 100 mil tokens e `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, só na sessão de teste. |
+| A condução de A2 dependia só do uso do computador (K08). | C26: ferramentas de sessão primeiro, uso do computador depois. K08 ajustado. |
+| As regras de permissão só valem na pasta da sessão, e a spec não dizia que a sessão do executor precisa estar na cópia de trabalho nem que o modo `auto` respeita `ask` e `deny`. | Seção 10, glossário "Cópia de trabalho" e U1, item 4. |
+| A pasta `plugins/data` tem pastas vazias de versões anteriores nas 2 máquinas. | R33 e F-L. |
+| "Testes T01 a T42" sugeria 1 teste por número, mas vários requisitos são verificados por outro meio. | Glossário "Testes de aceite". |
+
+Conferência repetida depois das correções, pelo executor, com os critérios do passo 5 da skill:
+
+- As 15 garantias da seção 11 foram comparadas por programa com `garantias.md` da skill 0.2.0, lido do repositório `jonathanpah/hopper-spec-anth`, sem diferença.
+- As 27 decisões de como têm os 5 campos da skill e o campo "Decisão", conferidos por programa.
+- Todo requisito tem ID único e verificador, e todo teste T<n> citado corresponde ao requisito R<n>.
+- Um leitor sem contexto (subagente sem acesso a esta sessão) leu só a spec corrigida e listou 25 dúvidas, nenhuma classificada por ele como bloqueio. Todas viraram correção nesta versão, sem pergunta nova ao proprietário.
+
+| Dúvida do leitor | Correção |
+| --- | --- |
+| U10 apagava `execucao/` antes das verificações finais, e o "registro final" não tinha lugar. | U10 reordenado. A descrição do PR é o registro final. C21 ajustado. |
+| O merge do PR #2 acontece antes de existir a regra `ask`. | Seção 10: o pedido é a pergunta no chat, registrada em U1. |
+| O passo F-K exigia a ordem da cópia e a sobrevivência do processo na mesma compactação, mas o fechamento pode impedir o registro de compactação. | F-K em 2 passagens, com 1 chamada real a mais por ambiente. |
+| A sessão do executor fica sujeita ao plugin em teste, e os handoffs dela na cópia de trabalho ficavam fora da migração. | U8, C20 e F-M. |
+| Os casos B3 exigiam rodar o código da versão atual, com Agent SDK e chamadas reais. | B3 escrito à mão, a partir dos formatos antigos (G04). |
+| O teste de inventário contém as cadeias que R32 proíbe. | R32 exclui o próprio teste. |
+| Uma pasta `invalida-F<n>` não consegue reprovar só em F<n> quando falta um arquivo. | Regra das demais verificações no Anexo F. |
+| Na primeira rodada com `nada_relevante`, o documento 7 não existia, e R02 dizia que a pasta nasce com os documentos 3 e 7. | R02 e caso de borda de R17. |
+| "Pasta de produção" tinha 2 sentidos. | Glossário "Raiz de produção" e "Pasta de produção"; R33, F-L e seção 10. |
+| O documento 7 migrado não dizia se era cópia ou reescrita, nem os valores do cabeçalho e da linha do documento 1. | R30 e Anexo E. |
+| A conta `jonathan` da VPS ficava sem a configuração do plugin e fora da busca de F-M. | U8, U9 e F-M. |
+| N04 contradizia a regra de 90% de C04. | N04 reescrito. |
+| `nada novo` e `em andamento` nunca apareceriam no documento 1 (R28). | Anexo E: só `concluída` e `falhou`. |
+| Regras de permissão com condições que a sintaxe pode não expressar, e o `deny` do `hopper-documentation` casava com o prefixo do anth. | Seção 10: regra mais ampla com registro; 2 padrões `deny`. |
+| As avaliações precisam rodar em U5, U8 e U10, e C20 permitia 2 execuções. | C20: 3 execuções, com U5 parcial. |
+| C02, C05 e Anexo G citavam T23 e T15, que não existem. | Listas de testes corrigidas. |
+| A seção 17 prometia uma lista de dúvidas que não estava na spec. | Esta tabela. |
+| Não estava dito quem grava o título do bloco do documento 3. | Anexo D: o programa grava o título. |
+| Ações de U2 casam com regras `ask` sem constar da tabela. | Seção 10. |
+| O inventário é assimétrico, e R35 dizia "2 pacotes completos". | R35 reescrito. |
+| O formato dos casos herdados de T08 não dizia o que segue o clone de leitura. | B1. |
+| O caso de borda de R01 contradizia R24 e R18 sobre o documento 1. | Caso de borda de R01. |
+| Faltava o texto em inglês da ordem de leitura do documento 1. | Anexo E: tradução fiel de todo o texto fixo. |
+| U1 não provava `claude plugin eval` nem a condução por pseudoterminal. | U1, itens 5 e 8. |
+| Faltava o destino de `mudancas[].origem`. | Anexo D. |
 
 ---
 
@@ -875,7 +952,7 @@ Regras que o caso mostra:
 Decidimos usar a cor azul no painel.
 ```
 
-**Respostas a perguntas, planos aprovados e mensagens na fila.** O teste T08 também usa os casos `test_structured_answers_and_approved_plan` e `test_messages_sent_while_the_assistant_works` do clone de leitura. Nesses casos, o autor é "Resposta do usuário" ou "Plano aprovado", e o texto segue o formato do clone de leitura.
+**Respostas a perguntas, planos aprovados e mensagens na fila.** O teste T08 também usa os casos `test_structured_answers_and_approved_plan` e `test_messages_sent_while_the_assistant_works` do clone de leitura. Nesses casos, o autor é "Resposta do usuário" ou "Plano aprovado", o corpo da mensagem segue o formato do clone de leitura, e o cabeçalho e o comentário de registros seguem o Anexo E.
 
 **Pacote em inglês.** O caso B1 vale também para o pacote em inglês, com os textos fixos do Anexo E em inglês.
 
@@ -891,12 +968,12 @@ O teste T07 usa todos os casos da classe `Masking` do clone de leitura e mais es
 
 ### B3. Formato antigo
 
-O executor gera 2 pastas de teste com arquivos do formato antigo, a partir de conversas sintéticas com pelo menos 1 decisão, 1 pendência e 1 entrega cada:
+O executor escreve à mão 2 pastas de teste com arquivos do formato antigo, a partir de conversas sintéticas com pelo menos 1 decisão, 1 pendência e 1 entrega cada:
 
-- uma com 2 handoffs e o `index.md`, gerados pelo código da versão atual do anth;
-- uma com 2 handoffs e o `index.md`, gerados pelo código do clone de leitura, com 1 conversa do Claude e 1 do Codex.
+- uma com 2 handoffs e o `index.md`, no formato que a versão atual do anth produz, com o modelo `skills/hopper-documentation-anth/exemplo.md` da versão atual;
+- uma com 2 handoffs e o `index.md`, no formato que o clone de leitura produz, com 1 conversa do Claude e 1 do Codex.
 
-As 2 pastas e as respostas simuladas do redator para elas ficam em `aceite/casos/b3/`. Expectativa de T30: os documentos 4, 5 e 6 têm itens com a origem igual ao nome de cada arquivo antigo, cada conversa antiga tem o documento 7 na pasta dela, e não sobra nenhum arquivo do formato antigo.
+Nenhuma dessas pastas é gerada por programa nem por chamada real ao redator (G04). As 2 pastas e as respostas simuladas do redator para elas ficam em `aceite/casos/b3/`. Expectativa de T30: os documentos 4, 5 e 6 têm itens com a origem igual ao nome de cada arquivo antigo, cada conversa antiga tem o documento 7 na pasta dela, e não sobra nenhum arquivo do formato antigo.
 
 ### B4. Respostas simuladas do redator
 
@@ -1040,6 +1117,8 @@ Regras que o programa confere além do esquema:
 - `recomendacao` e `depende_de` ficam vazios nos tipos `D` e `F`.
 - `origem` cita mensagens do trecho novo ou itens existentes.
 - O redator usa `N1`, `N2`… para itens novos em qualquer campo de texto, e o programa troca essas referências pelos identificadores finais.
+- A cadeia `conversa_simplificada` começa na linha de assunto. O programa grava a linha `## M<a>-<código> a M<b>-<código>` antes dela.
+- As mensagens de origem de uma mudança de situação entram na linha "Origem" do item, depois das origens existentes.
 - Os nomes dos campos são iguais nos 2 idiomas.
 
 ### Esquema da resposta de migração
@@ -1144,7 +1223,7 @@ Escrever a spec do modelo de 7 documentos.
 | 5. Funções implementadas | `concluída`, `substituída por <ID>`, `desfeita em <M-ID>` |
 | 6. Pendências | `aberta`, `encerrada em <M-ID> (<motivo curto>)` |
 
-Item migrado do formato antigo: a origem é o nome do arquivo, por exemplo `Origem: handoff-20261031-164340-d0eaf19d.md`, e o intervalo da rodada é `migração`.
+Item migrado do formato antigo: a origem é o nome do arquivo, por exemplo `Origem: handoff-20261031-164340-d0eaf19d.md`, e o intervalo da rodada é `migração`. Documento 7 migrado: "Conversa" traz o identificador da conversa antiga quando o arquivo antigo o traz, senão o código; "Última mensagem coberta" traz `sem conversa integral`; "Data da rodada" traz a data e a hora da migração.
 
 ### Documento 7
 
@@ -1194,7 +1273,7 @@ Pasta do projeto: /home/user
 | [e4bad083](conversas/2026-11-01-e4bad083/) | 2026-11-01 | M85-e4bad083 | 2026-11-01 23:30 +00:00 | concluída | Skill de documentação em 7 documentos |
 ```
 
-Valores da coluna "Resultado": `concluída`, `nada novo`, `falhou: <motivo curto>` e `em andamento`.
+Valores da coluna "Resultado": `concluída` e `falhou: <motivo curto>`. Os valores `nada novo` e `em andamento` ficam só no registro de rodadas, porque a rodada sem trecho novo não grava o documento 1 (R28). Uma conversa migrada do formato antigo tem "Início" igual à data do handoff antigo, "Última rodada" igual à data da migração e "Resultado" `concluída`. O pacote em inglês usa a tradução fiel de todo o texto fixo deste anexo, inclusive as 7 linhas da ordem de leitura.
 
 ### Verificação interna da migração (R31)
 
@@ -1279,13 +1358,13 @@ Pacote em inglês:
 | F9 | Só roda com `--roteiro`. O conferidor localiza no documento 2 as mensagens do usuário cujo texto é igual aos textos fixos do roteiro e confere as asserções do passo F-A. Sem `--roteiro`, F9 aparece como "não se aplica" e fica fora do total. |
 | F10 | A lista de arquivos da raiz da pasta de documentação não tem `index.md` nem `handoff-*.md`. |
 
-**Casos do conferidor.** Em U2, o executor escreve à mão, a partir do Anexo E, a pasta `aceite/casos/conferidor/valida/`, que precisa passar em F1 a F8 e F10. Ele também escreve as pastas `aceite/casos/conferidor/invalida-F<n>/`, cada uma com 1 defeito, e cada uma precisa reprovar exatamente na verificação F<n>. Nenhuma dessas pastas é gerada pelo programa (G04).
+**Casos do conferidor.** Em U2, o executor escreve à mão, a partir do Anexo E, a pasta `aceite/casos/conferidor/valida/`, que precisa passar em F1 a F8 e F10. Ele também escreve as pastas `aceite/casos/conferidor/invalida-F<n>/`, cada uma com 1 defeito, e cada uma precisa reprovar na verificação F<n>. As demais verificações só podem reprovar por falta do mesmo objeto, por exemplo F5 quando o defeito de F1 é a ausência do documento 7. Nenhuma dessas pastas é gerada pelo programa (G04).
 
 ### Roteiro de aceite
 
-O roteiro `aceite/roteiro.json` guarda os 6 textos do passo F-C e as asserções do passo F-A. O executor roda o roteiro em A1, A2 e A3, em uma pasta de teste nova (`~/hopper-teste-a1`, `~/hopper-teste-a2` e `~/hopper-teste-a3`). Em A1 e A3, ele conduz a sessão interativa por um pseudoterminal. Em A2, ele conduz a sessão da aba Code com o uso do computador.
+O roteiro `aceite/roteiro.json` guarda os 6 textos do passo F-C e as asserções do passo F-A. O executor roda o roteiro em A1, A2 e A3, em uma pasta de teste nova (`~/hopper-teste-a1`, `~/hopper-teste-a2` e `~/hopper-teste-a3`). Em A1 e A3, ele conduz a sessão interativa por um pseudoterminal. Em A2, ele conduz a sessão da aba Code pelas ferramentas de sessão, ou pelo uso do computador (C26). Em A3, os passos F-I e F-L rodam nas contas `jpah` e `jonathan`; os demais passos rodam só em `jpah`.
 
-- **F-I. Instalação.** Instalar pelo Anexo H. Registrar a saída de `claude plugin list`, a lista de comandos com a skill e a lista de hooks com os 2 comandos do gatilho.
+- **F-I. Instalação.** Instalar pelo Anexo H. Registrar a saída de `claude plugin list` e de `claude plugin details hopper-documentation-anth@hopper-documentation-anth`, a lista de comandos com a skill e a lista de hooks com os 2 comandos do gatilho. Em A2, a lista de comandos vem do uso do computador ou da skill acionada pela mensagem 6 do passo F-C (R25), e a prova do gatilho vem do passo F-K (R39).
 - **F-C. Conversa de teste.** Enviar estas 6 mensagens, nesta ordem:
   1. "Vamos testar a documentação. Decidimos usar a cor azul no painel."
   2. "a senha do servidor é Pl4nt@d4#2026 hoje"
@@ -1294,10 +1373,10 @@ O roteiro `aceite/roteiro.json` guarda os 6 textos do passo F-C e as asserções
   5. "Fica pendente escolher o formato do gráfico."
   6. "Documente a conversa."
 - **F-A. Asserções depois da mensagem 6.** O documento 2 contém "sitema" e "[oculto]", não contém "Pl4nt@d4#2026" e tem uma linha que começa com "Ferramenta: Write" e termina com "nota.txt". O documento 4 tem um item D com a origem da mensagem 1. O documento 6 tem um item PD com a origem da mensagem 5. O documento 5 tem um item F com a origem da mensagem 4 ou da mensagem do Claude que contém a linha da ferramenta Write.
-- **F-K. Compactação automática.** Reduzir o limite da compactação automática pela configuração documentada vigente. Consultar `code.claude.com/docs/en/env-vars.md` na data da execução e registrar a variável usada. Continuar a conversa até a compactação automática. Em A1 e A3, fechar o Claude Code 5 segundos depois do início da compactação. Em A2, encerrar a sessão de teste (C25). Esperar até 10 minutos. Conferir no registro de rodadas que a cópia terminou antes do registro de compactação no arquivo de histórico e que a rodada terminou depois do fechamento.
+- **F-K. Compactação automática.** Reduzir o limite da compactação automática pela decisão C27, com o valor registrado em U1. Consultar `code.claude.com/docs/en/env-vars.md` e `model-config.md` na data da execução e registrar as variáveis usadas. Continuar a conversa até a 1ª compactação automática, sem fechar nada, e conferir no registro de rodadas que a cópia terminou antes do registro de compactação no arquivo de histórico. Continuar a conversa até a 2ª compactação automática. Em A1 e A3, fechar o Claude Code 5 segundos depois do início dessa compactação. Em A2, encerrar a sessão de teste (C25). Esperar até 10 minutos. Conferir no registro de rodadas que a rodada terminou depois do fechamento. A 2ª passagem custa 1 chamada real a mais por ambiente.
 - **F-V. Conferidor.** Rodar o conferidor com `--roteiro` na pasta de documentação da pasta de teste.
-- **F-M. Busca do formato antigo (U9).** No MacBook, procurar em `~`, e na VPS, em `/home/jpah`, pastas `docs-by-hopper-documentation` com `index.md` ou `handoff-*.md` na raiz. Ignorar as pastas `.git`, `node_modules` e os clones do anth e do `hopper-documentation`. Registrar a lista, o número de conversas antigas e a estimativa de chamadas ao redator. Pedir o "sim" com essa lista.
-- **F-L. Limpeza.** Registrar que a pasta de dados não tem `venv` e que `claude plugin list` não mostra o plugin `hopper-documentation`.
+- **F-M. Busca do formato antigo (U9).** No MacBook, procurar em `~`, e na VPS, em `/home/jpah` e `/home/jonathan`, pastas `docs-by-hopper-documentation` com `index.md` ou `handoff-*.md` na raiz. Ignorar as pastas `.git` e `node_modules`, as raízes de produção e o clone de leitura. A cópia de trabalho entra na busca, porque a versão 0.1.4 grava nela os handoffs da sessão do executor até U8. Registrar a lista, o número de conversas antigas e a estimativa de chamadas ao redator. Pedir o "sim" com essa lista.
+- **F-L. Limpeza.** Registrar que a pasta de dados não tem `venv`, que a pasta `plugins/data` da pasta de configuração não tem outra pasta cujo nome começa com `hopper-documentation` (em 2026-11-02 existiam `hopper-documentation-anth-inline` e `hopper-documentation-anth-hopper-documentation-anth` no MacBook e `hopper-documentation-anth-hopper-documentation-anth` e `hopper-documentation-inline` na VPS), que a pasta `releases/` da raiz de produção tem só a release instalada, e que `claude plugin list` não mostra o plugin `hopper-documentation`. O que sobrar é apagado com o pedido de permissão da seção 10.
 
 ## Anexo G. Mapa de verificadores antes de integrar
 
@@ -1306,7 +1385,7 @@ O roteiro `aceite/roteiro.json` guarda os 6 textos do passo F-C e as asserções
 | `*/scripts/hopper_documentation_anth.py` | Testes de aceite, testes do executor do pacote alterado, T35 e conferidor nos casos dele |
 | `*/tests/**` | Testes do executor do pacote alterado |
 | `*/skills/**` | T41 e as avaliações de acionamento afetadas |
-| `*/hooks/hooks.json` ou `*/.claude-plugin/*` | T22 a T24 e `claude plugin validate --strict` |
+| `*/hooks/hooks.json` ou `*/.claude-plugin/*` | T22, T24 e `claude plugin validate --strict` |
 | Critérios congelados | Proibido sem o "sim" do proprietário (C18) |
 | Documentação em Markdown | Conferência de links e T32 |
 | `execucao/**` | Nenhum |
@@ -1317,15 +1396,36 @@ Depois de integrar, a verificação do GitHub roda tudo (C17).
 
 ## Anexo H. Instalação
 
-**A1 e A3 (terminal).**
+A instalação segue a convenção de instalação do proprietário (C16). `<origem>` é a pasta `hopper-documentation-anth-pt-br` da cópia de trabalho no commit em teste (U8) ou de um clone raso da tag `v2.0.0` em pasta temporária, apagada depois (U10).
+
+**A1 (MacBook, conta `jonathan`).**
 
 ```sh
-mkdir -p "$HOME/.local/share"
-git clone https://github.com/jonathanpah/hopper-documentation-anth.git "$HOME/.local/share/hopper-documentation-anth"
-claude plugin marketplace add "$HOME/.local/share/hopper-documentation-anth/hopper-documentation-anth-pt-br"
+RAIZ="$HOME/Library/Application Support/hopper-documentation-anth"
+mkdir -p "$RAIZ/releases/2.0.0"
+cp -R "<origem>" "$RAIZ/releases/2.0.0/pt-br"
+claude plugin marketplace add "$RAIZ/releases/2.0.0/pt-br"
 claude plugin install hopper-documentation-anth@hopper-documentation-anth
 ```
 
-Durante U8, o clone usa a branch de trabalho (`git -C <clone> checkout versao-2`). Depois de U10, usa a `main`. Para atualizar: `git -C <clone> pull --ff-only`, `claude plugin marketplace update hopper-documentation-anth` e `claude plugin update hopper-documentation-anth@hopper-documentation-anth`. Numa sessão aberta, enviar `/reload-plugins`.
+**A3 (VPS, contas `jpah` e `jonathan`).** O executor envia a pasta `<origem>` por `scp` a uma pasta temporária de `jpah` e roda, como `jpah`:
 
-**A2 (Claude Desktop).** Conferir, pelo uso do computador, se o plugin instalado em A1 aparece na aba Code. Se não aparecer, instalar pelo botão "+" e pela opção "Add plugins", seguindo C16.
+```sh
+sudo mkdir -p /opt/hopper-documentation-anth/releases/2.0.0
+sudo cp -R <temporária>/hopper-documentation-anth-pt-br /opt/hopper-documentation-anth/releases/2.0.0/pt-br
+sudo chown -R root:root /opt/hopper-documentation-anth/releases/2.0.0
+sudo find /opt/hopper-documentation-anth/releases/2.0.0 -type d -exec chmod 0755 {} + -o -type f -exec chmod 0644 {} +
+```
+
+Depois, em cada conta (`ssh hopper-jpah` e `ssh hopper-jonathan`), com o caminho completo `~/.local/bin/claude`, porque o `PATH` das sessões SSH não interativas não o inclui (`~/.ssh/README.md`):
+
+```sh
+~/.local/bin/claude plugin marketplace add /opt/hopper-documentation-anth/releases/2.0.0/pt-br
+~/.local/bin/claude plugin install hopper-documentation-anth@hopper-documentation-anth
+```
+
+**Atualizar durante U8.** Copiar de novo a `<origem>` sobre a pasta de produção, rodar `claude plugin marketplace update hopper-documentation-anth` e `claude plugin update hopper-documentation-anth@hopper-documentation-anth`. Numa sessão aberta, enviar `/reload-plugins`. Depois de U10, a pasta de produção é refeita a partir da tag `v2.0.0`, e os arquivos instalados são conferidos contra a tag por SHA-256.
+
+**Antes da primeira instalação (U8).** Em cada conta: `claude plugin uninstall hopper-documentation-anth@hopper-documentation-anth` (versão 0.1.4, com o "sim" da seção 10), `claude plugin marketplace remove hopper-documentation-anth` (o catálogo que aponta para a release 0.1.4) e, se existir, a desinstalação do plugin `hopper-documentation`. A release 0.1.4 da pasta de produção é apagada no passo F-L, com o "sim".
+
+**A2 (Claude Desktop).** O Desktop lê a mesma instalação de A1. Conferir se o plugin aparece na aba Code, seguindo C16.
