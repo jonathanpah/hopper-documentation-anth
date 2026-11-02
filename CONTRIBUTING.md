@@ -16,6 +16,8 @@ Version 2 of this plugin was built from `SPEC.md`. Changes follow the spec's rul
 4. Validate the plugins: `claude plugin validate --strict hopper-documentation-anth-pt-br` and the same for `-en`.
 5. Keep the program identical in both packages except for the `LANGUAGE` line.
 
+Run evaluations with `claude plugin eval ./<package> --ablation none --trust-plugin --model sonnet --allow-tools 'Bash(python3 *)'` because the skill runs the program through Bash, which evaluations allow only with `--allow-tools`.
+
 The GitHub verification (`.github/workflows/verificar.yml`) runs the acceptance tests on Ubuntu and macOS with Python 3.9 and 3.13, the checker cases and the inventory test.
 
 ## Frozen criteria

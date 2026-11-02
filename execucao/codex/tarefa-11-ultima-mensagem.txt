@@ -1,0 +1,4 @@
+Correção aplicada e [relatório gravado](/Users/jonathan/Library/CloudStorage/Dropbox/5-ai/5-claude/hopper-documentation-anth/execucao/codex/tarefa-11-relatorio.md). Os 49 testes do executor passaram em cada pacote. O `diff` mostra somente `LANGUAGE`.
+
+1. O aceite passou em 41 de 42 testes por pacote. O T38 falha porque o isolamento bloqueia `/bin/ps`, inclusive com o código original. Falta o verificador repeti-lo em ambiente que permita esse comando.
+

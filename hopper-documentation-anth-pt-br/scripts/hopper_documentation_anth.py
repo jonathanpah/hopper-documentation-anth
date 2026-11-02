@@ -1696,10 +1696,17 @@ def main(argv=None):
         try:
             codigo, linha = rodada(args.sessao, args.acionamento, args.historico or None, args.pasta_do_projeto or None)
         except Exception as erro:  # noqa: BLE001
-            registrar_escrita(args.sessao, args.pasta_do_projeto, args.acionamento, "falhou", repr(erro))
             codigo, linha = 1, T["linha_falhou"].format(motivo=repr(erro))
+            try:
+                registrar_escrita(args.sessao, args.pasta_do_projeto, args.acionamento, "falhou", repr(erro))
+            except Exception:  # noqa: BLE001
+                pass
         if args.marcador:
-            gravar_atomico(args.marcador, json.dumps({"codigo": codigo, "linha": linha}, ensure_ascii=False))
+            try:
+                gravar_atomico(args.marcador, json.dumps({"codigo": codigo, "linha": linha}, ensure_ascii=False))
+            except Exception as erro:  # noqa: BLE001
+                if not codigo:
+                    codigo, linha = 1, T["linha_falhou"].format(motivo=repr(erro))
         print(linha)
         if codigo:
             sys.stderr.write(linha + "\n")

@@ -837,5 +837,42 @@ class RegressoesDaTarefa08(unittest.TestCase):
                               T["motivo_tempo"].format(min=15), str(erro.exception))
 
 
+class RegressoesDaTarefa11(unittest.TestCase):
+    def test_rodada_sem_permissao_imprime_falha_original_mesmo_sem_registro_ou_marcador(self):
+        with tempfile.TemporaryDirectory() as temporario:
+            raiz = Path(temporario).resolve()
+            config = raiz / "config"
+            config.mkdir()
+            marcador_bloqueado = raiz / "marcador-bloqueado"
+            marcador_bloqueado.mkdir()
+            marcador_gravavel = raiz / "marcador.json"
+            config.chmod(0o555)
+            try:
+                self.assertFalse(os.access(config, os.W_OK))
+                for marcador in (None, marcador_gravavel, marcador_bloqueado):
+                    with self.subTest(marcador=marcador):
+                        comando = [sys.executable, str(RAIZ / "scripts" / "hopper_documentation_anth.py"),
+                                   "rodada", "--sessao", "3f9c2a71-1234-5678-9abc-123456789abc"]
+                        if marcador is not None:
+                            comando.extend(["--marcador", str(marcador)])
+                        resultado = subprocess.run(comando, text=True, capture_output=True, timeout=10,
+                                                   env={**os.environ, "CLAUDE_CONFIG_DIR": str(config)})
+                        self.assertEqual(resultado.returncode, 1, resultado.stderr)
+                        self.assertNotIn("Traceback", resultado.stderr)
+                        self.assertTrue(resultado.stdout, resultado.stderr)
+                        linha = resultado.stdout.splitlines()[-1]
+                        prefixo = "Documentação falhou:" if programa.LANGUAGE == "pt-br" else "Documentation failed:"
+                        self.assertTrue(linha.startswith(prefixo), linha)
+                        self.assertIn("PermissionError", linha)
+                        self.assertNotIn("IsADirectoryError", linha)
+                        self.assertEqual(resultado.stderr, linha + "\n")
+                        if marcador == marcador_gravavel:
+                            self.assertEqual(json.loads(marcador.read_text(encoding="utf-8")),
+                                             {"codigo": 1, "linha": linha})
+                self.assertFalse((config / "plugins").exists())
+            finally:
+                config.chmod(0o755)
+
+
 if __name__ == "__main__":
     unittest.main()
