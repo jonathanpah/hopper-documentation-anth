@@ -1,6 +1,0 @@
-As 11 correções foram implementadas. Em cada pacote, passaram os 13 testes do executor e 31 dos 32 testes de aceite. O T38 falhou porque o sandbox bloqueia `/bin/ps`.
-
-Os programas diferem somente em `LANGUAGE`. A aprovação integral do aceite permanece pendente.
-
-[Relatório completo da tarefa](/Users/jonathan/Library/CloudStorage/Dropbox/5-ai/5-claude/hopper-documentation-anth/execucao/codex/tarefa-01-relatorio.md)
-

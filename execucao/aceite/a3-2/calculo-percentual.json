@@ -1,9 +1,0 @@
-{
-  "contexto_inicial_tokens": 58979,
-  "margem_tokens": 6000,
-  "divisor": 765,
-  "percentual": 85,
-  "regra": "min(100, ceil((contexto_inicial_tokens + 6000) / 765))",
-  "modelo": "sonnet",
-  "tentativas_roteiro": 1
-}

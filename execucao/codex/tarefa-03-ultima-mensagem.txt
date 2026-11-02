@@ -1,3 +1,0 @@
-Apliquei os 2 ajustes sem alterar o programa e salvei o [relatório da tarefa 03](/Users/jonathan/Library/CloudStorage/Dropbox/5-ai/5-claude/hopper-documentation-anth/execucao/codex/tarefa-03-relatorio.md).
-
-Os 31 testes do executor passaram em cada pacote. T04 passou nas 5 repetições. **A aprovação integral permanece pendente** porque o sandbox bloqueia `ps`, necessário para T38. O aceite ficou em 41 aprovações de 42 por pacote.

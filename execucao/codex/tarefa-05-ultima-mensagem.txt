@@ -1,8 +1,0 @@
-A correção foi implementada nos 2 idiomas. O [relatório completo](</Users/jonathan/Library/CloudStorage/Dropbox/5-ai/5-claude/hopper-documentation-anth/execucao/codex/tarefa-05-relatorio.md>) registra as alterações e verificações.
-
-- Executor aprovado nos 42 testes por idioma, incluindo 11 novos.
-- Aceite com 40 aprovações em 42 testes por idioma. T14 cita um item apagado pelo próprio teste. T38 depende de uma consulta bloqueada pelo sandbox.
-- Resultado antigo de A3 preservado, com a reprovação esperada em F8.
-
-O aceite integral permanece pendente. Os arquivos protegidos ficaram intactos.
-

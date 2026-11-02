@@ -1,6 +1,0 @@
-Executei somente A3. O aceite final teve **9 de 10 aprovações**. F8 reprovou a referência futura a M19, ausente na conversa integral.
-
-A escrita terminou 39 segundos após o fechamento. R22 ficou sem comprovação na 2ª passagem. Preservei as evidências e não apliquei correções.
-
-[Relatório completo da tarefa 04](/Users/jonathan/Library/CloudStorage/Dropbox/5-ai/5-claude/hopper-documentation-anth/execucao/codex/tarefa-04-relatorio.md).
-

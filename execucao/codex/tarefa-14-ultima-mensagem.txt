@@ -1,5 +1,0 @@
-Correção implementada nos 2 pacotes. O [relatório da tarefa 14](/Users/jonathan/Library/CloudStorage/Dropbox/5-ai/5-claude/hopper-documentation-anth/execucao/codex/tarefa-14-relatorio.md) registra alterações, testes e evidências.
-
-Os 59 testes do executor passaram em cada pacote. O aceite aprovou 41 de 42 por pacote. Apenas T38 falhou pelo bloqueio de `ps` no isolamento, também reproduzido com o programa original.
-
-Arquivos protegidos preservados. Nenhum commit realizado.

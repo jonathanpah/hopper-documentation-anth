@@ -1,8 +1,0 @@
-Tarefa 13 concluída. A falha de modelo encerra a chamada sem nova tentativa. As demais correções foram preservadas.
-
-- Executor. **55 testes aprovados por pacote**.
-- Aceite. **41 de 42 por pacote**. T12 passou; só T38 falhou pelo bloqueio de `ps`.
-- `diff` mostra apenas `LANGUAGE`.
-
-Resultados acrescentados à seção “Tarefa 13” do [relatório](/Users/jonathan/Library/CloudStorage/Dropbox/5-ai/5-claude/hopper-documentation-anth/execucao/codex/tarefa-12-relatorio.md:166).
-

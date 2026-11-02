@@ -1,6 +1,0 @@
-Implementei as correções nos 2 pacotes. Os **56 testes do executor passam** em cada idioma.
-
-O aceite passou em 40 dos 42 testes por pacote. T12 conflita com a nova tentativa exigida. T38 falha pelo bloqueio de `ps` no isolamento.
-
-[Relatório completo da tarefa 12](/Users/jonathan/Library/CloudStorage/Dropbox/5-ai/5-claude/hopper-documentation-anth/execucao/codex/tarefa-12-relatorio.md)
-

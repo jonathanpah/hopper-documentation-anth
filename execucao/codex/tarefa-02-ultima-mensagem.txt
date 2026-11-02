@@ -1,8 +1,0 @@
-As 3 partes foram implementadas. O [relatório completo](</Users/jonathan/Library/CloudStorage/Dropbox/5-ai/5-claude/hopper-documentation-anth/execucao/codex/tarefa-02-relatorio.md>) registra as alterações, os testes e as limitações.
-
-- 31 testes do executor passaram em cada idioma.
-- Os 13 casos do conferidor produziram o resultado esperado.
-- O aceite teve 41 aprovações em 42 testes por pacote. T38 permanece bloqueado pelo sandbox, que impede executar `/bin/ps`.
-
-As alterações ficaram no disco, sem commit.
-

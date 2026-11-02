@@ -1,4 +1,0 @@
-Correção entregue nos 2 pacotes. T14 e os 43 testes do executor passaram em cada pacote. No aceite, passaram 41 de 42 testes. Somente T38 falhou pelo bloqueio de `ps`, previsto na tarefa.
-
-[Relatório completo](/Users/jonathan/Library/CloudStorage/Dropbox/5-ai/5-claude/hopper-documentation-anth/execucao/codex/tarefa-06-relatorio.md)
-
