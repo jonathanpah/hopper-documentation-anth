@@ -1,8 +1,8 @@
 {
   "name": "hopper-documentation-anth",
   "displayName": "hopper-documentation-anth",
-  "version": "0.1.4",
-  "description": "Registra a conversa em handoffs Markdown, a pedido e antes da compactação, para outra pessoa ou sessão continuar o trabalho.",
+  "version": "2.0.0",
+  "description": "Documenta cada conversa do Claude Code em 7 documentos Markdown (índice, conversa integral, conversa simplificada, decisões, funções implementadas, pendências e handoff), a pedido e antes de toda compactação.",
   "author": {
     "name": "Jonathan Honorio",
     "url": "https://github.com/jonathanpah"

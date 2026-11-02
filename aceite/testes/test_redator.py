@@ -31,7 +31,7 @@ class Redator(CasoDeAceite):
         self.assertIn(f"## {M(1)} ", trecho)
         self.assertIn(f"## {M(6)} ", trecho)
         self.assertNotIn(f"## {M(7)} ", trecho)
-        self.assertIn("Tarefa:", entrada.split("</trecho_novo>")[1])
+        self.assertRegex(entrada.split("</trecho_novo>")[1], r"^\s*(Tarefa|Task):")  # tradução fiel no pacote em inglês
         handoff_1 = le(self.amb.d(7))
         self.amb.acrescenta_historico(SESSAO_B1, registros_de(CASOS / "b1" / "segunda-rodada.jsonl"))
         self.assertEqual(self.amb.rodada(respostas=("rodada-b1", "rodada-m7")).returncode, 0)

@@ -5,11 +5,17 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/hopper_documentation_anth.py\" hook",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/hopper_documentation_anth.py\" copia",
+            "timeout": 60,
+            "statusMessage": "Copiando a conversa integral antes da compactação"
+          },
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/hopper_documentation_anth.py\" escrita",
             "async": true,
             "asyncRewake": true,
             "timeout": 3600,
-            "statusMessage": "Registrando o handoff da conversa em segundo plano"
+            "statusMessage": "Documentando a conversa em segundo plano"
           }
         ]
       }

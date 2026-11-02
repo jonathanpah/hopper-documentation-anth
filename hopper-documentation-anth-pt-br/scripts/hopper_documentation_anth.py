@@ -991,7 +991,7 @@ def arquivo_da_skill(nome):
 
 def entrada_do_redator(sessao, codigo, intervalo, pasta_doc, pasta, trecho):
     docs = documentos_da_pasta(pasta_doc)
-    return (f"{T['conversa']}: {sessao}. Código: {codigo}. Intervalo: {intervalo}.\n"
+    return (f"Conversa: {sessao}. Código: {codigo}. Intervalo: {intervalo}.\n"
             f"<regras_de_escrita>\n{arquivo_da_skill(T['regras'])}\n</regras_de_escrita>\n"
             f"<modelos>\n{arquivo_da_skill(T['modelos'])}\n</modelos>\n"
             f"<decisoes>\n{ler(docs['D']).strip()}\n</decisoes>\n"
@@ -1305,7 +1305,7 @@ def entrada_da_migracao(pasta_doc, arquivos):
         ident = identificador_antigo(arquivo) if arquivo.name != "index.md" else ""
         rotulo = f"### {arquivo.name}" + (f" ({T['conversa']}: {ident})" if ident else "")
         partes.append(f"{rotulo}\n{ler(arquivo).strip()}")
-    return (f"{T['conversa']}: {T['migracao']}.\n"
+    return (f"Conversa: {T['migracao']}.\n"
             f"<regras_de_escrita>\n{arquivo_da_skill(T['regras'])}\n</regras_de_escrita>\n"
             f"<modelos>\n{arquivo_da_skill(T['modelos'])}\n</modelos>\n"
             f"<decisoes>\n{ler(docs['D']).strip()}\n</decisoes>\n<funcoes>\n{ler(docs['F']).strip()}\n</funcoes>\n"

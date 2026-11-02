@@ -10,7 +10,7 @@
       "name": "hopper-documentation-anth",
       "displayName": "hopper-documentation-anth",
       "source": "./",
-      "description": "Records the conversation in Markdown handoffs, on request and before compaction, so another person or session can continue the work."
+      "description": "Documents each Claude Code conversation in 7 Markdown documents (index, full conversation, simplified conversation, decisions, implemented functions, pending items and handoff), on request and before every compaction."
     }
   ]
 }

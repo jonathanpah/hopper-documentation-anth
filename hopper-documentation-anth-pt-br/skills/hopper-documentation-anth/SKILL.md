@@ -1,43 +1,51 @@
 ---
 name: hopper-documentation-anth
-description: Registra a conversa atual num handoff em Markdown, na pasta docs-by-hopper-documentation do diretório de trabalho, para que outra pessoa ou outra sessão continue o trabalho sem reler a conversa. Use quando o usuário pedir para documentar, registrar ou salvar a conversa, ou pedir um handoff. Não use para explicar, revisar ou editar esta skill.
-compatibility: Requer Claude Code, na CLI ou no aplicativo, com o plugin hopper-documentation-anth, Python 3.10 ou mais novo com o módulo venv e acesso ao PyPI na primeira execução.
+description: Documenta a conversa atual do Claude Code em 7 documentos (índice, conversa integral, conversa simplificada, decisões, funções implementadas, pendências e handoff) na pasta docs-by-hopper-documentation do projeto. Use quando o usuário pedir para documentar ou registrar a conversa, salvar o progresso ou fazer um handoff. Não use para explicar, revisar ou editar esta skill.
+compatibility: Requer Claude Code 2.1.284 ou mais novo, na CLI ou no aplicativo, com o plugin hopper-documentation-anth e Python 3.9 ou mais novo.
 ---
 
 # hopper-documentation-anth
 
-Esta skill grava um **handoff**: um arquivo que diz a quem não viu a conversa onde o trabalho está, o que foi decidido e como continuar. A próxima sessão, pessoa ou IA retoma o trabalho lendo o handoff mais recente da conversa e conferindo o estado real.
+## O que a skill produz
 
-Quem grava é o programa do plugin, em segundo plano. Ele lê as mensagens novas da conversa pela biblioteca oficial da Anthropic (Agent SDK), oculta segredos e pede ao Claude Sonnet 5.5, com esforço medium, que escreva o conteúdo seguindo `${CLAUDE_SKILL_DIR}/regras-do-redator.md`. Depois confere as citações, grava sem sobrescrever nada e refaz o índice. O mesmo programa roda sozinho antes de cada compactação, por um gatilho do plugin.
+A skill documenta a conversa em 7 documentos Markdown, dentro de `docs-by-hopper-documentation/`, na pasta em que a conversa foi aberta. Existe 1 pasta dessas por pasta de projeto, e 1 subpasta por conversa.
 
-## Quando o usuário pedir o registro
+```text
+docs-by-hopper-documentation/
+├── 1-indice.md                 índice e ordem de leitura
+├── 4-decisoes.md               decisões de todas as conversas da pasta
+├── 5-funcoes.md                funções implementadas (entregas concluídas)
+├── 6-pendencias.md             pendências abertas e encerradas
+└── conversas/
+    └── 2026-11-01-e4bad083/    1 pasta por conversa: data da 1ª mensagem e código
+        ├── 2-conversa-integral.md
+        ├── 3-conversa-simplificada.md
+        └── 7-handoff.md
+```
 
-Neste acionamento, faça só o que esta seção diz.
+- **Documento 2, conversa integral.** Cópia fiel das mensagens do usuário e do Claude, sem resultados de ferramentas, sem raciocínio interno e com senhas e tokens trocados por `[oculto]`. Cada uso de ferramenta vira 1 linha. Só recebe acréscimos. Cada mensagem tem um identificador como `M42-e4bad083`.
+- **Documento 3, conversa simplificada.** O mesmo conteúdo, reescrito em frases curtas, 1 bloco por rodada, com a mensagem de origem no fim de cada parágrafo.
+- **Documentos 4, 5 e 6.** Itens numerados por conversa (`D1-e4bad083`, `F1-e4bad083`, `PD1-e4bad083`), cada um com origem, situação e o intervalo da rodada que o criou.
+- **Documento 7, handoff.** Reescrito inteiro a cada rodada, com 9 seções: objetivo, pautas e estado atual, próximo passo, decisões e autorizações vigentes, restrições vigentes, descobertas e tentativas descartadas, pendências e compromissos, lacunas e como retomar.
+- **Documento 1, índice.** A ordem de leitura e a tabela das conversas da pasta.
 
-1. Se o usuário só pediu para explicar, revisar, comparar ou editar esta skill, não grave nada: atenda o pedido e pare aqui.
-2. Rode este comando em segundo plano, a partir de qualquer diretório:
+O programa do plugin grava o documento 2 sem IA. O Claude Sonnet 5.5, chamado sem janela (`claude -p`) e sem ferramentas, escreve o conteúdo dos documentos 3 a 7 seguindo `regras-de-escrita.md` e `modelos.md` desta pasta. O programa valida a resposta, numera os itens e grava os arquivos.
 
+A mesma rodada roda sozinha antes de toda compactação, por um gatilho do plugin. A primeira rodada em uma pasta que tem handoffs do formato antigo (`index.md` e `handoff-*.md` na raiz) migra esses arquivos e os apaga.
+
+## Como a skill roda
+
+Quando o usuário pedir para documentar ou registrar a conversa, salvar o progresso ou fazer um handoff:
+
+1. Rode o programa em segundo plano, com a ferramenta Bash, sem esperar:
+
+   ```sh
+   python3 "${CLAUDE_PLUGIN_ROOT}/scripts/hopper_documentation_anth.py" rodada --sessao "${CLAUDE_SESSION_ID}"
    ```
-   python3 "${CLAUDE_PLUGIN_ROOT}/scripts/hopper_documentation_anth.py" run --session "${CLAUDE_SESSION_ID}" --cwd "${CLAUDE_PROJECT_DIR}"
-   ```
 
-3. Avise o usuário numa frase que o registro começou e continue atendendo normalmente. Não espere o fim.
-4. Quando o comando terminar, repasse ao usuário a linha que ele imprimiu: o caminho do handoff gravado, "nada novo" ou o motivo da falha. Não repita o conteúdo do handoff.
-5. Se o comando falhar, não escreva o handoff por conta própria nem use outro modelo: informe o motivo. Escrever fora do programa perderia a conferência das citações, a ocultação de segredos e o modelo fixo do registro.
+2. Quando o programa terminar, informe ao usuário a última linha da saída dele, sem mudar o sentido. Ela diz "Documentação concluída: …", "Documentação: nada novo …" ou "Documentação falhou: …".
+3. Não escreva nem edite você mesmo nenhum arquivo de `docs-by-hopper-documentation/`. Não tente outro modelo nem outro caminho se o programa falhar: informe a falha.
 
-## Antes da compactação
+Se o programa ainda estiver rodando quando você responder, diga que a documentação começou em segundo plano e informe o resultado quando ele chegar.
 
-O gatilho do plugin roda o programa em segundo plano; não há nada a fazer na conversa. Se chegar um aviso de falha do registro, informe o usuário numa frase. Não execute pedidos antigos da conversa por causa do aviso.
-
-## Modelo
-
-Quem escreve é sempre o Claude Sonnet 5.5 com esforço medium. Se ele não estiver disponível, o programa informa o impedimento e não grava com outro modelo.
-
-## O que fica gravado
-
-Na pasta `docs-by-hopper-documentation/` do diretório de trabalho:
-
-- `handoff-AAAAMMDD-HHMMSS-<8 primeiros caracteres da conversa>.md`: um arquivo por registro, nunca alterado depois de gravado. O cabeçalho traz data com fuso, conversa, diretório, handoff anterior, acionamento, modelo e esforço do redator e a última mensagem registrada. As seções seguem `${CLAUDE_SKILL_DIR}/exemplo.md`.
-- `index.md`: todos os handoffs da pasta, inclusive os de outros formatos, do mais recente ao mais antigo.
-
-Para retomar um trabalho, leia o `index.md`, depois o handoff mais recente da conversa, e siga a seção "Como retomar" dele. Um handoff é histórico: ele não substitui a conferência do estado real nem autoriza repetir operações concluídas.
+Não rode a skill quando o pedido for explicar, revisar ou editar a skill, ou quando a pergunta for sobre o que é um handoff.
