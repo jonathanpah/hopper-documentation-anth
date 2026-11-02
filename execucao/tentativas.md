@@ -14,4 +14,4 @@
 | Unidade | Verificador | Tentativa | Data (UTC) | O que mudou | Resultado |
 | --- | --- | --- | --- | --- | --- |
 | U1 | Item 4, provas das regras | 1 | 2026-11-02 02:48 | Arquivo de regras criado na cópia de trabalho; sessão ainda com as configurações da pasta de origem | reprovado (V-U1-04) |
-| U1 | Item 4, provas das regras | 2 | 2026-11-02 02:50 | Sessão movida para a cópia de trabalho com `change_directory` | em andamento |
+| U1 | Item 4, provas das regras | 2 | 2026-11-02 02:42 | Sessão movida para a cópia de trabalho com `change_directory` | em andamento |

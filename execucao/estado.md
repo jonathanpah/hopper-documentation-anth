@@ -14,7 +14,7 @@ Início: 2026-11-02 02:36 UTC.
 | 1. Versões | pronto | `versoes.md`, V-U1-01 |
 | 2. Acessos | pronto | `versoes.md`, V-U1-02 |
 | 3. Clone de leitura | pronto | V-U1-03 |
-| 4. Regras de permissão | em andamento, tentativa 2 (sessão movida para a cópia de trabalho) | V-U1-04, D-05 |
+| 4. Regras de permissão | `deny` aprovado; `ask` bloqueado · motivo: as regras `ask` não geram pedido nesta sessão · evidência: V-U1-04, tentativa 2 (5 comandos rodaram sem pedido; proprietário confirmou no chat) · como reproduzir: rodar `echo hopper_documentation_anth.py migrar` com a regra `Bash(*hopper_documentation_anth.py migrar*)` em `.claude/settings.local.json`, em sessão da aba Code em modo `auto`. Mecanismo substituto: D-06. | V-U1-04, D-05, D-06, P-01 |
 | 5. Plugin de sonda | pendente | |
 | 6. Chamada real ao redator | pendente | |
 | 7. Retomada | pendente | |
