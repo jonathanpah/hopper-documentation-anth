@@ -25,8 +25,14 @@ Início: 2026-11-02 02:36 UTC.
 
 | Unidade | Situação |
 | --- | --- |
-| U1 | em andamento |
-| U2 a U10 | pendentes |
+| U1 | itens 1 a 4 e 6 a 8 prontos (4: `ask` bloqueado, D-06); item 5: A3 pronto, A1 e A2 bloqueados (P-02, P-03); item 9 pendente; revisão passada 1 feita |
+| U2 | critérios escritos e testados; falta a revisão independente (derrubada pelo limite do plano, retoma depois de 05:30 UTC), o manifesto, a tag e a prova de C18 |
+| U3 e U4 | programa escrito; 31 testes de aceite aprovados nos 2 pacotes; revisão pendente |
+| U5 | gatilho e skill escritos; T41 aprovado; execução completa das avaliações pendente; revisão pendente |
+| U6 | migração escrita; T30, T31 e T42 aprovados; revisão pendente |
+| U7 | repositório e documentação atualizados; T32 e T35 aprovados; revisão pendente |
+| U8 | 2.0.0 instalada nas 3 contas com a migração desligada (V-U8-01); aceite depende do limite do plano (05:30 UTC), de A1 (P-02) e de A2 (P-03) |
+| U9 e U10 | pendentes |
 
 ## Requisitos
 
