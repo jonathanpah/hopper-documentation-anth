@@ -39,7 +39,7 @@ class Copiador(CasoDeAceite):
 
         t = threading.Thread(target=acrescenta)
         t.start()
-        r = self.amb.copia(escala="0.2")  # espera de C09: 0,1 s por leitura, 0,2 s estável, 1 s no máximo
+        r = self.amb.copia(escala="0.5")  # espera de C09: 0,25 s por leitura, 0,5 s estável, 2,5 s no máximo
         t.join()
         self.assertEqual(r.returncode, 0, r.stderr)
         self.assertIn("acréscimo 11", le(self.amb.d(2)))

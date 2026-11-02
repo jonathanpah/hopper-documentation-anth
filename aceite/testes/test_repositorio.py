@@ -131,10 +131,12 @@ class Localizacao(CasoDeAceite):
         sleep = shutil.which("sleep") or "/bin/sleep"
         outro = shutil.which("true") or "/usr/bin/true"
         if sys.platform.startswith("linux"):
-            shutil.copy2(sleep, falso)  # /proc/<pid>/exe resolve links simbólicos.
+            processo = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(30)"])
+            esperado_pid = Path(sys.executable).resolve()
         else:
             os.symlink(sleep, falso)  # cópias de binários do sistema são mortas no macOS.
-        processo = subprocess.Popen([str(falso), "30"])
+            processo = subprocess.Popen([str(falso), "30"])
+            esperado_pid = falso.resolve()
         def terminar():
             if processo.poll() is None:
                 processo.kill()
@@ -145,15 +147,17 @@ class Localizacao(CasoDeAceite):
         casa = pasta / "casa"
         (casa / ".local" / "bin").mkdir(parents=True)
         candidato_local = casa / ".local" / "bin" / "claude"
-        os.symlink(sleep, candidato_local)
+        candidato_local.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+        candidato_local.chmod(0o755)
         env = self.amb.ambiente()
         env.pop("HOPPER_DOCUMENTATION_ANTH_CLAUDE")
         env.update(CLAUDE_PID=str(processo.pid), PATH=str(pasta) + os.pathsep + env.get("PATH", ""), HOME=str(casa))
         with self.subTest(candidato="CLAUDE_PID antes do PATH"):
             r = subprocess.run([sys.executable, str(PROGRAMA), "executavel"], capture_output=True, text=True, env=env)
             self.assertEqual(r.returncode, 0, r.stderr)
-            self.assertNotEqual(falso.resolve(), candidato_path.resolve())
-            self.assertEqual(Path(r.stdout.strip()).resolve(), falso.resolve())
+            self.assertNotEqual(esperado_pid, candidato_path.resolve())
+            self.assertNotEqual(esperado_pid, candidato_local.resolve())
+            self.assertEqual(Path(r.stdout.strip()).resolve(), esperado_pid)
         env.pop("CLAUDE_PID")
         with self.subTest(candidato="PATH antes de ~/.local/bin/claude"):
             r = subprocess.run([sys.executable, str(PROGRAMA), "executavel"], capture_output=True, text=True, env=env)
