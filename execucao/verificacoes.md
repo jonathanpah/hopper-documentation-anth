@@ -259,3 +259,7 @@ Instalação nas 3 contas no commit `6a2747c`, conferida por SHA-256. Verificaç
 - A2 (aba Code do app, sessão `fc2e4426`, aberta com `start_session` na pasta `hopper-sonda-a2`, janela de 200 mil e 56%): rodada a pedido concluída (M1 a M12, R25); 1ª compactação às 23:19:58 UTC, escrita concluída às 23:20:36; 2ª compactação às 23:21:10, turno interrompido com `stop_session` às 23:21:33, escrita concluída às 23:21:43 (R23).
 
 Tentativa descartada antes de A2: para evitar o `start_session`, recusado em turno aberto por aviso automático, limpei a conversa da sessão de teste anterior e enviei a mensagem 1 por `SendMessage`. Essa mensagem ficou no histórico com `isMeta` verdadeiro e `origin.kind` `peer`, e o copiador a descartou, como faz com todo registro `isMeta`. O procedimento de C26 abre a sessão com o `start_session`, e as mensagens seguintes chegam como turnos normais; a execução válida seguiu esse procedimento.
+
+## V-U10-02 · U10 · Avaliações de acionamento completas, 3ª execução de C20 · 2026-11-02 23:33 · aprovado
+
+`claude plugin eval --ablation none --trust-plugin --model sonnet --allow-tools 'Bash(python3 *)' --no-publish`, no painel de Terminal, commit `6a2747c` (pacotes iguais aos do commit atual). Pacote em português: **23 de 23** casos aprovados (658 s). Pacote em inglês: **23 de 23** (585 s). Saídas em `execucao/avaliacoes/u10-*/`.
