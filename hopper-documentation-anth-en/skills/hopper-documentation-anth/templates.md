@@ -50,3 +50,9 @@ The 9 keys of the `handoff` field become the 9 sections, in this order: Goal; To
 ## Summary
 
 The `resumo` field has up to 80 characters and goes to the folder index, in the "Subject" column.
+
+## Migration
+
+The `handoffs_antigos` field is a list with the last handoff of each old conversation. Each entry has `conversa` (identifier given in the file), `data`, `resumo` (up to 80 characters) and `handoff` (the 9 keys of document 7). In `data`, use the date of the conversation's last old handoff in `YYYY-MM-DD`, without a time, for example `2026-09-30`.
+
+The `sem_conteudo` field lists the names of old files with no relevant content. During migration, each item of `itens_novos` also includes `conversa`.

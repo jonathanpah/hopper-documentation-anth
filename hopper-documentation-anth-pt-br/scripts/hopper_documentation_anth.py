@@ -84,6 +84,7 @@ TEXTOS = {
         "motivo_tempo": "o redator não respondeu em {min} minutos", "motivo_situacao": "situação não permitida: {situacao}",
         "motivo_origem": "origem inválida: {origem}", "motivo_verificacao": "verificação interna da migração reprovou: {detalhe}",
         "motivo_referencias": "referências inexistentes: {referencias}",
+        "motivo_data": "data inválida para a conversa {conversa}: {data}; use AAAA-MM-DD, sem hora",
         "motivo_origem_fora": "origem fora do trecho novo: {origem}",
         "motivo_assunto": "linha de assunto ausente em conversa_simplificada",
         "regra_origem": "a origem de um item novo ou de uma mudança é uma mensagem de {inicio} a {fim} ou um item existente",
@@ -137,6 +138,7 @@ TEXTOS = {
         "motivo_tempo": "the writer did not answer in {min} minutes", "motivo_situacao": "status not allowed: {situacao}",
         "motivo_origem": "invalid source: {origem}", "motivo_verificacao": "internal migration check failed: {detalhe}",
         "motivo_referencias": "nonexistent references: {referencias}",
+        "motivo_data": "invalid date for conversation {conversa}: {data}; use YYYY-MM-DD, without a time",
         "motivo_origem_fora": "source outside the new segment: {origem}",
         "motivo_assunto": "subject line missing in conversa_simplificada",
         "regra_origem": "the source of a new item or a change is a message from {inicio} to {fim} or an existing item",
@@ -181,7 +183,11 @@ def esquema_de_migracao():
     esquema["required"] += ["handoffs_antigos", "sem_conteudo"]
     esquema["properties"]["handoffs_antigos"] = {
         "type": "array", "items": {"type": "object", "additionalProperties": False, "required": ["conversa", "data", "resumo", "handoff"],
-                                   "properties": {"conversa": {"type": "string"}, "data": {"type": "string"},
+                                   "properties": {"conversa": {"type": "string"},
+                                                  "data": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                                                           "description": ("Data do último handoff antigo da conversa, só a data, sem hora."
+                                                                           if LANGUAGE == "pt-br" else
+                                                                           "Date of the conversation's last old handoff, date only, without a time.")},
                                                   "resumo": {"type": "string", "maxLength": 80},
                                                   "handoff": {"type": "object", "additionalProperties": False, "required": ESQUEMA_HANDOFF,
                                                               "properties": {k: {"type": "string"} for k in ESQUEMA_HANDOFF}}}}}
@@ -946,6 +952,20 @@ def validar_esquema(valor, esquema):
 def validar_resposta(resposta, esquema, mensagens_validas, itens_existentes, migracao=False, arquivos_validos=None,
                      mensagens_existentes=None):
     """Confere o esquema completo e as regras do Anexo D antes do diário e da gravação."""
+    # Classifica a data como corrigível antes de o pattern do esquema rejeitá-la.
+    if migracao and isinstance(resposta, dict) and isinstance(resposta.get("handoffs_antigos"), list):
+        problemas = []
+        for h in resposta["handoffs_antigos"]:
+            if not isinstance(h, dict) or not isinstance(h.get("data"), str):
+                continue  # Ausência e tipo incorreto continuam sujeitos ao esquema completo.
+            try:
+                if not re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", h["data"]):
+                    raise ValueError()
+                dt.date.fromisoformat(h["data"])
+            except ValueError:
+                problemas.append(T["motivo_data"].format(conversa=h.get("conversa", ""), data=repr(h["data"])))
+        if problemas:
+            raise RespostaCorrigivel(problemas)
     validar_esquema(resposta, esquema)
     refs = {i["ref"] for i in resposta["itens_novos"]}
     if len(refs) != len(resposta["itens_novos"]):
@@ -957,13 +977,6 @@ def validar_resposta(resposta, esquema, mensagens_validas, itens_existentes, mig
         for item in resposta["itens_novos"] + resposta["handoffs_antigos"]:
             if not re.fullmatch(r"[A-Za-z0-9-]+", item["conversa"]):
                 raise Falha(T["motivo_esquema"] + " (conversa)")
-        for h in resposta["handoffs_antigos"]:
-            try:
-                if not re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", h["data"]):
-                    raise ValueError()
-                dt.date.fromisoformat(h["data"])
-            except ValueError:
-                raise Falha(T["motivo_esquema"] + " (data)")
 
     problemas = []
     tipos = {i["ref"]: i["tipo"] for i in resposta["itens_novos"]}
@@ -1688,9 +1701,15 @@ def main(argv=None):
             n = migrar(args.pasta)
             print(T["linha_migracao"].format(n=n))
             return 0
-        except Falha as erro:
-            print(T["linha_falhou"].format(motivo=erro))
-            sys.stderr.write(str(erro) + "\n")
+        except Exception as erro:  # noqa: BLE001
+            motivo = str(erro) if isinstance(erro, Falha) else repr(erro)
+            linha = T["linha_falhou"].format(motivo=motivo)
+            try:
+                registrar("", Path(args.pasta), "migrar", "migracao", "falhou", motivo)
+            except Exception:  # noqa: BLE001
+                pass
+            print(linha)
+            sys.stderr.write(motivo + "\n")
             return 1
     if args.comando == "rodada":
         try:

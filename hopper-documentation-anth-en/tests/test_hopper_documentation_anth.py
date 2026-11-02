@@ -874,5 +874,124 @@ class RegressoesDaTarefa11(unittest.TestCase):
                 config.chmod(0o755)
 
 
+class RegressoesDaTarefa12(unittest.TestCase):
+    setUp = RegressoesDaTarefa01.setUp
+    resposta = RegressoesDaTarefa02.resposta
+    preparar_migracao = RegressoesDaTarefa02.preparar_migracao
+
+    def resposta_com_hora(self):
+        resposta = self.resposta("migracao-b3-anth")
+        resposta["handoffs_antigos"][0]["data"] = "2026-09-30 12:20:55"
+        return resposta
+
+    def processo_do_redator(self, resposta, modelos):
+        envelope = {"structured_output": resposta, "modelUsage": modelos}
+        return subprocess.CompletedProcess(["redator-simulado"], 0, json.dumps(envelope), "")
+
+    def executar_migrar(self):
+        saida, erros = io.StringIO(), io.StringIO()
+        with redirect_stdout(saida), redirect_stderr(erros):
+            codigo = programa.main(["migrar", "--pasta", str(self.projeto)])
+        return codigo, saida.getvalue(), erros.getvalue()
+
+    def conferir_arquivos_preservados(self, antes):
+        self.assertEqual({p: p.read_bytes() for p in antes}, antes)
+        self.assertFalse(list((programa.pasta_de_dados() / "diarios").glob("*.json")))
+        self.assertFalse(list((self.projeto / programa.PASTA_DOC / T["conversas"]).glob("*")))
+
+    def test_data_com_hora_repete_e_conclui_migracao(self):
+        pasta = self.preparar_migracao()
+        invalida = self.resposta_com_hora()
+        with patch.object(programa, "chamar_redator", side_effect=[(invalida, {programa.MODELO: 11}),
+                                                                 (self.resposta("migracao-b3-anth"),
+                                                                  {programa.MODELO: 23})]) as redator:
+            self.assertEqual(programa.migrar(self.projeto), 3)
+        self.assertEqual(redator.call_count, 2)
+        entrada, esquema = redator.call_args_list[0].args
+        campo = esquema["properties"]["handoffs_antigos"]["items"]["properties"]["data"]
+        self.assertEqual(campo["pattern"], "^[0-9]{4}-[0-9]{2}-[0-9]{2}$")
+        self.assertTrue(campo["description"])
+        segunda = redator.call_args_list[1].args[0]
+        self.assertTrue(segunda.startswith(entrada))
+        self.assertEqual(len(segunda[len(entrada):].splitlines()), 1)
+        for detalhe in (invalida["handoffs_antigos"][0]["conversa"], "2026-09-30 12:20:55"):
+            self.assertIn(detalhe, segunda[len(entrada):])
+        registros = [r for r in programa.registros_de_rodadas() if r["etapa"] == "migracao"]
+        self.assertEqual(registros[0]["resultado"], "em andamento")
+        self.assertEqual(registros[0]["modelos"], {programa.MODELO: 11})
+        self.assertEqual(registros[-1]["modelos"], {programa.MODELO: 23})
+        self.assertFalse(programa.arquivos_antigos(pasta))
+        self.assertTrue((pasta / T["conversas"] / "2026-03-14-3f9c2a71" / T["d7"]).is_file())
+
+    def test_data_com_hora_duas_vezes_falha_registra_e_preserva_antigos(self):
+        pasta = self.preparar_migracao()
+        antes = {p: p.read_bytes() for p in programa.arquivos_antigos(pasta)}
+        with patch.object(programa, "chamar_redator", side_effect=[(self.resposta_com_hora(), {programa.MODELO: 11}),
+                                                                 (self.resposta_com_hora(), {programa.MODELO: 23})]) as redator:
+            codigo, saida, erros = self.executar_migrar()
+        self.assertEqual((codigo, redator.call_count), (1, 2))
+        self.assertIn("2026-09-30 12:20:55", saida)
+        self.assertNotIn("Traceback", erros)
+        self.conferir_arquivos_preservados(antes)
+        registros = programa.registros_de_rodadas()
+        self.assertEqual([r["resultado"] for r in registros], ["em andamento", "em andamento", "falhou"])
+        self.assertEqual([r["modelos"] for r in registros], [{programa.MODELO: 11}, {programa.MODELO: 23}, {}])
+        self.assertTrue(all(r["etapa"] == "migracao" and r["pasta_do_projeto"] == str(self.projeto) for r in registros))
+        self.assertTrue(all("2026-09-30 12:20:55" in r["motivo"] for r in registros))
+
+    def test_datas_invalidas_sao_corrigiveis_com_conversa_e_valor(self):
+        for data in ("2026-09-30 17:34:54", "2026-9-30", "2026-02-30", ""):
+            with self.subTest(data=data):
+                resposta = self.resposta("migracao-b3-anth")
+                resposta["handoffs_antigos"][0]["data"] = data
+                with self.assertRaises(programa.RespostaCorrigivel) as erro:
+                    programa.validar_resposta(resposta, programa.esquema_de_migracao(), set(), set(), migracao=True)
+                self.assertIn(resposta["handoffs_antigos"][0]["conversa"], str(erro.exception))
+                self.assertIn(repr(data), str(erro.exception))
+
+    def test_modelo_reprovado_falha_em_uma_chamada(self):
+        pasta = self.preparar_migracao()
+        antes = {p: p.read_bytes() for p in programa.arquivos_antigos(pasta)}
+        uso = {"claude-haiku-5-5": {"outputTokens": 100}}
+        processo = self.processo_do_redator(self.resposta("migracao-b3-anth"), uso)
+        with patch.object(programa, "executavel_do_claude", return_value="redator-simulado"), \
+                patch.object(programa.subprocess, "run", return_value=processo) as redator:
+            codigo, saida, _ = self.executar_migrar()
+        self.assertEqual((codigo, redator.call_count), (1, 1))
+        self.assertIn(T["motivo_modelo"].format(modelo=programa.MODELO), saida)
+        self.conferir_arquivos_preservados(antes)
+        registros = programa.registros_de_rodadas()
+        self.assertEqual([r["resultado"] for r in registros], ["falhou"])
+        self.assertEqual(registros[0]["modelos"], {})
+
+    def test_falha_de_modelo_encerra_mesmo_apos_correcao_de_data(self):
+        for ordem in ("data-primeiro", "modelo-primeiro"):
+            with self.subTest(ordem=ordem):
+                pasta = self.preparar_migracao()
+                antes = {p: p.read_bytes() for p in programa.arquivos_antigos(pasta)}
+                processos = [self.processo_do_redator(self.resposta_com_hora(), {programa.MODELO: {"outputTokens": 100}}),
+                             self.processo_do_redator(self.resposta("migracao-b3-anth"), {"outro": {"outputTokens": 100}})]
+                if ordem == "modelo-primeiro":
+                    processos.reverse()
+                with patch.object(programa, "executavel_do_claude", return_value="redator-simulado"), \
+                        patch.object(programa.subprocess, "run", side_effect=processos) as redator:
+                    codigo, _, _ = self.executar_migrar()
+                self.assertEqual((codigo, redator.call_count), (1, 2 if ordem == "data-primeiro" else 1))
+                self.conferir_arquivos_preservados(antes)
+
+    def test_migrar_preserva_linha_final_se_registro_falhar(self):
+        for erro in (programa.Falha("erro original"), PermissionError("pasta sem escrita")):
+            with self.subTest(erro=type(erro).__name__), \
+                    patch.object(programa, "migrar", side_effect=erro), \
+                    patch.object(programa, "registrar", side_effect=OSError("registro bloqueado")) as registro:
+                codigo, saida, erros = self.executar_migrar()
+                self.assertEqual(codigo, 1)
+                motivo = str(erro) if isinstance(erro, programa.Falha) else repr(erro)
+                self.assertEqual(saida, T["linha_falhou"].format(motivo=motivo) + "\n")
+                self.assertIn(motivo, erros)
+                self.assertNotIn("registro bloqueado", saida + erros)
+                registro.assert_called_once_with("", self.projeto, "migrar", "migracao", "falhou", motivo)
+
+
 if __name__ == "__main__":
     unittest.main()
