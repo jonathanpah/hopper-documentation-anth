@@ -79,13 +79,21 @@ class Conferencia:
         d2 = pasta / self.t["d2"]
         if not d2.exists():
             return []
+        # Um cabeçalho de mensagem é uma linha "## M…" seguida do comentário de registros. Uma linha "## " no texto de
+        # uma mensagem (por exemplo, um título que o Claude escreveu) não é cabeçalho. Uma linha "## " fora desse par,
+        # logo depois do cabeçalho do arquivo, é reprovada em F2 como cabeçalho fora do formato.
+        linhas = le(d2).split("\n")
+        inicios = [i for i in range(len(linhas) - 1) if linhas[i].startswith("## ") and linhas[i + 1].startswith("<!-- registros:")]
+        primeiro = next((i for i, l in enumerate(linhas) if l.startswith("## ")), None)
+        if primeiro is not None and primeiro not in inicios:
+            inicios = [primeiro] + inicios
         saida = []
-        for parte in le(d2).split("\n## ")[1:]:
-            linhas = ("## " + parte).split("\n")
-            m = RE_MENSAGEM.match(linhas[0])
-            registros = linhas[1] if len(linhas) > 1 else ""
-            corpo = "\n".join(linhas[2:]).strip("\n")
-            saida.append((int(m.group(2)) if m else None, m.group(3) if m else None, m.group(5) if m else linhas[0], corpo, registros, linhas[0]))
+        for k, i in enumerate(inicios):
+            fim = inicios[k + 1] if k + 1 < len(inicios) else len(linhas)
+            m = RE_MENSAGEM.match(linhas[i])
+            registros = linhas[i + 1] if i + 1 < len(linhas) else ""
+            corpo = "\n".join(linhas[i + 2:fim]).strip("\n")
+            saida.append((int(m.group(2)) if m else None, m.group(3) if m else None, m.group(5) if m else linhas[i], corpo, registros, linhas[i]))
         return saida
 
     def ids_de_mensagens(self):
@@ -312,8 +320,9 @@ class Conferencia:
 
     def f9(self):
         r = self.roteiro
-        textos = r["mensagens"]
         fixos = r["textos_fixos"][self.idioma]
+        # No documento 2, a senha da mensagem 2 aparece oculta; o roteiro guarda o texto como gravado.
+        textos = [t.replace("{oculto}", fixos["oculto"]) for t in r.get("mensagens_no_documento_2", r["mensagens"])]
         localizadas = {}
         for pasta in self.pastas_de_conversa():
             msgs = self.mensagens(pasta)

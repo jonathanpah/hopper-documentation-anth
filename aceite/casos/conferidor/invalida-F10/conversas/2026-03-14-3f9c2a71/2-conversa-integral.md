@@ -16,6 +16,10 @@ Quero seguir o sitema, claro ou escuro.
 
 Vou criar o arquivo.
 
+## Plano
+
+Primeiro o arquivo, depois a conferência.
+
 Ferramenta: Write · /tmp/projeto-teste/nota.txt
 
 Ferramenta: Bash · Lista os arquivos da pasta

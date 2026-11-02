@@ -714,16 +714,19 @@ class Documento2:
         self.texto = ler(self.caminho)
 
     def mensagens(self):
-        """Lista de (n, codigo, autor, texto, primeiro, ultimo, hora) já gravadas."""
+        """Lista de (n, codigo, autor, texto, primeiro, ultimo, hora) já gravadas.
+
+        Um cabeçalho de mensagem é uma linha `## M<n>-<código> · …` seguida da linha do comentário de registros.
+        Uma linha que começa com `## ` dentro do texto de uma mensagem não é cabeçalho."""
+        linhas = self.texto.split("\n")
+        inicios = [i for i in range(len(linhas) - 1) if self.CABECALHO.match(linhas[i]) and self.REGISTROS.match(linhas[i + 1])]
         saida = []
-        for parte in self.texto.split("\n## ")[1:]:
-            linhas = ("## " + parte).split("\n")
-            m = self.CABECALHO.match(linhas[0])
-            r = self.REGISTROS.match(linhas[1]) if len(linhas) > 1 else None
-            if m:
-                saida.append({"n": int(m.group(2)), "codigo": m.group(3), "autor": m.group(5), "hora": m.group(4),
-                              "texto": "\n".join(linhas[2:]).strip("\n"),
-                              "primeiro": r.group(1) if r else "", "ultimo": r.group(2) if r else ""})
+        for k, i in enumerate(inicios):
+            fim = inicios[k + 1] if k + 1 < len(inicios) else len(linhas)
+            m = self.CABECALHO.match(linhas[i])
+            r = self.REGISTROS.match(linhas[i + 1])
+            saida.append({"n": int(m.group(2)), "codigo": m.group(3), "autor": m.group(5), "hora": m.group(4),
+                          "texto": "\n".join(linhas[i + 2:fim]).strip("\n"), "primeiro": r.group(1), "ultimo": r.group(2)})
         return saida
 
     def ultimo_numero(self):

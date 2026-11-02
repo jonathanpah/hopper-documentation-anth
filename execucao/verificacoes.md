@@ -167,3 +167,9 @@ Pasta de documentação e resultado bruto em `execucao/aceite/a3/`.
 ## Pausa · 2026-11-02 10:10
 
 Execução pausada a pedido do proprietário ("pause"). Interrompidos: avaliações de acionamento completas do pacote em português (sem resultado), 3 revisões independentes (U2, U3-U4-U6, U5-U7; retomáveis) e a medição de A1 no painel de Terminal. Observação: depois do falso bloqueio de A1, o arquivo `.claude/settings.local.json` recebeu regras `allow` gravadas pelo app a partir de aprovações do proprietário, o que indica que pedidos de permissão chegaram a ele; D-06 precisa ser revista na retomada.
+
+## V-U8-02 (correção) · 2026-11-02 13:07 · F2 e F9 corrigidos
+
+- Entrega: `Documento2.mensagens` passa a reconhecer como cabeçalho só a linha `## M<n>-<código> · …` seguida da linha do comentário de registros. Pacote em inglês regenerado (difere só em `LANGUAGE`).
+- Critérios (ainda não congelados): o conferidor aplica a mesma regra; `aceite/roteiro.json` ganha `mensagens_no_documento_2`, com a mensagem 2 como gravada (`{oculto}`); o caso `valida` do conferidor ganha uma linha "## Plano" dentro da mensagem do Claude, e os casos `invalida-F<n>` foram regenerados; teste novo `test_R05_titulo_no_texto_de_uma_mensagem_nao_e_cabecalho`, que falha sem a correção.
+- Resultados: conferidor nos casos (valida 9 de 9; cada invalida reprova na verificação dela); conferidor com roteiro na pasta real de A3 (`execucao/aceite/a3/`): **10 de 10 aprovadas**; testes de aceite: 32 de 32 nos 2 pacotes; testes do executor: aprovados nos 2.

@@ -8,6 +8,14 @@
   "Fica pendente escolher o formato do gráfico.",
   "Documente a conversa."
  ],
+ "mensagens_no_documento_2": [
+  "Vamos testar a documentação. Decidimos usar a cor azul no painel.",
+  "a senha do servidor é {oculto} hoje",
+  "Quero seguir o sitema, claro ou escuro.",
+  "Use a ferramenta Write para criar o arquivo nota.txt com o texto teste.",
+  "Fica pendente escolher o formato do gráfico.",
+  "Documente a conversa."
+ ],
  "assercoes": {
   "documento_2": {
    "contem": ["sitema"],

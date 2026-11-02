@@ -51,6 +51,29 @@ class Copiador(CasoDeAceite):
                                          f"- {TEXTO['pasta_do_projeto']}: {self.amb.projeto}\n- {TEXTO['fuso']}: +00:00\n\n"), texto[:300])
         self.assertEqual(corpo_do_documento_2(texto).strip() + "\n", le(CASOS / "b1" / f"esperado-{IDIOMA}.md"))
 
+    def test_R05_titulo_no_texto_de_uma_mensagem_nao_e_cabecalho(self):
+        """T05: uma resposta do Claude com linhas "## " (achado do aceite em A3, V-U8-02) não quebra a numeração nem a retomada."""
+        texto_com_titulos = "Resumo da skill.\n\n## O que a skill produz\n\nOs 7 documentos.\n\n## Como a skill roda\n\nEm segundo plano."
+        registros = [
+            usuario("u1", "Explique a skill.", "2026-03-14T15:00:00.000Z"),
+            {"type": "assistant", "uuid": "a1", "timestamp": "2026-03-14T15:00:05.000Z",
+             "message": {"role": "assistant", "content": [{"type": "text", "text": texto_com_titulos}]}},
+        ]
+        self.amb.grava_historico(SESSAO_B1, registros)
+        self.assertEqual(self.amb.copia().returncode, 0)
+        antes = self.amb.d(2).read_bytes()
+        self.assertIn(texto_com_titulos, antes.decode("utf-8"))
+        self.amb.acrescenta_historico(SESSAO_B1, [usuario("u2", "Obrigado.", "2026-03-14T15:01:00.000Z")])
+        self.assertEqual(self.amb.copia().returncode, 0)
+        depois = le(self.amb.d(2))
+        self.assertTrue(depois.encode("utf-8").startswith(antes))
+        self.assertIn(f"## M3-{CODIGO_B1} · ", depois)
+        self.assertEqual(depois.count(f"## M3-{CODIGO_B1} "), 1)
+        self.assertEqual(depois.count("Obrigado."), 1)
+        # resposta sem itens (as origens de rodada-b1 citam M4, que esta conversa não tem)
+        self.assertEqual(self.amb.rodada(respostas=("rodada-nada-relevante",)).returncode, 0)
+        self.assertIn(f"## M1-{CODIGO_B1} a M3-{CODIGO_B1}", le(self.amb.d(3)))
+
     def test_R06_uma_linha_por_ferramenta_sem_resultado(self):
         """T06: linha `Ferramenta: <nome> · <alvo>`, alvo cortado em 120 caracteres, sem o resultado; sem alvo, só o nome."""
         longo = "x" * 200
