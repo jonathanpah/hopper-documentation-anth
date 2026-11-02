@@ -1,18 +1,11 @@
-# Document index
+# Index of the English package
 
-- [README](README.md): purpose, what it runs and sends, requirements, installation, use, limits, tests, and updates.
-- [Skill](skills/hopper-documentation-anth/SKILL.md): what the conversation does when the user asks for a record or a compaction notice arrives.
-- [Writer rules](skills/hopper-documentation-anth/writer-rules.md): the content rules the program sends to the model that writes the handoff.
-- [Example](skills/hopper-documentation-anth/example.md): a complete handoff.
-- [Program](scripts/hopper_documentation_anth.py): reads the conversation, hides secrets, calls the writer, checks quotes, writes the handoff, and rebuilds the index.
-- [Hook](hooks/hooks.json): runs the program before each compaction.
-- [Tests](tests/test_hopper_documentation_anth.py) and [evaluation suite](evals/): program tests and behavior cases for `claude plugin eval`.
-- [Contributing](../CONTRIBUTING.md): proposals, pull requests, verification, and review.
-- [Security Policy](../SECURITY.md): scope, security expectations, and private vulnerability reporting.
-- [Code of Conduct](../CODE_OF_CONDUCT.md): participation and moderation.
-- [License](LICENSE): MIT terms and copyright.
-- [Bug report](../.github/ISSUE_TEMPLATE/bug-report.yml), [change proposal](../.github/ISSUE_TEMPLATE/change-proposal.yml), and [pull request template](../.github/pull_request_template.md): GitHub templates.
-
-- [Português (Brasil)](../hopper-documentation-anth-pt-br/index.md): equivalent skill and documentation, released with the English version.
-
-- [Claude plugin](.claude-plugin/plugin.json) · [Claude marketplace](.claude-plugin/marketplace.json).
+- `README.md`: what the plugin writes, how it runs, requirements, installation, limits and tests.
+- `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json`: plugin manifest and catalog.
+- `hooks/hooks.json`: the 2 commands of the `PreCompact` event (copy and writing).
+- `scripts/hopper_documentation_anth.py`: the program (copier, writer call, writing, hooks and migration).
+- `skills/hopper-documentation-anth/SKILL.md`: the skill, with what it produces and how it runs.
+- `skills/hopper-documentation-anth/writing-rules.md` and `templates.md`: what the writer receives.
+- `tests/`: executor tests.
+- `evals/`: triggering evals (`claude plugin eval`).
+- `LICENSE`: MIT license. Community files are at the repository root.
