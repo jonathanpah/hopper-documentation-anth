@@ -56,3 +56,5 @@ O campo `resumo` tem até 80 caracteres e vai para o índice da pasta, na coluna
 O campo `handoffs_antigos` é uma lista com o último handoff de cada conversa antiga. Cada entrada tem `conversa` (identificador indicado no arquivo), `data`, `resumo` (até 80 caracteres) e `handoff` (as 9 chaves do documento 7). Em `data`, use a data do último handoff antigo da conversa em `AAAA-MM-DD`, sem hora, por exemplo `2026-09-30`.
 
 O campo `sem_conteudo` lista os nomes dos arquivos antigos sem conteúdo relevante. Na migração, cada item de `itens_novos` também traz `conversa`.
+
+Todo arquivo antigo precisa de destino; arquivos sem conteúdo próprio, como o `index.md` antigo que só lista os handoffs, vão em `sem_conteudo`.

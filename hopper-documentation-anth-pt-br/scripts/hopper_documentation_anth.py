@@ -85,6 +85,7 @@ TEXTOS = {
         "motivo_origem": "origem inválida: {origem}", "motivo_verificacao": "verificação interna da migração reprovou: {detalhe}",
         "motivo_referencias": "referências inexistentes: {referencias}",
         "motivo_data": "data inválida para a conversa {conversa}: {data}; use AAAA-MM-DD, sem hora",
+        "motivo_destino": "arquivos sem destino: {arquivos}",
         "motivo_origem_fora": "origem fora do trecho novo: {origem}",
         "motivo_assunto": "linha de assunto ausente em conversa_simplificada",
         "regra_origem": "a origem de um item novo ou de uma mudança é uma mensagem de {inicio} a {fim} ou um item existente",
@@ -139,6 +140,7 @@ TEXTOS = {
         "motivo_origem": "invalid source: {origem}", "motivo_verificacao": "internal migration check failed: {detalhe}",
         "motivo_referencias": "nonexistent references: {referencias}",
         "motivo_data": "invalid date for conversation {conversa}: {data}; use YYYY-MM-DD, without a time",
+        "motivo_destino": "files without destination: {arquivos}",
         "motivo_origem_fora": "source outside the new segment: {origem}",
         "motivo_assunto": "subject line missing in conversa_simplificada",
         "regra_origem": "the source of a new item or a change is a message from {inicio} to {fim} or an existing item",
@@ -1013,7 +1015,14 @@ def validar_resposta(resposta, esquema, mensagens_validas, itens_existentes, mig
     textos = [i[c] for i in resposta["itens_novos"] for c in ("texto", "situacao", "recomendacao", "depende_de")]
     textos += [m["situacao"] for m in resposta["mudancas"]]
     if migracao:
-        textos += [h["handoff"][c] for h in resposta["handoffs_antigos"] for c in ESQUEMA_HANDOFF]
+        textos_handoffs = [h["handoff"][c] for h in resposta["handoffs_antigos"] for c in ESQUEMA_HANDOFF]
+        textos += textos_handoffs
+        citados = set(resposta["sem_conteudo"])
+        citados.update(o.strip() for item in resposta["itens_novos"] + resposta["mudancas"] for o in item["origem"])
+        faltam = sorted(nome for nome in (arquivos_validos or set()) - citados
+                        if not any(nome in texto for texto in textos_handoffs))
+        if faltam:
+            problemas.append(T["motivo_destino"].format(arquivos=", ".join(faltam)))
         mensagens = set()
     else:
         textos += [resposta["conversa_simplificada"], *resposta["handoff"].values()]

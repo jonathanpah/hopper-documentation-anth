@@ -233,3 +233,7 @@ Diagnóstico pelo rastro (`--keep-temp`): sem `--allow-tools`, a avaliação ret
 ## V-CODEX-12 · Tarefas 12 e 13 do Codex (migração real) · 2026-11-02 21:40 · aprovado pelo verificador
 
 Conferência própria: aceite 42 de 42 nos 2 pacotes (T12 aprovado depois da tarefa 13), testes do executor 55 de 55 nos 2, `claude plugin validate --strict` aprovado nos 2, programa en igual ao pt-br gerado pelo `sed`, manifesto dos critérios 129 de 129. Evidência das falhas em D-24.
+
+## V-CODEX-14 · Tarefa 14 do Codex (destino dos arquivos antigos antes da gravação) · 2026-11-02 21:55 · aprovado pelo verificador
+
+Evidência: a migração de `/home/jpah/projects/mallmetrics/repo` reprovou na verificação interna ("arquivos sem destino: index.md") depois de gravar os documentos, e o diário fazia a repetição reprovar de novo. Correção: a condição de destino é conferida antes da gravação, com a nova tentativa existente, e a skill orienta pôr o `index.md` antigo em `sem_conteudo`. Conferência própria: aceite 42 de 42 nos 2 pacotes, executor 59 de 59 nos 2, `validate --strict` aprovado nos 2, programa en igual ao pt-br gerado, manifesto 129 de 129.

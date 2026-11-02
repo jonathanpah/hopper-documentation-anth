@@ -56,3 +56,5 @@ The `resumo` field has up to 80 characters and goes to the folder index, in the 
 The `handoffs_antigos` field is a list with the last handoff of each old conversation. Each entry has `conversa` (identifier given in the file), `data`, `resumo` (up to 80 characters) and `handoff` (the 9 keys of document 7). In `data`, use the date of the conversation's last old handoff in `YYYY-MM-DD`, without a time, for example `2026-09-30`.
 
 The `sem_conteudo` field lists the names of old files with no relevant content. During migration, each item of `itens_novos` also includes `conversa`.
+
+Every old file needs a destination; files without their own content, such as the old `index.md` that only lists handoffs, go in `sem_conteudo`.

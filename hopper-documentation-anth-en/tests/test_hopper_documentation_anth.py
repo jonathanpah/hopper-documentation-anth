@@ -993,5 +993,100 @@ class RegressoesDaTarefa12(unittest.TestCase):
                 registro.assert_called_once_with("", self.projeto, "migrar", "migracao", "falhou", motivo)
 
 
+class RegressoesDaTarefa14(unittest.TestCase):
+    setUp = RegressoesDaTarefa01.setUp
+    resposta = RegressoesDaTarefa02.resposta
+    preparar_migracao = RegressoesDaTarefa02.preparar_migracao
+    processo_do_redator = RegressoesDaTarefa12.processo_do_redator
+    executar_migrar = RegressoesDaTarefa12.executar_migrar
+
+    def resposta_sem_destino_do_indice(self):
+        resposta = self.resposta("migracao-b3-anth")
+        resposta["sem_conteudo"] = []
+        return resposta
+
+    def test_indice_sem_destino_repete_e_conclui_sem_gravar_a_primeira_resposta(self):
+        pasta = self.preparar_migracao()
+        antes = {p.relative_to(pasta): p.read_bytes() for p in pasta.rglob("*") if p.is_file()}
+        processos = iter([
+            self.processo_do_redator(self.resposta_sem_destino_do_indice(), {programa.MODELO: {"outputTokens": 11}}),
+            self.processo_do_redator(self.resposta("migracao-b3-anth"), {programa.MODELO: {"outputTokens": 23}}),
+        ])
+
+        def redator(*args, **kwargs):
+            self.assertEqual({p.relative_to(pasta): p.read_bytes() for p in pasta.rglob("*") if p.is_file()}, antes)
+            self.assertFalse(list((programa.pasta_de_dados() / "diarios").glob("*.json")))
+            return next(processos)
+
+        with patch.object(programa, "executavel_do_claude", return_value="redator-simulado"), \
+                patch.object(programa.subprocess, "run", side_effect=redator) as chamadas, \
+                patch.object(programa, "verificacao_interna", wraps=programa.verificacao_interna) as verificacao:
+            codigo, saida, erros = self.executar_migrar()
+        self.assertEqual((codigo, chamadas.call_count), (0, 2))
+        self.assertEqual(saida, T["linha_migracao"].format(n=3) + "\n")
+        self.assertEqual(erros, "")
+        entrada = chamadas.call_args_list[0].kwargs["input"]
+        segunda = chamadas.call_args_list[1].kwargs["input"]
+        self.assertTrue(segunda.startswith(entrada))
+        correcao = segunda[len(entrada):]
+        self.assertEqual(len(correcao.splitlines()), 1)
+        self.assertIn("index.md", correcao)
+        self.assertFalse(programa.arquivos_antigos(pasta))
+        self.assertTrue(all((pasta / T[c]).is_file() for c in ("d1", "d4", "d5", "d6")))
+        self.assertTrue((pasta / T["conversas"] / "2026-03-14-3f9c2a71" / T["d7"]).is_file())
+        self.assertFalse(list((programa.pasta_de_dados() / "diarios").glob("*.json")))
+        verificacao.assert_called_once()
+        registros = [r for r in programa.registros_de_rodadas() if r["etapa"] == "migracao"]
+        self.assertEqual(registros[0]["resultado"], "em andamento")
+        self.assertIn("index.md", registros[0]["motivo"])
+        self.assertEqual(registros[0]["modelos"], {programa.MODELO: 11})
+        self.assertEqual(registros[-1]["modelos"], {programa.MODELO: 23})
+
+    def test_indice_sem_destino_duas_vezes_falha_sem_gravar_nem_apagar(self):
+        pasta = self.preparar_migracao()
+        antes = {p.relative_to(pasta): p.read_bytes() for p in pasta.rglob("*") if p.is_file()}
+        processos = [self.processo_do_redator(self.resposta_sem_destino_do_indice(),
+                                             {programa.MODELO: {"outputTokens": n}}) for n in (11, 23)]
+        with patch.object(programa, "executavel_do_claude", return_value="redator-simulado"), \
+                patch.object(programa.subprocess, "run", side_effect=processos) as chamadas:
+            codigo, saida, erros = self.executar_migrar()
+        self.assertEqual((codigo, chamadas.call_count), (1, 2))
+        motivo = "arquivos sem destino: index.md" if programa.LANGUAGE == "pt-br" else "files without destination: index.md"
+        self.assertIn(motivo, saida)
+        self.assertNotIn("Traceback", erros)
+        self.assertEqual({p.relative_to(pasta): p.read_bytes() for p in pasta.rglob("*") if p.is_file()}, antes)
+        self.assertFalse(list((programa.pasta_de_dados() / "diarios").glob("*.json")))
+        registros = programa.registros_de_rodadas()
+        self.assertEqual([r["resultado"] for r in registros], ["em andamento", "em andamento", "falhou"])
+        self.assertEqual([r["modelos"] for r in registros], [{programa.MODELO: 11}, {programa.MODELO: 23}, {}])
+        self.assertTrue(all(motivo in r["motivo"] for r in registros))
+
+    def test_indice_aceito_em_origem_sem_conteudo_ou_qualquer_campo_do_handoff(self):
+        nomes = {p.name for p in (CASOS / "b3" / "anth").iterdir()}
+        for destino in ("itens_novos", "mudancas", "sem_conteudo", *programa.ESQUEMA_HANDOFF):
+            with self.subTest(destino=destino):
+                resposta = self.resposta_sem_destino_do_indice()
+                if destino == "itens_novos":
+                    resposta["itens_novos"][0]["origem"].append(" index.md ")
+                elif destino == "mudancas":
+                    resposta["mudancas"].append({"id": "N1", "situacao": T["situacoes"]["D"][0], "origem": ["index.md"]})
+                elif destino == "sem_conteudo":
+                    resposta["sem_conteudo"].append("index.md")
+                else:
+                    resposta["handoffs_antigos"][0]["handoff"][destino] += " (index.md)"
+                programa.validar_resposta(resposta, programa.esquema_de_migracao(), set(), set(),
+                                          migracao=True, arquivos_validos=nomes)
+
+    def test_arquivos_sem_destino_sao_corrigiveis_e_listados_em_ordem(self):
+        resposta = self.resposta_sem_destino_do_indice()
+        resposta["itens_novos"][0]["texto"] += " (index.md, outro.md)"
+        nomes = {p.name for p in (CASOS / "b3" / "anth").iterdir()} | {"outro.md"}
+        with self.assertRaises(programa.RespostaCorrigivel) as erro:
+            programa.validar_resposta(resposta, programa.esquema_de_migracao(), set(), set(),
+                                      migracao=True, arquivos_validos=nomes)
+        motivo = "arquivos sem destino: " if programa.LANGUAGE == "pt-br" else "files without destination: "
+        self.assertEqual(str(erro.exception), motivo + "index.md, outro.md")
+
+
 if __name__ == "__main__":
     unittest.main()
