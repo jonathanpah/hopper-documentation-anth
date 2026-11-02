@@ -1459,6 +1459,39 @@ def identificador_antigo(arquivo):
     return "antigo-" + hashlib.sha256(arquivo.name.encode("utf-8")).hexdigest()[:4]
 
 
+def partes_da_migracao(arquivos):
+    """Agrupa conversas por data; só um arquivo indivisível pode exceder o limite de R11."""
+    tamanhos = {a: len(ler(a)) for a in arquivos}
+    if sum(tamanhos.values()) <= LIMITE_DO_TRECHO:
+        return [arquivos] if arquivos else []
+    conversas = {}
+    atual = [a for a in arquivos if a.name == "index.md"]
+    tamanho = sum(tamanhos[a] for a in atual)
+    partes = []
+    # Os nomes antigos trazem a data e a hora; cada conversa fica na data do seu primeiro handoff.
+    for arquivo in sorted(arquivos):
+        if arquivo.name != "index.md":
+            conversas.setdefault(identificador_antigo(arquivo), []).append(arquivo)
+    for handoffs in conversas.values():
+        total = sum(tamanhos[a] for a in handoffs)
+        if total <= LIMITE_DO_TRECHO:
+            if atual and tamanho + total > LIMITE_DO_TRECHO:
+                partes.append(atual)
+                atual, tamanho = [], 0
+            atual.extend(handoffs)
+            tamanho += total
+            continue
+        for arquivo in handoffs:
+            if atual and tamanho + tamanhos[arquivo] > LIMITE_DO_TRECHO:
+                partes.append(atual)
+                atual, tamanho = [], 0
+            atual.append(arquivo)
+            tamanho += tamanhos[arquivo]
+    if atual:
+        partes.append(atual)
+    return partes
+
+
 def entrada_da_migracao(pasta_doc, arquivos):
     docs = documentos_da_pasta(pasta_doc)
     partes = []
@@ -1513,51 +1546,58 @@ def migrar(projeto, acionamento="migrar"):
     diario = pasta_de_dados() / "diarios" / f"migracao-{nome_curto(pasta_doc)}.json"
     # Serializa migrações da pasta sem prender a cópia durante a chamada ao redator.
     with Trava(f"migracao-{nome_curto(pasta_doc)}", 15 * 60):
-        if diario.exists():
-            dados = json.loads(ler(diario))
-            resposta, mapa, modelos = dados["resposta"], dados["mapa"], dados["modelos"]
-            arquivos = [pasta_doc / nome for nome in dados["arquivos"]]
+        dados = json.loads(ler(diario)) if diario.exists() else None
+        arquivos = arquivos_antigos(pasta_doc)
+        if dados is not None:
+            nomes = set(dados["arquivos"])
+            partes = [[pasta_doc / nome for nome in dados["arquivos"]]]
+            partes += partes_da_migracao([a for a in arquivos if a.name not in nomes])
         else:
-            arquivos = arquivos_antigos(pasta_doc)
-            if not arquivos:
-                return 0
+            partes = partes_da_migracao(arquivos)
+        total = 0
+        for arquivos in partes:
+            if dados is not None:
+                resposta, mapa, modelos = dados["resposta"], dados["mapa"], dados["modelos"]
+                dados = None
+            else:
+                with Trava(f"pasta-{nome_curto(pasta_doc)}", 60):
+                    entrada = entrada_da_migracao(pasta_doc, arquivos)
+                    itens_existentes = {i["id"] for i in todos_os_itens(pasta_doc)}
+                registro = dict(conversa="", pasta_do_projeto=projeto, acionamento=acionamento, etapa="migracao")
+                resposta, modelos = chamar_redator_validado(entrada, esquema_de_migracao(), set(), itens_existentes,
+                                                            registro, migracao=True, arquivos_validos={a.name for a in arquivos})
+                resposta = ocultar_campos(resposta)
+                mapa = None
             with Trava(f"pasta-{nome_curto(pasta_doc)}", 60):
-                entrada = entrada_da_migracao(pasta_doc, arquivos)
-                itens_existentes = {i["id"] for i in todos_os_itens(pasta_doc)}
-            registro = dict(conversa="", pasta_do_projeto=projeto, acionamento=acionamento, etapa="migracao")
-            resposta, modelos = chamar_redator_validado(entrada, esquema_de_migracao(), set(), itens_existentes,
-                                                        registro, migracao=True, arquivos_validos={a.name for a in arquivos})
-            resposta = ocultar_campos(resposta)
-            mapa = None
-        with Trava(f"pasta-{nome_curto(pasta_doc)}", 60):
-            mapa = reservar_itens(pasta_doc, "", resposta, mapa)
-            if not diario.exists():
-                gravar_atomico(diario, json.dumps({"resposta": resposta, "mapa": mapa, "modelos": modelos,
-                                                  "arquivos": [a.name for a in arquivos]}, ensure_ascii=False))
-            interromper("depois-do-diario")
-            garantir_documentos_compartilhados(pasta_doc)
-            gravar_itens(pasta_doc, "", resposta, T["migracao"], mapa)
-            aplicar_mudancas(pasta_doc, resposta, mapa)
-            for h in resposta["handoffs_antigos"]:
-                codigo = codigo_do_identificador(h["conversa"], pasta_doc)
-                pasta = pasta_da_conversa(pasta_doc, codigo, h["data"])
-                pasta.mkdir(parents=True, exist_ok=True)
-                gravar_documento_7(pasta, codigo, h["conversa"], projeto, T["sem_integral"], h["handoff"], mapa)
-                registrar("", projeto, acionamento, "migracao", "concluída", intervalo=codigo, modelos=modelos, resumo=h["resumo"])
-            detalhe = verificacao_interna(pasta_doc, arquivos, resposta)
-            if detalhe:
-                motivo = T["motivo_verificacao"].format(detalhe=detalhe)
-                registrar("", projeto, acionamento, "migracao", "falhou", motivo)
+                mapa = reservar_itens(pasta_doc, "", resposta, mapa)
+                if not diario.exists():
+                    gravar_atomico(diario, json.dumps({"resposta": resposta, "mapa": mapa, "modelos": modelos,
+                                                      "arquivos": [a.name for a in arquivos]}, ensure_ascii=False))
+                interromper("depois-do-diario")
+                garantir_documentos_compartilhados(pasta_doc)
+                gravar_itens(pasta_doc, "", resposta, T["migracao"], mapa)
+                aplicar_mudancas(pasta_doc, resposta, mapa)
+                for h in resposta["handoffs_antigos"]:
+                    codigo = codigo_do_identificador(h["conversa"], pasta_doc)
+                    pasta = pasta_da_conversa(pasta_doc, codigo, h["data"])
+                    pasta.mkdir(parents=True, exist_ok=True)
+                    gravar_documento_7(pasta, codigo, h["conversa"], projeto, T["sem_integral"], h["handoff"], mapa)
+                    registrar("", projeto, acionamento, "migracao", "concluída", intervalo=codigo, modelos=modelos, resumo=h["resumo"])
+                detalhe = verificacao_interna(pasta_doc, arquivos, resposta)
+                if detalhe:
+                    motivo = T["motivo_verificacao"].format(detalhe=detalhe)
+                    registrar("", projeto, acionamento, "migracao", "falhou", motivo)
+                    gravar_documento_1(pasta_doc, projeto)
+                    raise Falha(motivo)
+                registrar("", projeto, acionamento, "migracao", "concluída", intervalo=f"{len(arquivos)} {T['migracao']}", modelos=modelos)
+                interromper("antes-da-exclusao")
+                for arquivo in arquivos:
+                    arquivo.unlink(missing_ok=True)
+                registrar("", projeto, acionamento, "exclusao", "concluída", intervalo=f"{len(arquivos)} {T['migracao']}")
                 gravar_documento_1(pasta_doc, projeto)
-                raise Falha(motivo)
-            registrar("", projeto, acionamento, "migracao", "concluída", intervalo=f"{len(arquivos)} {T['migracao']}", modelos=modelos)
-            interromper("antes-da-exclusao")
-            for arquivo in arquivos:
-                arquivo.unlink(missing_ok=True)
-            registrar("", projeto, acionamento, "exclusao", "concluída", intervalo=f"{len(arquivos)} {T['migracao']}")
-            gravar_documento_1(pasta_doc, projeto)
-            diario.unlink(missing_ok=True)
-    return len(arquivos)
+                diario.unlink(missing_ok=True)
+            total += len(arquivos)
+    return total
 
 
 # ---------------------------------------------------------------------------------------------------------------------

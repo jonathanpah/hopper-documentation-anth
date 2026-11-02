@@ -58,3 +58,5 @@ O campo `handoffs_antigos` é uma lista com o último handoff de cada conversa a
 O campo `sem_conteudo` lista os nomes dos arquivos antigos sem conteúdo relevante. Na migração, cada item de `itens_novos` também traz `conversa`.
 
 Todo arquivo antigo precisa de destino; arquivos sem conteúdo próprio, como o `index.md` antigo que só lista os handoffs, vão em `sem_conteudo`.
+
+Um handoff intermediário cujo conteúdo um handoff posterior da mesma conversa substituiu vai em `sem_conteudo`; os parágrafos do documento 7 citam como origem os handoffs de onde vieram.

@@ -58,3 +58,5 @@ The `handoffs_antigos` field is a list with the last handoff of each old convers
 The `sem_conteudo` field lists the names of old files with no relevant content. During migration, each item of `itens_novos` also includes `conversa`.
 
 Every old file needs a destination; files without their own content, such as the old `index.md` that only lists handoffs, go in `sem_conteudo`.
+
+An intermediate handoff whose content a later handoff from the same conversation superseded goes in `sem_conteudo`; document 7 paragraphs cite the handoffs they came from as their sources.

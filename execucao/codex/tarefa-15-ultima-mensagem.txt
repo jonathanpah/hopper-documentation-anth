@@ -1,0 +1,6 @@
+A migração em partes está implementada nos 2 pacotes. O [relatório completo](</Users/jonathan/Library/CloudStorage/Dropbox/5-ai/5-claude/hopper-documentation-anth/execucao/codex/tarefa-15-relatorio.md>) registra as alterações e verificações.
+
+Os 65 testes do executor passaram em cada pacote. O `diff` mostra somente `LANGUAGE`.
+
+1. O aceite passou em 41 de 42 testes por pacote. Falta o verificador executar T38 fora do isolamento. A falha também ocorre no programa anterior, com a consulta a `ps` bloqueada.
+

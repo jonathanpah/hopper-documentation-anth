@@ -1088,5 +1088,190 @@ class RegressoesDaTarefa14(unittest.TestCase):
         self.assertEqual(str(erro.exception), motivo + "index.md, outro.md")
 
 
+class RegressoesDaTarefa15(unittest.TestCase):
+    setUp = RegressoesDaTarefa01.setUp
+    resposta = RegressoesDaTarefa02.resposta
+    processo_do_redator = RegressoesDaTarefa12.processo_do_redator
+    executar_migrar = RegressoesDaTarefa12.executar_migrar
+
+    def preparar_arquivos(self, entradas=None, tamanho_indice=20):
+        pasta = self.projeto / programa.PASTA_DOC
+        pasta.mkdir()
+        if entradas is None:
+            entradas = [("handoff-20260314-010000-3f9c2a71.md", 95_000),
+                        ("handoff-20260314-020000-8f9c2a71.md", 95_000),
+                        ("handoff-20260314-030000-3f9c2a71.md", 95_000),
+                        ("handoff-20260314-040000-8f9c2a71.md", 95_000)]
+        (pasta / "index.md").write_text("i" * tamanho_indice, encoding="utf-8")
+        for nome, tamanho in entradas:
+            # Caracteres multibyte distinguem o limite de caracteres de um limite em bytes.
+            (pasta / nome).write_text("á" * tamanho, encoding="utf-8")
+        return pasta
+
+    def resposta_da_parte(self, arquivos):
+        handoffs = [a for a in arquivos if a.name != "index.md"]
+        ultimo = handoffs[-1]
+        conversa = programa.identificador_antigo(ultimo)
+        resposta = self.resposta("migracao-b3-anth")
+        resposta["sem_conteudo"] = [a.name for a in arquivos if a != ultimo]
+        for item in resposta["itens_novos"]:
+            item.update(conversa=conversa, origem=[ultimo.name], texto=f"{item['tipo']} de {ultimo.name}.")
+        resposta["handoffs_antigos"] = [{"conversa": conversa, "data": "2026-03-14", "resumo": ultimo.name,
+                                        "handoff": {c: f"Estado de {ultimo.name}. ({ultimo.name})"
+                                                    for c in programa.ESQUEMA_HANDOFF}}]
+        return resposta
+
+    def partes_de_duas_conversas(self, pasta):
+        arquivos = programa.arquivos_antigos(pasta)
+        return [[pasta / "index.md"] + [a for a in arquivos if "3f9c2a71" in a.name],
+                [a for a in arquivos if "8f9c2a71" in a.name]]
+
+    def redator_falso(self, resposta):
+        return self.processo_do_redator(resposta, {programa.MODELO: {"outputTokens": 17}})
+
+    def conferir_concluida(self, pasta, codigos):
+        self.assertFalse(programa.arquivos_antigos(pasta))
+        self.assertFalse(list((programa.pasta_de_dados() / "diarios").glob("*.json")))
+        self.assertTrue(all((pasta / T[c]).is_file() for c in ("d1", "d4", "d5", "d6")))
+        for codigo in codigos:
+            self.assertTrue((programa.pasta_da_conversa(pasta, codigo) / T["d7"]).is_file())
+        self.assertEqual(len(programa.todos_os_itens(pasta)), 3 * len(codigos))
+
+    def test_duas_conversas_grandes_fazem_duas_chamadas_com_documentos_atualizados(self):
+        pasta = self.preparar_arquivos()
+        partes = self.partes_de_duas_conversas(pasta)
+        chamadas = []
+
+        def redator(*args, **kwargs):
+            n = len(chamadas)
+            entrada = kwargs["input"]
+            antigos = entrada.split("<arquivos_antigos>\n", 1)[1].split("</arquivos_antigos>", 1)[0]
+            self.assertEqual([a.name for a in partes[n]],
+                             [linha.split()[1] for linha in antigos.splitlines() if linha.startswith("### ")])
+            if n:
+                self.assertTrue(all(not a.exists() for a in partes[0]))
+                self.assertTrue(all(a.exists() for a in partes[1]))
+                for tipo, tag in (("D", "decisoes"), ("F", "funcoes"), ("PD", "pendencias")):
+                    texto = entrada.split(f"<{tag}>\n", 1)[1].split(f"</{tag}>", 1)[0]
+                    self.assertIn(f"{tipo}1-3f9c2a71", texto)
+            chamadas.append(entrada)
+            return self.redator_falso(self.resposta_da_parte(partes[n]))
+
+        with patch.object(programa, "executavel_do_claude", return_value="redator-simulado"), \
+                patch.object(programa.subprocess, "run", side_effect=redator), \
+                patch.object(programa, "verificacao_interna", wraps=programa.verificacao_interna) as verificar:
+            codigo, saida, erros = self.executar_migrar()
+        self.assertEqual((codigo, len(chamadas)), (0, 2), saida + erros)
+        self.assertEqual(saida, T["linha_migracao"].format(n=5) + "\n")
+        self.assertEqual(erros, "")
+        self.assertEqual(verificar.call_count, 2)
+        self.conferir_concluida(pasta, ("3f9c2a71", "8f9c2a71"))
+        registros = programa.registros_de_rodadas()
+        self.assertEqual([r["intervalo"] for r in registros if r["etapa"] == "exclusao"],
+                         [f"3 {T['migracao']}", f"2 {T['migracao']}"])
+
+    def test_falha_na_segunda_parte_preserva_primeira_e_nova_execucao_conclui(self):
+        pasta = self.preparar_arquivos()
+        primeira, segunda = self.partes_de_duas_conversas(pasta)
+        antes = {a: a.read_bytes() for a in segunda}
+        invalida = self.resposta_da_parte(segunda)
+        invalida["handoffs_antigos"][0]["data"] += " 12:20:55"
+        respostas = [self.resposta_da_parte(primeira), invalida, invalida]
+        with patch.object(programa, "executavel_do_claude", return_value="redator-simulado"), \
+                patch.object(programa.subprocess, "run", side_effect=[self.redator_falso(r) for r in respostas]) as redator:
+            codigo, saida, erros = self.executar_migrar()
+        self.assertEqual((codigo, redator.call_count), (1, 3))
+        self.assertIn(T["linha_falhou"].split("{")[0], saida)
+        self.assertNotIn("Traceback", erros)
+        self.assertTrue(all(not a.exists() for a in primeira))
+        self.assertEqual({a: a.read_bytes() for a in segunda}, antes)
+        self.assertEqual(len(programa.todos_os_itens(pasta)), 3)
+        handoff = programa.pasta_da_conversa(pasta, "3f9c2a71") / T["d7"]
+        handoff_antes = handoff.read_bytes()
+        self.assertIsNone(programa.pasta_da_conversa(pasta, "8f9c2a71"))
+        registros = programa.registros_de_rodadas()
+        self.assertEqual(registros[-1]["resultado"], "falhou")
+        self.assertEqual(len([r for r in registros if r["etapa"] == "exclusao"]), 1)
+        self.assertIn("Problemas" if programa.LANGUAGE == "pt-br" else "Problems",
+                      redator.call_args_list[2].kwargs["input"])
+        with patch.object(programa, "executavel_do_claude", return_value="redator-simulado"), \
+                patch.object(programa.subprocess, "run", return_value=self.redator_falso(self.resposta_da_parte(segunda))) as redator:
+            codigo, saida, erros = self.executar_migrar()
+        self.assertEqual((codigo, redator.call_count), (0, 1), saida + erros)
+        self.assertEqual(saida, T["linha_migracao"].format(n=2) + "\n")
+        self.assertIn("D1-3f9c2a71", redator.call_args.kwargs["input"])
+        self.assertEqual(handoff.read_bytes(), handoff_antes)
+        self.conferir_concluida(pasta, ("3f9c2a71", "8f9c2a71"))
+
+    def test_diario_da_segunda_parte_reaplica_sem_redator_nem_itens_duplicados(self):
+        pasta = self.preparar_arquivos()
+        partes = self.partes_de_duas_conversas(pasta)
+        terceira = pasta / "handoff-20260315-010000-9f9c2a71.md"
+        terceira.write_text("á" * 190_000, encoding="utf-8")
+        gravar = programa.gravar_itens
+
+        def gravar_e_interromper(*args):
+            resultado = gravar(*args)
+            if args[2]["handoffs_antigos"][0]["conversa"] == "8f9c2a71":
+                raise OSError("interrupção da segunda parte")
+            return resultado
+
+        with patch.object(programa, "executavel_do_claude", return_value="redator-simulado"), \
+                patch.object(programa.subprocess, "run", side_effect=[self.redator_falso(self.resposta_da_parte(p)) for p in partes]), \
+                patch.object(programa, "gravar_itens", side_effect=gravar_e_interromper):
+            codigo, _, _ = self.executar_migrar()
+        self.assertEqual(codigo, 1)
+        diario = next((programa.pasta_de_dados() / "diarios").glob("*.json"))
+        self.assertEqual(json.loads(diario.read_text())["arquivos"], [a.name for a in partes[1]])
+        self.assertTrue(all(not a.exists() for a in partes[0]))
+        self.assertTrue(terceira.exists())
+
+        def redator_da_terceira(*args, **kwargs):
+            self.assertTrue(all(not a.exists() for parte in partes for a in parte))
+            for tipo in ("D", "F", "PD"):
+                self.assertIn(f"{tipo}1-8f9c2a71", kwargs["input"])
+            return self.redator_falso(self.resposta_da_parte([terceira]))
+
+        with patch.object(programa, "executavel_do_claude", return_value="redator-simulado"), \
+                patch.object(programa.subprocess, "run", side_effect=redator_da_terceira) as redator:
+            codigo, saida, erros = self.executar_migrar()
+        self.assertEqual((codigo, redator.call_count), (0, 1), saida + erros)
+        self.assertEqual(saida, T["linha_migracao"].format(n=3) + "\n")
+        self.conferir_concluida(pasta, ("3f9c2a71", "8f9c2a71", "9f9c2a71"))
+
+    def test_conversa_maior_que_limite_termina_com_ultimo_handoff(self):
+        nomes = [f"handoff-20260314-0{n}0000-3f9c2a71.md" for n in (1, 2, 3)]
+        pasta = self.preparar_arquivos([(nome, 160_000) for nome in nomes])
+        partes = [[pasta / "index.md", pasta / nomes[0]], [pasta / nomes[1]], [pasta / nomes[2]]]
+        with patch.object(programa, "executavel_do_claude", return_value="redator-simulado"), \
+                patch.object(programa.subprocess, "run", side_effect=[self.redator_falso(self.resposta_da_parte(p)) for p in partes]) as redator:
+            codigo, saida, erros = self.executar_migrar()
+        self.assertEqual((codigo, redator.call_count), (0, 3), saida + erros)
+        self.assertEqual(saida, T["linha_migracao"].format(n=4) + "\n")
+        handoff = programa.ler(programa.pasta_da_conversa(pasta, "3f9c2a71") / T["d7"])
+        self.assertIn(nomes[-1], handoff)
+        self.assertNotIn(nomes[0], handoff)
+        self.assertNotIn(nomes[1], handoff)
+        self.assertEqual(len(programa.todos_os_itens(pasta)), 9)
+        self.assertFalse(programa.arquivos_antigos(pasta))
+
+    def test_limite_exato_mantem_uma_chamada_e_ordem_original(self):
+        nome = "handoff-20260314-010000-3f9c2a71.md"
+        pasta = self.preparar_arquivos([(nome, 299_980)])
+        arquivos = programa.arquivos_antigos(pasta)
+        self.assertEqual(programa.partes_da_migracao(arquivos), [arquivos])
+        with patch.object(programa, "executavel_do_claude", return_value="redator-simulado"), \
+                patch.object(programa.subprocess, "run", return_value=self.redator_falso(self.resposta_da_parte(arquivos))) as redator:
+            codigo, saida, erros = self.executar_migrar()
+        self.assertEqual((codigo, redator.call_count), (0, 1), saida + erros)
+        self.conferir_concluida(pasta, ("3f9c2a71",))
+
+    def test_arquivo_indivisivel_acima_do_limite_fica_inteiro(self):
+        nome = "handoff-20260314-010000-3f9c2a71.md"
+        pasta = self.preparar_arquivos([(nome, 300_001)])
+        self.assertEqual(programa.partes_da_migracao(programa.arquivos_antigos(pasta)),
+                         [[pasta / "index.md"], [pasta / nome]])
+
+
 if __name__ == "__main__":
     unittest.main()
