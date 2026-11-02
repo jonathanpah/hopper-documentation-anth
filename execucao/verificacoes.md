@@ -146,3 +146,7 @@ Pré-autorizado por D-08. Em cada conta, nesta ordem: `config.json` com `{"migra
 - VPS, `jpah` (A3): 2.0.0, `Read from: /opt/hopper-documentation-anth/releases/2.0.0/pt-br`; `details`: Skills (1), Hooks (1) PreCompact. Pasta de produção `root:root`, 0755 e 0644.
 - VPS, `jonathan`: 2.0.0, mesma pasta de produção.
 Faltam: a lista de hooks com os 2 comandos (A1 e A3, por pseudoterminal), os passos F-C, F-A, F-K e F-V, que dependem de chamadas reais (limite do plano até 05:30 UTC), de A1 (P-02) e de A2 (P-03).
+
+## V-U8-01 (correção) · 2026-11-02 10:00
+
+A desinstalação da 0.1.4 apagou a pasta de dados e o `config.json` gravado antes (D-14). O arquivo foi regravado nas 3 contas (MacBook `jonathan`, VPS `jpah` e `jonathan`) com `{"migracao_automatica": false}` e conferido por leitura. Nenhuma rodada da versão 2 rodou antes disso (nenhum `rodadas.jsonl` existia). N12 preservada.
