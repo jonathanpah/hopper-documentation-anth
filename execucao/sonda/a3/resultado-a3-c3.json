@@ -1,0 +1,191 @@
+{
+ "marca": "a3-c3",
+ "pasta": "/home/jpah/hopper-sonda-a3",
+ "pct": 70,
+ "modelo": "haiku",
+ "modo": "compactar",
+ "fechar": true,
+ "eventos": [
+  {
+   "hora": "2026-11-02T03:30:37Z",
+   "evento": "claude iniciado",
+   "pid": 3844958
+  },
+  {
+   "hora": "2026-11-02T03:31:05Z",
+   "evento": "mensagem 1 enviada"
+  },
+  {
+   "hora": "2026-11-02T03:31:14Z",
+   "evento": "resposta 1 recebida",
+   "registros": 43
+  },
+  {
+   "hora": "2026-11-02T03:31:15Z",
+   "evento": "mensagem 2 enviada"
+  },
+  {
+   "hora": "2026-11-02T03:31:17Z",
+   "evento": "sync-inicio visto na sonda",
+   "sonda_hora": "2026-11-02T03:31:15.899+00:00"
+  },
+  {
+   "hora": "2026-11-02T03:31:22Z",
+   "evento": "SIGHUP enviado ao grupo do Claude Code, 5 s depois do sync-inicio"
+  },
+  {
+   "hora": "2026-11-02T03:33:16Z",
+   "evento": "fim"
+  }
+ ],
+ "historico": "/home/jpah/.claude/projects/-home-jpah-hopper-sonda-a3/1d4c0d45-a7d7-46a7-9c65-6ee49d25829b.jsonl",
+ "session_id": "1d4c0d45-a7d7-46a7-9c65-6ee49d25829b",
+ "contexto_inicial_tokens": 59706,
+ "mensagens_enviadas": 2,
+ "compactou": true,
+ "claude_vivo_apos_fechar": false,
+ "sonda": [
+  {
+   "hora": "2026-11-02T03:31:15.899+00:00",
+   "etapa": "sync-inicio",
+   "pid": 3845216,
+   "ppid": 3845215,
+   "session_id": "1d4c0d45-a7d7-46a7-9c65-6ee49d25829b",
+   "transcript_path": "/home/jpah/.claude/projects/-home-jpah-hopper-sonda-a3/1d4c0d45-a7d7-46a7-9c65-6ee49d25829b.jsonl",
+   "cwd": "/home/jpah/hopper-sonda-a3",
+   "trigger": "auto",
+   "hook_event_name": "PreCompact",
+   "claude_pid": "3844958",
+   "executavel": "/home/jpah/.local/share/claude/versions/2.1.316",
+   "plugin_data": "/home/jpah/.claude/plugins/data/sonda-precompact-hopper-sonda",
+   "plugin_root": "/home/jpah/hopper-sonda/catalogo/sonda-precompact",
+   "historico": {
+    "linhas": 43,
+    "marca_presente": true,
+    "resumos_de_compactacao": 0,
+    "tamanho": 490222
+   },
+   "chaves_da_entrada": [
+    "custom_instructions",
+    "cwd",
+    "hook_event_name",
+    "prompt_id",
+    "scratchpad_dir",
+    "session_id",
+    "transcript_path",
+    "trigger"
+   ]
+  },
+  {
+   "hora": "2026-11-02T03:31:15.901+00:00",
+   "etapa": "async-inicio",
+   "pid": 3845214,
+   "ppid": 3845213,
+   "session_id": "1d4c0d45-a7d7-46a7-9c65-6ee49d25829b",
+   "transcript_path": "/home/jpah/.claude/projects/-home-jpah-hopper-sonda-a3/1d4c0d45-a7d7-46a7-9c65-6ee49d25829b.jsonl",
+   "cwd": "/home/jpah/hopper-sonda-a3",
+   "trigger": "auto",
+   "hook_event_name": "PreCompact",
+   "claude_pid": "3844958",
+   "executavel": "/home/jpah/.local/share/claude/versions/2.1.316",
+   "plugin_data": "/home/jpah/.claude/plugins/data/sonda-precompact-hopper-sonda",
+   "plugin_root": "/home/jpah/hopper-sonda/catalogo/sonda-precompact",
+   "historico": {
+    "linhas": 43,
+    "marca_presente": true,
+    "resumos_de_compactacao": 0,
+    "tamanho": 490222
+   }
+  },
+  {
+   "hora": "2026-11-02T03:31:15.908+00:00",
+   "etapa": "async-separado-criado",
+   "pid": 3845214,
+   "ppid": 3845213,
+   "session_id": "1d4c0d45-a7d7-46a7-9c65-6ee49d25829b",
+   "transcript_path": "/home/jpah/.claude/projects/-home-jpah-hopper-sonda-a3/1d4c0d45-a7d7-46a7-9c65-6ee49d25829b.jsonl",
+   "cwd": "/home/jpah/hopper-sonda-a3",
+   "trigger": "auto",
+   "hook_event_name": "PreCompact",
+   "claude_pid": "3844958",
+   "executavel": "/home/jpah/.local/share/claude/versions/2.1.316",
+   "plugin_data": "/home/jpah/.claude/plugins/data/sonda-precompact-hopper-sonda",
+   "plugin_root": "/home/jpah/hopper-sonda/catalogo/sonda-precompact",
+   "historico": {
+    "linhas": 43,
+    "marca_presente": true,
+    "resumos_de_compactacao": 0,
+    "tamanho": 490222
+   },
+   "modo_de_criacao": "fork duplo + setsid, pai = init"
+  },
+  {
+   "hora": "2026-11-02T03:31:15.935+00:00",
+   "etapa": "separado-inicio",
+   "pid": 3845220,
+   "ppid": 1,
+   "session_id": "1d4c0d45-a7d7-46a7-9c65-6ee49d25829b",
+   "transcript_path": "/home/jpah/.claude/projects/-home-jpah-hopper-sonda-a3/1d4c0d45-a7d7-46a7-9c65-6ee49d25829b.jsonl",
+   "cwd": "/home/jpah/hopper-sonda-a3",
+   "trigger": "auto",
+   "hook_event_name": "PreCompact",
+   "claude_pid": "3844958",
+   "executavel": "/home/jpah/.local/share/claude/versions/2.1.316",
+   "plugin_data": "/home/jpah/.claude/plugins/data/sonda-precompact-hopper-sonda",
+   "plugin_root": "/home/jpah/hopper-sonda/catalogo/sonda-precompact",
+   "historico": {
+    "linhas": 46,
+    "marca_presente": true,
+    "resumos_de_compactacao": 0,
+    "tamanho": 491713
+   }
+  },
+  {
+   "hora": "2026-11-02T03:31:18.902+00:00",
+   "etapa": "sync-fim",
+   "pid": 3845216,
+   "ppid": 3845215,
+   "session_id": "1d4c0d45-a7d7-46a7-9c65-6ee49d25829b",
+   "transcript_path": "/home/jpah/.claude/projects/-home-jpah-hopper-sonda-a3/1d4c0d45-a7d7-46a7-9c65-6ee49d25829b.jsonl",
+   "cwd": "/home/jpah/hopper-sonda-a3",
+   "trigger": "auto",
+   "hook_event_name": "PreCompact",
+   "claude_pid": "3844958",
+   "executavel": "/home/jpah/.local/share/claude/versions/2.1.316",
+   "plugin_data": "/home/jpah/.claude/plugins/data/sonda-precompact-hopper-sonda",
+   "plugin_root": "/home/jpah/hopper-sonda/catalogo/sonda-precompact",
+   "historico": {
+    "linhas": 46,
+    "marca_presente": true,
+    "resumos_de_compactacao": 0,
+    "tamanho": 491713
+   }
+  },
+  {
+   "hora": "2026-11-02T03:33:15.938+00:00",
+   "etapa": "separado-fim",
+   "pid": 3845220,
+   "ppid": 1,
+   "session_id": "1d4c0d45-a7d7-46a7-9c65-6ee49d25829b",
+   "transcript_path": "/home/jpah/.claude/projects/-home-jpah-hopper-sonda-a3/1d4c0d45-a7d7-46a7-9c65-6ee49d25829b.jsonl",
+   "cwd": "/home/jpah/hopper-sonda-a3",
+   "trigger": "auto",
+   "hook_event_name": "PreCompact",
+   "claude_pid": "3844958",
+   "executavel": "erro: [Errno 2] No such file or directory: '/proc/3844958/exe'",
+   "plugin_data": "/home/jpah/.claude/plugins/data/sonda-precompact-hopper-sonda",
+   "plugin_root": "/home/jpah/hopper-sonda/catalogo/sonda-precompact",
+   "historico": {
+    "linhas": 52,
+    "marca_presente": true,
+    "resumos_de_compactacao": 0,
+    "tamanho": 495366
+   }
+  }
+ ],
+ "historico_final": {
+  "linhas": 52,
+  "marca_presente": true,
+  "resumos_de_compactacao": 0
+ }
+}

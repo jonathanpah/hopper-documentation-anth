@@ -1,0 +1,170 @@
+{
+ "marca": "a3-c2",
+ "pasta": "/home/jpah/hopper-sonda-a3",
+ "pct": 70,
+ "modelo": "haiku",
+ "modo": "compactar",
+ "fechar": true,
+ "eventos": [
+  {
+   "hora": "2026-11-02T03:26:04Z",
+   "evento": "claude iniciado",
+   "pid": 3844244
+  },
+  {
+   "hora": "2026-11-02T03:26:32Z",
+   "evento": "mensagem 1 enviada"
+  },
+  {
+   "hora": "2026-11-02T03:26:42Z",
+   "evento": "resposta 1 recebida",
+   "registros": 43
+  },
+  {
+   "hora": "2026-11-02T03:26:43Z",
+   "evento": "mensagem 2 enviada"
+  },
+  {
+   "hora": "2026-11-02T03:26:45Z",
+   "evento": "sync-inicio visto na sonda",
+   "sonda_hora": "2026-11-02T03:26:43.749+00:00"
+  },
+  {
+   "hora": "2026-11-02T03:26:50Z",
+   "evento": "SIGHUP enviado ao grupo do Claude Code, 5 s depois do sync-inicio"
+  },
+  {
+   "hora": "2026-11-02T03:29:23Z",
+   "evento": "fim"
+  }
+ ],
+ "historico": "/home/jpah/.claude/projects/-home-jpah-hopper-sonda-a3/b6b83164-1066-442b-bcc7-cffb5bd06878.jsonl",
+ "session_id": "b6b83164-1066-442b-bcc7-cffb5bd06878",
+ "contexto_inicial_tokens": 59702,
+ "mensagens_enviadas": 2,
+ "compactou": true,
+ "claude_vivo_apos_fechar": false,
+ "sonda": [
+  {
+   "hora": "2026-11-02T03:26:43.748+00:00",
+   "etapa": "async-inicio",
+   "pid": 3844507,
+   "ppid": 3844506,
+   "session_id": "b6b83164-1066-442b-bcc7-cffb5bd06878",
+   "transcript_path": "/home/jpah/.claude/projects/-home-jpah-hopper-sonda-a3/b6b83164-1066-442b-bcc7-cffb5bd06878.jsonl",
+   "cwd": "/home/jpah/hopper-sonda-a3",
+   "trigger": "auto",
+   "hook_event_name": "PreCompact",
+   "claude_pid": "3844244",
+   "executavel": "/home/jpah/.local/share/claude/versions/2.1.316",
+   "plugin_data": "/home/jpah/.claude/plugins/data/sonda-precompact-hopper-sonda",
+   "plugin_root": "/home/jpah/hopper-sonda/catalogo/sonda-precompact",
+   "historico": {
+    "linhas": 43,
+    "marca_presente": true,
+    "resumos_de_compactacao": 0,
+    "tamanho": 490312
+   }
+  },
+  {
+   "hora": "2026-11-02T03:26:43.749+00:00",
+   "etapa": "sync-inicio",
+   "pid": 3844505,
+   "ppid": 3844504,
+   "session_id": "b6b83164-1066-442b-bcc7-cffb5bd06878",
+   "transcript_path": "/home/jpah/.claude/projects/-home-jpah-hopper-sonda-a3/b6b83164-1066-442b-bcc7-cffb5bd06878.jsonl",
+   "cwd": "/home/jpah/hopper-sonda-a3",
+   "trigger": "auto",
+   "hook_event_name": "PreCompact",
+   "claude_pid": "3844244",
+   "executavel": "/home/jpah/.local/share/claude/versions/2.1.316",
+   "plugin_data": "/home/jpah/.claude/plugins/data/sonda-precompact-hopper-sonda",
+   "plugin_root": "/home/jpah/hopper-sonda/catalogo/sonda-precompact",
+   "historico": {
+    "linhas": 43,
+    "marca_presente": true,
+    "resumos_de_compactacao": 0,
+    "tamanho": 490312
+   },
+   "chaves_da_entrada": [
+    "custom_instructions",
+    "cwd",
+    "hook_event_name",
+    "prompt_id",
+    "scratchpad_dir",
+    "session_id",
+    "transcript_path",
+    "trigger"
+   ]
+  },
+  {
+   "hora": "2026-11-02T03:26:43.751+00:00",
+   "etapa": "async-separado-criado",
+   "pid": 3844507,
+   "ppid": 3844506,
+   "session_id": "b6b83164-1066-442b-bcc7-cffb5bd06878",
+   "transcript_path": "/home/jpah/.claude/projects/-home-jpah-hopper-sonda-a3/b6b83164-1066-442b-bcc7-cffb5bd06878.jsonl",
+   "cwd": "/home/jpah/hopper-sonda-a3",
+   "trigger": "auto",
+   "hook_event_name": "PreCompact",
+   "claude_pid": "3844244",
+   "executavel": "/home/jpah/.local/share/claude/versions/2.1.316",
+   "plugin_data": "/home/jpah/.claude/plugins/data/sonda-precompact-hopper-sonda",
+   "plugin_root": "/home/jpah/hopper-sonda/catalogo/sonda-precompact",
+   "historico": {
+    "linhas": 43,
+    "marca_presente": true,
+    "resumos_de_compactacao": 0,
+    "tamanho": 490312
+   },
+   "separado_pid": 3844508
+  },
+  {
+   "hora": "2026-11-02T03:26:43.778+00:00",
+   "etapa": "separado-inicio",
+   "pid": 3844508,
+   "ppid": 3844507,
+   "session_id": "b6b83164-1066-442b-bcc7-cffb5bd06878",
+   "transcript_path": "/home/jpah/.claude/projects/-home-jpah-hopper-sonda-a3/b6b83164-1066-442b-bcc7-cffb5bd06878.jsonl",
+   "cwd": "/home/jpah/hopper-sonda-a3",
+   "trigger": "auto",
+   "hook_event_name": "PreCompact",
+   "claude_pid": "3844244",
+   "executavel": "/home/jpah/.local/share/claude/versions/2.1.316",
+   "plugin_data": "/home/jpah/.claude/plugins/data/sonda-precompact-hopper-sonda",
+   "plugin_root": "/home/jpah/hopper-sonda/catalogo/sonda-precompact",
+   "historico": {
+    "linhas": 43,
+    "marca_presente": true,
+    "resumos_de_compactacao": 0,
+    "tamanho": 490312
+   }
+  },
+  {
+   "hora": "2026-11-02T03:26:46.751+00:00",
+   "etapa": "sync-fim",
+   "pid": 3844505,
+   "ppid": 3844504,
+   "session_id": "b6b83164-1066-442b-bcc7-cffb5bd06878",
+   "transcript_path": "/home/jpah/.claude/projects/-home-jpah-hopper-sonda-a3/b6b83164-1066-442b-bcc7-cffb5bd06878.jsonl",
+   "cwd": "/home/jpah/hopper-sonda-a3",
+   "trigger": "auto",
+   "hook_event_name": "PreCompact",
+   "claude_pid": "3844244",
+   "executavel": "/home/jpah/.local/share/claude/versions/2.1.316",
+   "plugin_data": "/home/jpah/.claude/plugins/data/sonda-precompact-hopper-sonda",
+   "plugin_root": "/home/jpah/hopper-sonda/catalogo/sonda-precompact",
+   "historico": {
+    "linhas": 46,
+    "marca_presente": true,
+    "resumos_de_compactacao": 0,
+    "tamanho": 491803
+   }
+  }
+ ],
+ "historico_final": {
+  "linhas": 52,
+  "marca_presente": true,
+  "resumos_de_compactacao": 0
+ }
+}
