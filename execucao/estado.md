@@ -7,7 +7,7 @@
 
 ## Unidade atual: U9, migração
 
-U1 a U8 aprovadas, com exceção do item 9 de U1 (limpeza das pastas da sonda, feita no fim de U10). Aceites A1, A2 e A3 aprovados (V-U8-04, V-U8-06 e V-U8-08 com as tentativas de A3 em V-U8-02 a V-U8-05 e anexos de `aceite/`); avaliações de acionamento aprovadas (V-U8-07 e V-U8-08). Critérios congelados no commit `e737aca`, tag `criterios-congelados`. As regras `ask` passaram a gerar pedido depois que a sessão mudou de pasta (as aprovações ficaram como `allow` em `.claude/settings.local.json`); D-06 continua como mecanismo de registro das ações da seção 10.
+U1 a U8 aprovadas, com exceção do item 9 de U1 (limpeza das pastas da sonda, feita no fim de U10). Aceites A1, A2 e A3 aprovados (A1 em V-U8-04, A2 em V-U8-06 e A3 em V-U8-09, depois das tentativas de V-U8-02 a V-U8-05); avaliações de acionamento aprovadas (V-U8-07 e V-U8-08). Critérios congelados no commit `e737aca`, tag `criterios-congelados`. As regras `ask` passaram a gerar pedido depois que a sessão mudou de pasta (as aprovações ficaram como `allow` em `.claude/settings.local.json`); D-06 continua como mecanismo de registro das ações da seção 10.
 
 Próximo passo: U9 (D-08, até 60 chamadas ao redator) e depois U10 (D-19).
 
