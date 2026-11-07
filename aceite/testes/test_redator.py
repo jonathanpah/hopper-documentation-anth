@@ -73,7 +73,9 @@ class Redator(CasoDeAceite):
         self.assertEqual(blocos_do_documento_3(le(self.amb.d(3))), intervalos)
 
     def test_R12_chama_o_redator_com_as_opcoes_de_C03_e_descarta_resposta_invalida(self):
-        """T12: comando e ambiente montados pela decisão C03; respostas fora do esquema ou de outro modelo são descartadas."""
+        """T12: comando e ambiente montados pela decisão C03; resposta fora do esquema é descartada.
+
+        Versão 2.1: a resposta de outro modelo já foi paga e é gravada, com aviso na linha final e os modelos no registro."""
         extra = {"CLAUDE_CODE_AUTO_COMPACT_WINDOW": "100000", "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "70",
                  "CLAUDE_CODE_EFFORT_LEVEL": "low", "ANTHROPIC_MODEL": "claude-opus-5-5"}
         self.assertEqual(self.amb.rodada(extra=extra).returncode, 0)
@@ -103,7 +105,7 @@ class Redator(CasoDeAceite):
             self.assertNotIn(chave, env, chave)
         self.assertEqual(chamada["cwd"], str(self.amb.dados))
         # resposta fora do esquema: nada gravado nos documentos 3 a 7, falha registrada
-        for resposta in ("rodada-fora-do-esquema", "rodada-modelo-errado"):
+        for resposta in ("rodada-fora-do-esquema",):
             amb = type(self.amb)()
             self.addCleanup(amb.limpa)
             amb.historico_b1()
@@ -117,6 +119,17 @@ class Redator(CasoDeAceite):
             r = amb.rodada(respostas=(resposta, "rodada-b1"))
             self.assertEqual(r.returncode, 0, r.stderr)
             self.assertEqual(len(amb.chamadas()), 2)
+        amb = type(self.amb)()
+        self.addCleanup(amb.limpa)
+        amb.historico_b1()
+        r = amb.rodada(respostas=("rodada-modelo-errado",))
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertTrue(amb.d(3).exists())
+        self.assertTrue(amb.d(7).exists())
+        self.assertIn("claude-opus-5-5 90%", r.stdout.strip().splitlines()[-1])
+        escrita = [x for x in amb.rodadas() if x["etapa"] == "escrita"][-1]
+        self.assertEqual(escrita["resultado"], TEXTO["res_concluida"] if IDIOMA == "pt-br" else "concluída")
+        self.assertEqual(escrita["modelos"], {"claude-opus-5-5": 900, "claude-sonnet-5-5": 100})
         amb = type(self.amb)()
         self.addCleanup(amb.limpa)
         amb.historico_b1()
@@ -160,7 +173,8 @@ class Redator(CasoDeAceite):
         self.amb.acrescenta_historico(SESSAO_B1, [{"type": "user", "uuid": "u10", "timestamp": "2026-03-14T15:20:00.000Z",
                                                    "message": {"role": "user", "content": "Decidimos usar a cor azul no painel."}}])
         terceira = self.amb.respostas / "rodada-m8.json"
-        terceira.write_text(le(self.amb.resposta("rodada-m7")).replace(M(7), M(8)), encoding="utf-8")
+        # Versão 2.1: a decisão da 3ª rodada tem texto próprio, porque uma decisão vigente repetida reaproveita o número.
+        terceira.write_text(le(self.amb.resposta("rodada-m7")).replace(M(7), M(8)).replace("cor azul", "cor verde"), encoding="utf-8")
         respostas = ",".join(str(p) for p in (self.amb.resposta("rodada-b1"), self.amb.resposta("rodada-m7"), terceira))
         self.assertEqual(self.amb.rodada(respostas=(), extra={"HOPPER_DOCUMENTATION_ANTH_SIMULADO": respostas}).returncode, 0)
         self.assertEqual([i["id"] for i in itens(le(self.amb.d(4)))], [f"D2-{CODIGO_B1}", f"D3-{CODIGO_B1}"])

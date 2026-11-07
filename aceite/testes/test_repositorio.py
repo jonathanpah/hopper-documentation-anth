@@ -65,7 +65,7 @@ class Repositorio(unittest.TestCase):
         self.assertEqual(com_proibidos, [])
         for pacote in ("hopper-documentation-anth-pt-br", "hopper-documentation-anth-en"):
             manifesto = json.loads(le(RAIZ / pacote / ".claude-plugin" / "plugin.json"))
-            self.assertEqual(manifesto["version"], "2.0.0", pacote)
+            self.assertEqual(manifesto["version"], "2.1.0", pacote)
 
     def test_R35_dois_pacotes_com_o_mesmo_programa(self):
         """T35: os 2 programas diferem só na linha LANGUAGE; os 2 pacotes têm os arquivos de plugin."""

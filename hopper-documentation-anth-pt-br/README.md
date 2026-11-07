@@ -20,13 +20,14 @@ docs-by-hopper-documentation/
 ```
 
 - O **documento 2** é a cópia fiel das mensagens, sem resultados de ferramentas e sem raciocínio interno. Senhas, tokens e chaves viram `[oculto]`. Ele só recebe acréscimos, e cada mensagem tem um identificador como `M42-e4bad083`.
-- Os **documentos 3 a 7** são escritos pelo Claude Sonnet 5.5, chamado sem janela (`claude -p`), sem ferramentas e em modo seguro. O programa valida a resposta, numera os itens (`D1-e4bad083`, `F1-e4bad083`, `PD1-e4bad083`) e grava os arquivos.
+- Os **documentos 3 a 7** são escritos pelo Claude Sonnet 5.5, chamado sem janela (`claude -p`), sem ferramentas e em modo seguro. O programa valida a resposta, numera os itens (`D1-e4bad083`, `F1-e4bad083`, `PD1-e4bad083`) e grava os arquivos. Se o Claude Code usar outro modelo em parte do texto, os documentos são gravados mesmo assim, e a linha final avisa.
 - O **documento 7** é o handoff, reescrito inteiro a cada rodada, com 9 seções.
 
 ## Como roda
 
 - **Antes de toda compactação**, automática ou manual, 2 comandos do evento `PreCompact` rodam: a cópia (síncrona, até 60 segundos) e a escrita (em processo separado, que termina mesmo que o Claude Code seja fechado).
 - **A pedido**, quando você pede para documentar ou registrar a conversa, salvar o progresso ou fazer um handoff. A skill roda o mesmo programa em segundo plano e informa a linha final.
+- **Outra conversa, a pedido**, pelo código de 8 letras que aparece no índice, como em "documente a conversa b2b21be3". Serve para documentar o fim de uma conversa encerrada antes de continuá-la em outra sessão. A conversa precisa ter rodado na mesma máquina e na mesma conta.
 - **Na primeira rodada** em uma pasta com handoffs do formato antigo (`index.md` e `handoff-*.md` na raiz), o programa migra esses arquivos para os documentos 4 a 7 e os apaga. Para desligar a migração automática, grave `{"migracao_automatica": false}` em `config.json` na pasta de dados. O comando `migrar --pasta <pasta do projeto>` migra a qualquer momento.
 
 Registros internos ficam na pasta de dados do plugin, `~/.claude/plugins/data/hopper-documentation-anth-hopper-documentation-anth/`: `rodadas.jsonl` (1 linha por etapa, com resultado e motivo), `saidas/` (saída completa de cada processo separado), travas e diários.

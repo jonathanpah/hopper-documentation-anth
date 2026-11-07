@@ -427,12 +427,16 @@ class RegressoesDaTarefa02(unittest.TestCase):
         self.assertEqual([m["n"] for m in novas], [3])
         self.assertEqual(aviso, "")
 
-    def test_12_modelos_exigem_contagem_e_aceitam_output_tokens(self):
+    def test_12_modelos_sao_contados_sem_reprovar_a_resposta(self):
+        """Versão 2.1: a contagem de modelos nunca reprova a resposta; o aviso informa os outros modelos."""
         self.assertEqual(programa.conferir_modelos({programa.MODELO: {"output_tokens": 95}, "aux": {"output_tokens": 5}}),
                          {programa.MODELO: 95, "aux": 5})
-        for uso in ({programa.MODELO: {}}, {programa.MODELO: {"output_tokens": 1}, "aux": {"output_tokens": 900}}):
-            with self.subTest(uso=uso), self.assertRaises(programa.Falha):
-                programa.conferir_modelos(uso)
+        self.assertEqual(programa.conferir_modelos({programa.MODELO: {}}), {programa.MODELO: 0})
+        self.assertEqual(programa.conferir_modelos(None), {})
+        self.assertEqual(programa.aviso_de_modelos({programa.MODELO: 100}), "")
+        self.assertEqual(programa.aviso_de_modelos({}), T["aviso_sem_modelos"])
+        self.assertEqual(programa.aviso_de_modelos({programa.MODELO: 10, "aux": 90}),
+                         T["aviso_modelos"].format(lista=f"aux 90%, {programa.MODELO} 10%"))
 
     def test_13_valida_esquema_completo_e_origens(self):
         for altera in (lambda r: r.update(resumo="x" * 81),
@@ -738,6 +742,8 @@ class RegressoesDaTarefa08(unittest.TestCase):
         r = self.resposta()
         for item in r["itens_novos"]:
             item["origem"] = ["M7-3f9c2a71"]
+            if item["tipo"] == "D":
+                item["texto"] = "Manter o tema escolhido nas próximas telas."
         r["conversa_simplificada"] = T["assunto"] + "continuidade.**\n\nContinuação. (M7-3f9c2a71)"
         r["handoff"] = {k: "Continuação. (M7-3f9c2a71)" for k in programa.ESQUEMA_HANDOFF}
         r["mudancas"] = [{"id": "PD1-3f9c2a71", "situacao": T["situacoes"]["PD"][1] + "M8-3f9c2a71 (fim)",
@@ -821,20 +827,20 @@ class RegressoesDaTarefa08(unittest.TestCase):
                       "M1-3f9c2a71 to M6-3f9c2a71", linha)
         self.assertNotIn("M99-3f9c2a71", programa.ler(pasta / T["d7"]))
 
-    def test_modelo_e_tempo_nao_acionam_nova_tentativa(self):
+    def test_tempo_nao_aciona_nova_tentativa_e_modelo_nao_reprova(self):
         pasta_doc, pasta, codigo, *_ = self.preparar_rodada()
+        with patch.object(programa, "executavel_do_claude", return_value="redator-simulado"), \
+                patch.object(programa.subprocess, "run", side_effect=subprocess.TimeoutExpired(["redator-simulado"], 900)) as processo:
+            with self.assertRaises(programa.Falha) as erro:
+                programa.escrever(self.sessao, self.projeto, pasta_doc, pasta, codigo, "pedido")
+        self.assertEqual(processo.call_count, 1)
+        self.assertIn(T["motivo_tempo"].format(min=15), str(erro.exception))
         envelope = {"structured_output": self.resposta(), "modelUsage": {"outro-modelo": {"outputTokens": 10}}}
-        casos = (("modelo", subprocess.CompletedProcess([], 0, json.dumps(envelope), "")),
-                 ("tempo", subprocess.TimeoutExpired(["redator-simulado"], 900)))
-        for motivo, resultado in casos:
-            opcoes = {"side_effect": resultado} if isinstance(resultado, Exception) else {"return_value": resultado}
-            with self.subTest(motivo=motivo), patch.object(programa, "executavel_do_claude", return_value="redator-simulado"), \
-                    patch.object(programa.subprocess, "run", **opcoes) as processo:
-                with self.assertRaises(programa.Falha) as erro:
-                    programa.escrever(self.sessao, self.projeto, pasta_doc, pasta, codigo, "pedido")
-                self.assertEqual(processo.call_count, 1)
-                self.assertIn(T["motivo_modelo"].format(modelo=programa.MODELO) if motivo == "modelo" else
-                              T["motivo_tempo"].format(min=15), str(erro.exception))
+        with patch.object(programa, "executavel_do_claude", return_value="redator-simulado"), \
+                patch.object(programa.subprocess, "run", return_value=subprocess.CompletedProcess([], 0, json.dumps(envelope), "")) as processo:
+            linha = programa.escrever(self.sessao, self.projeto, pasta_doc, pasta, codigo, "pedido")
+        self.assertEqual(processo.call_count, 1)
+        self.assertTrue(linha.endswith(T["aviso_modelos"].format(lista="outro-modelo 100%")), linha)
 
 
 class RegressoesDaTarefa11(unittest.TestCase):
@@ -949,35 +955,33 @@ class RegressoesDaTarefa12(unittest.TestCase):
                 self.assertIn(resposta["handoffs_antigos"][0]["conversa"], str(erro.exception))
                 self.assertIn(repr(data), str(erro.exception))
 
-    def test_modelo_reprovado_falha_em_uma_chamada(self):
-        pasta = self.preparar_migracao()
-        antes = {p: p.read_bytes() for p in programa.arquivos_antigos(pasta)}
+    def test_outro_modelo_nao_reprova_a_migracao(self):
+        """Versão 2.1: a resposta já paga é aproveitada, qualquer que seja o modelo, e os modelos vão ao registro."""
+        self.preparar_migracao()
         uso = {"claude-haiku-5-5": {"outputTokens": 100}}
         processo = self.processo_do_redator(self.resposta("migracao-b3-anth"), uso)
         with patch.object(programa, "executavel_do_claude", return_value="redator-simulado"), \
                 patch.object(programa.subprocess, "run", return_value=processo) as redator:
             codigo, saida, _ = self.executar_migrar()
-        self.assertEqual((codigo, redator.call_count), (1, 1))
-        self.assertIn(T["motivo_modelo"].format(modelo=programa.MODELO), saida)
-        self.conferir_arquivos_preservados(antes)
+        self.assertEqual((codigo, redator.call_count), (0, 1), saida)
         registros = programa.registros_de_rodadas()
-        self.assertEqual([r["resultado"] for r in registros], ["falhou"])
-        self.assertEqual(registros[0]["modelos"], {})
+        self.assertEqual(registros[-1]["resultado"], "concluída")
+        self.assertIn({"claude-haiku-5-5": 100}, [r["modelos"] for r in registros])
 
-    def test_falha_de_modelo_encerra_mesmo_apos_correcao_de_data(self):
+    def test_outro_modelo_conclui_com_ou_sem_correcao_de_data(self):
+        """Versão 2.1: a data inválida pede 1 nova chamada; o modelo diferente nunca reprova."""
         for ordem in ("data-primeiro", "modelo-primeiro"):
             with self.subTest(ordem=ordem):
-                pasta = self.preparar_migracao()
-                antes = {p: p.read_bytes() for p in programa.arquivos_antigos(pasta)}
+                self.setUp()
+                self.preparar_migracao()
                 processos = [self.processo_do_redator(self.resposta_com_hora(), {programa.MODELO: {"outputTokens": 100}}),
                              self.processo_do_redator(self.resposta("migracao-b3-anth"), {"outro": {"outputTokens": 100}})]
                 if ordem == "modelo-primeiro":
                     processos.reverse()
                 with patch.object(programa, "executavel_do_claude", return_value="redator-simulado"), \
                         patch.object(programa.subprocess, "run", side_effect=processos) as redator:
-                    codigo, _, _ = self.executar_migrar()
-                self.assertEqual((codigo, redator.call_count), (1, 2 if ordem == "data-primeiro" else 1))
-                self.conferir_arquivos_preservados(antes)
+                    codigo, saida, _ = self.executar_migrar()
+                self.assertEqual((codigo, redator.call_count), (0, 2 if ordem == "data-primeiro" else 1), saida)
 
     def test_migrar_preserva_linha_final_se_registro_falhar(self):
         for erro in (programa.Falha("erro original"), PermissionError("pasta sem escrita")):
@@ -1275,3 +1279,98 @@ class RegressoesDaTarefa15(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Versao21(unittest.TestCase):
+    """Mudanças da versão 2.1: envio menor ao redator, decisão repetida, código curto, erro do Claude Code e índice."""
+    setUp = RegressoesDaTarefa01.setUp
+
+    def item(self, item_id, texto, situacao, **extra):
+        tipo = item_id.split("-")[0].rstrip("0123456789")
+        return programa.texto_do_item(item_id, tipo, texto, ["M1-" + item_id.split("-")[1]], situacao, "M1-x a M2-x",
+                                      extra.get("recomendacao", ""), extra.get("depende_de", ""))
+
+    def pasta_com_itens(self):
+        pasta_doc = self.projeto / programa.PASTA_DOC
+        programa.garantir_documentos_compartilhados(pasta_doc)
+        docs = programa.documentos_da_pasta(pasta_doc)
+        sD, sF, sP = T["situacoes"]["D"], T["situacoes"]["F"], T["situacoes"]["PD"]
+        docs["D"].write_text(f"# {T['titulo_d4']}\n\n" + self.item("D1-aaaa1111", "Usar a cor azul.", sD[0]) + "\n"
+                             + self.item("D2-aaaa1111", "Usar a cor vermelha.", sD[1] + "D1-aaaa1111"), encoding="utf-8")
+        docs["F"].write_text(f"# {T['titulo_d5']}\n\n" + self.item("F1-aaaa1111", "Tela criada.", sF[0]) + "\n"
+                             + self.item("F1-bbbb2222", "Relatório gerado.", sF[0]), encoding="utf-8")
+        docs["PD"].write_text(f"# {T['titulo_d6']}\n\n"
+                              + self.item("PD1-aaaa1111", "Revisar a tela.", sP[0], recomendacao="revisar", depende_de="nada") + "\n"
+                              + self.item("PD2-aaaa1111", "Publicar.", sP[1] + "M2-aaaa1111 (feito)"), encoding="utf-8")
+        return pasta_doc, docs
+
+    def test_redator_recebe_so_o_necessario(self):
+        pasta_doc, docs = self.pasta_com_itens()
+        decisoes = programa.lista_para_o_redator(docs["D"], "D", "aaaa1111")
+        self.assertIn("### D1-aaaa1111\nUsar a cor azul.", decisoes)
+        self.assertNotIn("D2-aaaa1111", decisoes)
+        self.assertNotIn(T["origem"], decisoes)
+        funcoes = programa.lista_para_o_redator(docs["F"], "F", "aaaa1111")
+        self.assertIn("F1-aaaa1111", funcoes)
+        self.assertNotIn("F1-bbbb2222", funcoes)
+        pendencias = programa.lista_para_o_redator(docs["PD"], "PD", "aaaa1111")
+        self.assertIn("PD1-aaaa1111", pendencias)
+        self.assertIn(T["recomendacao"], pendencias)
+        self.assertNotIn("PD2-aaaa1111", pendencias)
+        self.assertEqual(len(programa.todos_os_itens(pasta_doc)), 6)
+
+    def test_decisao_repetida_reaproveita_o_identificador(self):
+        pasta_doc, docs = self.pasta_com_itens()
+        resposta = {"itens_novos": [
+            {"ref": "N1", "tipo": "D", "texto": "  usar a COR azul  ", "origem": ["M1-aaaa1111"], "situacao": "x", "recomendacao": "", "depende_de": ""},
+            {"ref": "N2", "tipo": "D", "texto": "Usar a cor vermelha.", "origem": ["M1-aaaa1111"], "situacao": "x", "recomendacao": "", "depende_de": ""},
+            {"ref": "N3", "tipo": "D", "texto": "Usar a cor vermelha", "origem": ["M1-aaaa1111"], "situacao": "x", "recomendacao": "", "depende_de": ""},
+            {"ref": "N4", "tipo": "PD", "texto": "Revisar a tela.", "origem": ["M1-aaaa1111"], "situacao": "x", "recomendacao": "", "depende_de": ""}],
+            "mudancas": []}
+        mapa = programa.reservar_itens(pasta_doc, "aaaa1111", resposta)
+        self.assertEqual(mapa["N1"], "D1-aaaa1111")
+        self.assertEqual(mapa["N2"], "D3-aaaa1111")
+        self.assertEqual(mapa["N3"], "D3-aaaa1111")
+        self.assertEqual(mapa["N4"], "PD3-aaaa1111")
+
+    def test_mudanca_para_o_proprio_item_e_ignorada(self):
+        pasta_doc, docs = self.pasta_com_itens()
+        antes = docs["D"].read_text(encoding="utf-8")
+        resposta = {"mudancas": [{"id": "D1-aaaa1111", "situacao": T["situacoes"]["D"][1] + "N1", "origem": ["M2-aaaa1111"]}]}
+        self.assertEqual(programa.aplicar_mudancas(pasta_doc, resposta, {"N1": "D1-aaaa1111"}), [])
+        self.assertEqual(docs["D"].read_text(encoding="utf-8"), antes)
+
+    def test_codigo_curto_acha_a_conversa(self):
+        projetos = programa.pasta_de_configuracao() / "projects"
+        for pasta, nome in (("p1", "0c3014d0-1487-4fc0-b3a1-c2c0a33502a4"), ("p2", "7e44c8cf-2598-4cbf-8c05-7bc84d4e8233"),
+                            ("p2", "7e44c8cf-9999-4cbf-8c05-7bc84d4e8233")):
+            (projetos / pasta).mkdir(parents=True, exist_ok=True)
+            (projetos / pasta / f"{nome}.jsonl").write_text("{}\n", encoding="utf-8")
+        self.assertEqual(programa.resolver_sessao("0c3014d0"), "0c3014d0-1487-4fc0-b3a1-c2c0a33502a4")
+        self.assertEqual(programa.resolver_sessao("7e44c8cf2598"), "7e44c8cf-2598-4cbf-8c05-7bc84d4e8233")
+        self.assertEqual(programa.resolver_sessao("0c3014d0-1487-4fc0-b3a1-c2c0a33502a4"), "0c3014d0-1487-4fc0-b3a1-c2c0a33502a4")
+        with self.assertRaises(programa.Falha) as erro:
+            programa.resolver_sessao("7e44c8cf")
+        self.assertEqual(str(erro.exception), T["motivo_codigo_ambiguo"].format(codigo="7e44c8cf", n=2))
+        with self.assertRaises(programa.Falha) as erro:
+            programa.resolver_sessao("deadbeef")
+        self.assertEqual(str(erro.exception), T["motivo_historico"])
+
+    def test_erro_do_claude_code_mostra_a_causa(self):
+        envelope = {"is_error": True, "result": "Not logged in · Please run /login", "terminal_reason": "api_error"}
+        processo = subprocess.CompletedProcess(["redator-simulado"], 1, json.dumps(envelope), "")
+        with patch.object(programa, "executavel_do_claude", return_value="redator-simulado"), \
+                patch.object(programa.subprocess, "run", return_value=processo):
+            with self.assertRaises(programa.Falha) as erro:
+                programa.chamar_redator("entrada", programa.ESQUEMA_RODADA)
+        self.assertEqual(str(erro.exception), T["motivo_erro_claude"] + " (Not logged in · Please run /login)")
+
+    def test_indice_manda_documentar_antes_e_ler_so_o_handoff(self):
+        pasta_doc = self.projeto / programa.PASTA_DOC
+        (pasta_doc / T["conversas"] / "2026-11-01-b2b21be3").mkdir(parents=True)
+        programa.gravar_documento_1(pasta_doc, self.projeto)
+        texto = programa.ler(pasta_doc / T["d1"])
+        self.assertIn("documente a conversa b2b21be3" if programa.LANGUAGE == "pt-br" else "document conversation b2b21be3", texto)
+        self.assertIn(f"4. {T['ordem_itens'][3].split('(')[0]}", texto)
+        self.assertNotIn("5. ", texto.split(f"## {T['secao_conversas']}")[0])
+
