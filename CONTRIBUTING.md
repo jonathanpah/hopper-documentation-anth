@@ -22,7 +22,7 @@ The GitHub verification (`.github/workflows/verificar.yml`) runs the acceptance 
 
 ## Frozen criteria
 
-The files in `aceite/`, the workflow and `SPEC.md` are frozen: `aceite/MANIFESTO.sha256` holds their SHA-256, and the tag `criterios-congelados` marks the commit. The verification fails with "CRITÉRIO ALTERADO" when a frozen file differs from the manifest or the manifest differs from the tag. Changing a criterion needs the owner's approval, in its own commit, and the tag is moved to it.
+The files in `aceite/`, the workflow and `SPEC.md` are frozen: `aceite/MANIFESTO.sha256` holds their SHA-256, and the tag `criterios-congelados-2-1` marks the commit (the tag `criterios-congelados` keeps the criteria of version 2.0). The verification fails with "CRITÉRIO ALTERADO" when a frozen file differs from the manifest or the manifest differs from the tag. Changing a criterion needs the owner's approval, in its own commit, with a new tag and the workflow pointing to it, because force pushes are not allowed.
 
 ## Reporting and fixing a defect
 
