@@ -20,7 +20,7 @@ A verificação do GitHub (`.github/workflows/verificar.yml`) roda os testes de 
 
 ## Critérios congelados
 
-Os arquivos de `aceite/`, o fluxo de verificação e o `SPEC.md` são congelados: `aceite/MANIFESTO.sha256` guarda o SHA-256 deles, e a tag `criterios-congelados-2-1` marca o commit (a tag `criterios-congelados` guarda os critérios da versão 2.0). A verificação falha com "CRITÉRIO ALTERADO" quando um arquivo congelado difere do manifesto ou o manifesto difere da tag. Mudar um critério exige a aprovação do proprietário, em commit próprio, com uma tag nova e o fluxo de verificação apontando para ela, porque envios forçados não são permitidos.
+Os arquivos de `aceite/`, o fluxo de verificação e o `SPEC.md` são congelados: `aceite/MANIFESTO.sha256` guarda o SHA-256 deles, e a tag `criterios-v<versão>` da versão atual marca o commit (hoje `criterios-v2.1.0`; `criterios-v2.0.0` guarda os critérios da versão 2.0). A verificação falha com "CRITÉRIO ALTERADO" quando um arquivo congelado difere do manifesto ou o manifesto difere da tag. Mudar um critério exige a aprovação do proprietário, em commit próprio, com uma tag nova `criterios-v<próxima versão>` e o fluxo de verificação apontando para ela, porque envios forçados não são permitidos.
 
 ## Relatar e corrigir um defeito
 
