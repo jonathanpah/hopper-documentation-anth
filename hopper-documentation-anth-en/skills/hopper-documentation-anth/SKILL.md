@@ -1,6 +1,6 @@
 ---
 name: hopper-documentation-anth
-description: Documents the current Claude Code conversation in 7 documents (index, full conversation, simplified conversation, decisions, implemented functions, pending items and handoff) in the project's docs-by-hopper-documentation folder. Use when the user asks to document or record the conversation, save progress or write a handoff. Do not use to explain, review or edit this skill.
+description: Documents the current Claude Code conversation, or another conversation given by its code, in 7 documents (index, full conversation, simplified conversation, decisions, implemented functions, pending items and handoff) in the project's docs-by-hopper-documentation folder. Use when the user asks to document or record the conversation, save progress, write a handoff or document another conversation before continuing it. Do not use to explain, review or edit this skill.
 compatibility: Requires Claude Code 2.1.284 or newer, in the CLI or in the app, with the hopper-documentation-anth plugin and Python 3.9 or newer.
 allowed-tools: Bash(python3 *)
 ---
@@ -43,6 +43,8 @@ When the user asks to document or record the conversation, save progress or writ
    ```sh
    python3 "${CLAUDE_PLUGIN_ROOT}/scripts/hopper_documentation_anth.py" rodada --sessao "${CLAUDE_SESSION_ID}"
    ```
+
+   If the request is to document another conversation, replace `"${CLAUDE_SESSION_ID}"` with the code the user gives. The code has 8 or 12 letters and appears in the table of the folder's index, as in "document conversation b2b21be3". The full identifier also works. The other conversation must have run on this same machine and in this same account.
 
 2. Say in 1 sentence that the documentation started in the background.
 3. When the program finishes, repeat the last line of its output to the user, without changing the text.

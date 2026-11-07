@@ -1,6 +1,6 @@
 # hopper-documentation-anth
 
-Claude Code plugin that documents each conversation in 7 Markdown documents, on request and before every compaction, so another person or session can continue the work. Version 2.0.0, built from `SPEC.md`.
+Claude Code plugin that documents each conversation in 7 Markdown documents, on request and before every compaction, so another person or session can continue the work. Version 2.1.0, built from `SPEC.md` (the changes of version 2.1 are at the end of the spec).
 
 | Package | Language | README |
 | --- | --- | --- |

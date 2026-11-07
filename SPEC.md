@@ -1447,3 +1447,16 @@ Depois, em cada conta (`ssh hopper-jpah` e `ssh hopper-jonathan`), com o caminho
 **Antes da primeira instalação (U8).** Em cada conta: `claude plugin uninstall hopper-documentation-anth@hopper-documentation-anth` (versão 0.1.4, com o "sim" da seção 10), `claude plugin marketplace remove hopper-documentation-anth` (o catálogo que aponta para a release 0.1.4) e, se existir, a desinstalação do plugin `hopper-documentation`. A release 0.1.4 da pasta de produção é apagada no passo F-L, com o "sim".
 
 **A2 (Claude Desktop).** O Desktop lê a mesma instalação de A1. Conferir se o plugin aparece na aba Code, seguindo C16.
+
+## Versão 2.1.0, mudanças sobre esta spec
+
+Pedido e autorização do proprietário em 07/11/2026. Estas mudanças prevalecem sobre os trechos desta spec que as contradizem. Os critérios congelados em `aceite/` foram ajustados só no que elas exigem, com o "sim" do proprietário.
+
+1. **Entrada do redator (Anexo D).** `<decisoes>` traz só as decisões vigentes, com o texto inteiro e sem os dados de controle. `<funcoes>` traz só as funções implementadas da conversa da rodada. `<pendencias>` traz só as pendências abertas, completas. O programa continua lendo os documentos inteiros para numerar os itens e conferir as citações.
+2. **Decisão repetida.** Uma decisão nova com o mesmo texto de uma decisão vigente reaproveita o identificador da existente. A comparação ignora maiúsculas, espaços repetidos e o ponto final. Uma mudança que aponta para o próprio item reaproveitado não se aplica.
+3. **Documento 1.** A ordem de leitura manda documentar a conversa antes de continuá-la, ler o handoff da conversa que vai continuar e consultar os demais documentos só quando precisar de um detalhe.
+4. **Rodada a pedido de outra conversa.** `--sessao` aceita o código de 8 ou 12 letras do índice. O programa acha a conversa pelo nome do arquivo de histórico, na mesma conta. Código sem conversa ou com mais de 1 conversa falha com motivo claro.
+5. **Regra de modelo (C04).** A resposta válida é gravada qualquer que seja o modelo, porque ela já foi paga. A linha final avisa quando outro modelo escreveu parte do texto, e o registro de rodadas guarda os tokens de saída por modelo.
+6. **Falha do Claude Code.** Quando o Claude Code responde com erro, a linha final mostra a causa que ele informou, por exemplo a falta de login.
+7. **Regras de escrita.** O arquivo de regras ganhou as regras de forma do proprietário: "existe" no lugar do "há" existencial, sem travessão, sem dois-pontos em frases, sem barras entre alternativas, algarismos nos números e parágrafos de 3 ou 4 frases.
+8. **Marca dos critérios congelados.** A verificação do GitHub passa a conferir a marca `criterios-congelados-2-1`, no commit da versão 2.1. A marca `criterios-congelados` continua no commit da versão 2.0, porque as regras de permissão do repositório proíbem reescrever marcas no GitHub.

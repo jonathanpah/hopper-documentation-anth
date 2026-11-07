@@ -1,6 +1,6 @@
 ---
 name: hopper-documentation-anth
-description: Documenta a conversa atual do Claude Code em 7 documentos (índice, conversa integral, conversa simplificada, decisões, funções implementadas, pendências e handoff) na pasta docs-by-hopper-documentation do projeto. Use quando o usuário pedir para documentar ou registrar a conversa, salvar o progresso ou fazer um handoff. Não use para explicar, revisar ou editar esta skill.
+description: Documenta a conversa atual do Claude Code, ou outra conversa indicada pelo código, em 7 documentos (índice, conversa integral, conversa simplificada, decisões, funções implementadas, pendências e handoff) na pasta docs-by-hopper-documentation do projeto. Use quando o usuário pedir para documentar ou registrar a conversa, salvar o progresso, fazer um handoff ou documentar outra conversa antes de continuá-la. Não use para explicar, revisar ou editar esta skill.
 compatibility: Requer Claude Code 2.1.284 ou mais novo, na CLI ou no aplicativo, com o plugin hopper-documentation-anth e Python 3.9 ou mais novo.
 allowed-tools: Bash(python3 *)
 ---
@@ -43,6 +43,8 @@ Quando o usuário pedir para documentar ou registrar a conversa, salvar o progre
    ```sh
    python3 "${CLAUDE_PLUGIN_ROOT}/scripts/hopper_documentation_anth.py" rodada --sessao "${CLAUDE_SESSION_ID}"
    ```
+
+   Se o pedido for para documentar outra conversa, troque `"${CLAUDE_SESSION_ID}"` pelo código que o usuário indicar. O código tem 8 ou 12 letras e aparece na tabela do índice da pasta, como em "documente a conversa b2b21be3". O identificador completo também serve. A outra conversa precisa ter rodado nesta mesma máquina e nesta mesma conta.
 
 2. Diga em 1 frase que a documentação começou em segundo plano.
 3. Quando o programa terminar, repita para o usuário a última linha da saída, sem mudar o texto.

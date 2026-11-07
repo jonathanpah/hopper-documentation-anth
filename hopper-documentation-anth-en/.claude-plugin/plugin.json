@@ -1,7 +1,7 @@
 {
   "name": "hopper-documentation-anth",
   "displayName": "hopper-documentation-anth",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Documents each Claude Code conversation in 7 Markdown documents (index, full conversation, simplified conversation, decisions, implemented functions, pending items and handoff), on request and before every compaction.",
   "author": {
     "name": "Jonathan Honorio",

@@ -20,13 +20,14 @@ docs-by-hopper-documentation/
 ```
 
 - **Document 2** is the faithful copy of the messages, without tool results and without internal reasoning. Passwords, tokens and keys become `[hidden]`. It only receives additions, and each message has an identifier such as `M42-e4bad083`.
-- **Documents 3 to 7** are written by Claude Sonnet 5.5, called headless (`claude -p`), without tools and in safe mode. The program validates the answer, numbers the items (`D1-e4bad083`, `F1-e4bad083`, `PD1-e4bad083`) and writes the files.
+- **Documents 3 to 7** are written by Claude Sonnet 5.5, called headless (`claude -p`), without tools and in safe mode. The program validates the answer, numbers the items (`D1-e4bad083`, `F1-e4bad083`, `PD1-e4bad083`) and writes the files. If Claude Code uses another model for part of the text, the documents are written anyway and the last line warns about it.
 - **Document 7** is the handoff, rewritten in full on every run, with 9 sections.
 
 ## How it runs
 
 - **Before every compaction**, automatic or manual, 2 commands of the `PreCompact` event run: the copy (synchronous, up to 60 seconds) and the writing (in a separate process, which finishes even if Claude Code is closed).
 - **On request**, when you ask to document or record the conversation, save progress or write a handoff. The skill runs the same program in the background and reports the last line.
+- **Another conversation, on request**, by the 8-letter code shown in the index, as in "document conversation b2b21be3". It documents the end of a finished conversation before you continue it in another session. The conversation must have run on the same machine and in the same account.
 - **On the first run** in a folder with old-format handoffs (`index.md` and `handoff-*.md` at the root), the program migrates those files into documents 4 to 7 and deletes them. To turn automatic migration off, write `{"migracao_automatica": false}` to `config.json` in the data folder. The `migrar --pasta <project folder>` command migrates at any time.
 
 Internal records live in the plugin's data folder, `~/.claude/plugins/data/hopper-documentation-anth-hopper-documentation-anth/`: `rodadas.jsonl` (1 line per step, with result and reason), `saidas/` (full output of each separate process), locks and diaries.

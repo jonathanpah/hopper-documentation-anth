@@ -9,7 +9,7 @@ escreve os documentos 3 a 7. Usa só a biblioteca padrão do Python 3.9 ou mais 
 Comandos:
   copia                      gatilho de cópia (síncrono), com o JSON do evento PreCompact na entrada padrão
   escrita                    gatilho de escrita (assíncrono), idem; inicia a rodada em processo separado
-  rodada --sessao <id>       rodada completa a pedido (skill)
+  rodada --sessao <id>       rodada completa a pedido (skill); aceita também o código de 8 ou 12 letras do índice
   migrar --pasta <pasta>     migra os arquivos do formato antigo da pasta do projeto
   executavel                 imprime o executável do Claude Code que o programa usaria
 """
@@ -29,7 +29,7 @@ import time
 from pathlib import Path
 
 LANGUAGE = "pt-br"
-VERSAO = "2.0.0"
+VERSAO = "2.1.0"
 NOME_DA_PASTA_DE_DADOS = "hopper-documentation-anth-hopper-documentation-anth"
 PASTA_DOC = "docs-by-hopper-documentation"
 MODELO = "claude-sonnet-5-5"
@@ -51,10 +51,13 @@ TEXTOS = {
         "situacoes": {"D": ["vigente", "substituída por ", "revogada em "], "F": ["concluída", "substituída por ", "desfeita em "],
                       "PD": ["aberta", "encerrada em "]},
         "ordem": "Ordem de leitura", "secao_conversas": "Conversas",
-        "ordem_itens": ["Este índice.", "O handoff da conversa mais recente (documento 7).", "As pendências: [{d6}]({d6}).",
-                        "As decisões: [{d4}]({d4}).", "As funções implementadas: [{d5}]({d5}).",
-                        "A conversa simplificada da conversa que você vai continuar (documento 3).",
-                        "A conversa integral, para conferir uma origem (documento 2)."],
+        "ordem_itens": ["Este índice.",
+                        "Antes de continuar uma conversa, peça à skill para documentá-la, com o código da tabela abaixo, por "
+                        "exemplo \"documente a conversa {exemplo}\". Se não houver nada novo, a skill avisa sem chamar a IA.",
+                        "O handoff da conversa que você vai continuar (documento 7). Sem indicação, o da conversa mais recente.",
+                        "Os demais documentos ficam para consulta, quando precisar de um detalhe. São as pendências "
+                        "([{d6}]({d6})), as decisões ([{d4}]({d4})), as funções implementadas ([{d5}]({d5})), a conversa "
+                        "simplificada (documento 3) e a conversa integral (documento 2)."],
         "colunas": ["Conversa", "Início", "Última mensagem", "Última rodada", "Resultado", "Assunto"],
         "res_concluida": "concluída", "res_falhou": "falhou", "res_nada_novo": "nada novo", "res_andamento": "em andamento",
         "sem_integral": "sem conversa integral", "assunto": "**Assunto: ", "sem_conteudo": "Sem conteúdo novo relevante.",
@@ -80,7 +83,10 @@ TEXTOS = {
         "linha_falhou": "Documentação falhou: {motivo}.", "linha_migracao": "Migração concluída: {n} arquivos antigos migrados.",
         "motivo_historico": "arquivo de histórico não encontrado",
         "motivo_trava": "outra rodada da conversa ou da pasta em andamento; a espera de {segundos} segundos acabou",
-        "motivo_esquema": "resposta do redator fora do esquema", "motivo_modelo": "resposta de outro modelo que não o {modelo}",
+        "motivo_esquema": "resposta do redator fora do esquema", "motivo_erro_claude": "o Claude Code respondeu com erro",
+        "motivo_codigo_ambiguo": "o código {codigo} corresponde a {n} conversas; use o identificador completo",
+        "aviso_modelos": "Aviso: outros modelos escreveram parte do texto ({lista}).",
+        "aviso_sem_modelos": "Aviso: o Claude Code não informou os modelos usados.",
         "motivo_tempo": "o redator não respondeu em {min} minutos", "motivo_situacao": "situação não permitida: {situacao}",
         "motivo_origem": "origem inválida: {origem}", "motivo_verificacao": "verificação interna da migração reprovou: {detalhe}",
         "motivo_referencias": "referências inexistentes: {referencias}",
@@ -106,10 +112,15 @@ TEXTOS = {
         "situacoes": {"D": ["in force", "replaced by ", "revoked in "], "F": ["done", "replaced by ", "undone in "],
                       "PD": ["open", "closed in "]},
         "ordem": "Reading order", "secao_conversas": "Conversations",
-        "ordem_itens": ["This index.", "The handoff of the most recent conversation (document 7).", "The pending items: [{d6}]({d6}).",
-                        "The decisions: [{d4}]({d4}).", "The implemented functions: [{d5}]({d5}).",
-                        "The simplified conversation of the conversation you are going to continue (document 3).",
-                        "The full conversation, to check a source (document 2)."],
+        "ordem_itens": ["This index.",
+                        "Before continuing a conversation, ask the skill to document it, with the code from the table below, "
+                        "for example \"document conversation {exemplo}\". If there is nothing new, the skill says so without "
+                        "calling the AI.",
+                        "The handoff of the conversation you are going to continue (document 7). Without an indication, the one "
+                        "of the most recent conversation.",
+                        "The other documents are for reference, when you need a detail. They are the pending items "
+                        "([{d6}]({d6})), the decisions ([{d4}]({d4})), the implemented functions ([{d5}]({d5})), the "
+                        "simplified conversation (document 3) and the full conversation (document 2)."],
         "colunas": ["Conversation", "Start", "Last message", "Last run", "Result", "Subject"],
         "res_concluida": "done", "res_falhou": "failed", "res_nada_novo": "nothing new", "res_andamento": "in progress",
         "sem_integral": "no full conversation", "assunto": "**Subject: ", "sem_conteudo": "No relevant new content.",
@@ -135,7 +146,10 @@ TEXTOS = {
         "linha_falhou": "Documentation failed: {motivo}.", "linha_migracao": "Migration done: {n} old files migrated.",
         "motivo_historico": "transcript file not found",
         "motivo_trava": "another run of the conversation or folder is in progress; the {segundos}-second wait expired",
-        "motivo_esquema": "writer response outside the schema", "motivo_modelo": "response from a model other than {modelo}",
+        "motivo_esquema": "writer response outside the schema", "motivo_erro_claude": "Claude Code answered with an error",
+        "motivo_codigo_ambiguo": "the code {codigo} matches {n} conversations; use the full identifier",
+        "aviso_modelos": "Warning: other models wrote part of the text ({lista}).",
+        "aviso_sem_modelos": "Warning: Claude Code did not report the models used.",
         "motivo_tempo": "the writer did not answer in {min} minutes", "motivo_situacao": "status not allowed: {situacao}",
         "motivo_origem": "invalid source: {origem}", "motivo_verificacao": "internal migration check failed: {detalhe}",
         "motivo_referencias": "nonexistent references: {referencias}",
@@ -508,6 +522,23 @@ INTERRUPCAO = "[Request interrupted by user"
 RELATO_DE_AGENTE = "Another Claude session sent a message:"
 SYSTEM_REMINDER = re.compile(r"<system-reminder>.*?</system-reminder>", re.S)
 CAMPOS_DE_ALVO = ("description", "file_path", "pattern", "url", "query", "skill", "command")
+
+
+def resolver_sessao(sessao):
+    """Troca o código de 8 ou 12 letras do índice pelo identificador completo da conversa (item 4 da versão 2.1)."""
+    curto = sessao.lower()
+    if re.fullmatch(r"[0-9a-f]{12}", curto):
+        prefixo = f"{curto[:8]}-{curto[8:]}"
+    elif re.fullmatch(r"[0-9a-f]{8}", curto):
+        prefixo = curto
+    else:
+        return sessao
+    nomes = sorted({p.stem for p in (pasta_de_configuracao() / "projects").glob(f"*/{prefixo}*.jsonl")})
+    if not nomes:
+        raise Falha(T["motivo_historico"])
+    if len(nomes) > 1:
+        raise Falha(T["motivo_codigo_ambiguo"].format(codigo=sessao, n=len(nomes)))
+    return nomes[0]
 
 
 def localizar_historico(sessao):
@@ -1066,18 +1097,29 @@ def origem_valida(origem, mensagens_validas, itens_existentes, refs):
 
 
 def conferir_modelos(uso):
-    """Regra de modelo (C04): Sonnet 5.5 produz no mínimo 90% dos tokens de saída."""
-    motivo = T["motivo_modelo"].format(modelo=MODELO)
-    if not isinstance(uso, dict) or MODELO not in uso:
-        raise Falha(motivo)
-    try:
-        saidas = {m: int(v.get("outputTokens", v.get("output_tokens", 0))) for m, v in uso.items() if isinstance(v, dict)}
-    except (ValueError, TypeError):
-        raise Falha(motivo)
-    total = sum(saidas.values())
-    if total <= 0 or any(v < 0 for v in saidas.values()) or saidas.get(MODELO, 0) / total < 0.9:
-        raise Falha(motivo)
+    """Tokens de saída por modelo. Versão 2.1: a resposta já foi paga, então nunca é descartada por causa do modelo."""
+    saidas = {}
+    if isinstance(uso, dict):
+        for m, v in uso.items():
+            if not isinstance(v, dict):
+                continue
+            try:
+                saidas[str(m)] = int(v.get("outputTokens", v.get("output_tokens", 0)) or 0)
+            except (ValueError, TypeError):
+                continue
     return saidas
+
+
+def aviso_de_modelos(modelos):
+    """Aviso para a linha final quando o texto não veio só do modelo escolhido no comando."""
+    total = sum(v for v in modelos.values() if v > 0)
+    if total <= 0:
+        return T["aviso_sem_modelos"]
+    outros = {m: v for m, v in modelos.items() if m != MODELO and v > 0}
+    if not outros:
+        return ""
+    partes = sorted(((m, v) for m, v in modelos.items() if v > 0), key=lambda x: -x[1])
+    return T["aviso_modelos"].format(lista=", ".join(f"{m} {round(100 * v / total)}%" for m, v in partes))
 
 
 def executavel_do_claude():
@@ -1124,7 +1166,10 @@ def chamar_redator(entrada, esquema):
         envelope = json.loads(processo.stdout.strip().splitlines()[-1] if processo.stdout.strip() else "{}")
     except ValueError:
         raise Falha(T["motivo_esquema"])
-    if not isinstance(envelope, dict) or envelope.get("is_error") or not isinstance(envelope.get("structured_output"), dict):
+    if isinstance(envelope, dict) and envelope.get("is_error"):
+        detalhe = " ".join(str(envelope.get("result") or envelope.get("terminal_reason") or "").split())[:200]
+        raise Falha(T["motivo_erro_claude"] + (f" ({ocultar(detalhe)})" if detalhe else ""))
+    if not isinstance(envelope, dict) or not isinstance(envelope.get("structured_output"), dict):
         raise Falha(T["motivo_esquema"])
     modelos = conferir_modelos(envelope.get("modelUsage"))
     return envelope["structured_output"], modelos
@@ -1151,14 +1196,54 @@ def arquivo_da_skill(nome):
     return ler(raiz_do_plugin() / "skills" / "hopper-documentation-anth" / nome).strip()
 
 
+def blocos_de_itens(texto):
+    """Divide um documento de itens em (cabeçalho, [(identificador, bloco)])."""
+    partes = re.split(r"\n(?=### )", texto.strip())
+    cabecalho = partes[0] if partes and not partes[0].startswith("### ") else ""
+    blocos = []
+    for parte in partes:
+        if parte.startswith("### "):
+            blocos.append((parte.split("\n", 1)[0][4:].strip(), parte.strip()))
+    return cabecalho, blocos
+
+
+def situacao_do_bloco(bloco):
+    m = re.search(rf"^- {re.escape(T['situacao'])}: (.*)$", bloco, re.M)
+    return m.group(1).strip() if m else ""
+
+
+def lista_para_o_redator(caminho, tipo, codigo):
+    """O que o redator precisa ver de cada documento de itens (item 3 da versão 2.1).
+
+    Decisões: só as vigentes, com o texto inteiro e sem os dados de controle. Funções implementadas: só as desta
+    conversa, sem os dados de controle. Pendências: só as abertas, completas. O programa continua lendo os documentos
+    inteiros para numerar e conferir as citações."""
+    cabecalho, blocos = blocos_de_itens(ler(caminho))
+    saida = [cabecalho] if cabecalho else []
+    for item_id, bloco in blocos:
+        situacao = situacao_do_bloco(bloco)
+        if tipo == "D" and not situacao.startswith(T["situacoes"]["D"][0]):
+            continue
+        if tipo == "F" and not item_id.endswith("-" + codigo):
+            continue
+        if tipo == "PD" and not situacao.startswith(T["situacoes"]["PD"][0]):
+            continue
+        if tipo == "PD":
+            saida.append(bloco)
+        else:
+            texto = [l for l in bloco.split("\n")[1:] if l.strip() and not l.startswith("- ")]
+            saida.append(f"### {item_id}\n" + "\n".join(texto))
+    return "\n\n".join(saida)
+
+
 def entrada_do_redator(sessao, codigo, intervalo, pasta_doc, pasta, trecho):
     docs = documentos_da_pasta(pasta_doc)
     return (f"Conversa: {sessao}. Código: {codigo}. Intervalo: {intervalo}.\n"
             f"<regras_de_escrita>\n{arquivo_da_skill(T['regras'])}\n</regras_de_escrita>\n"
             f"<modelos>\n{arquivo_da_skill(T['modelos'])}\n</modelos>\n"
-            f"<decisoes>\n{ler(docs['D']).strip()}\n</decisoes>\n"
-            f"<funcoes>\n{ler(docs['F']).strip()}\n</funcoes>\n"
-            f"<pendencias>\n{ler(docs['PD']).strip()}\n</pendencias>\n"
+            f"<decisoes>\n{lista_para_o_redator(docs['D'], 'D', codigo)}\n</decisoes>\n"
+            f"<funcoes>\n{lista_para_o_redator(docs['F'], 'F', codigo)}\n</funcoes>\n"
+            f"<pendencias>\n{lista_para_o_redator(docs['PD'], 'PD', codigo)}\n</pendencias>\n"
             f"<handoff_anterior>\n{ler(pasta / T['d7']).strip()}\n</handoff_anterior>\n"
             f"<trecho_novo>\n{trecho.strip()}\n</trecho_novo>\n{T['tarefa']}\n")
 
@@ -1194,14 +1279,38 @@ def gravar_documento_3(pasta, codigo, resposta, a, b, mapa=None):
     gravar_atomico(caminho, texto + substituir_refs(bloco_do_documento_3(resposta, codigo, a, b), mapa or {}))
 
 
+def texto_normalizado(texto):
+    return " ".join(texto.casefold().split()).rstrip(" .")
+
+
+def decisoes_vigentes_por_texto(pasta_doc):
+    _, blocos = blocos_de_itens(ler(documentos_da_pasta(pasta_doc)["D"]))
+    saida = {}
+    for item_id, bloco in blocos:
+        if situacao_do_bloco(bloco).startswith(T["situacoes"]["D"][0]):
+            linhas = [l for l in bloco.split("\n")[1:] if l.strip() and not l.startswith("- ")]
+            saida.setdefault(texto_normalizado(" ".join(linhas)), item_id)
+    return saida
+
+
 def reservar_itens(pasta_doc, codigo, resposta, mapa=None):
-    """Reserva números consecutivos por tipo e código; o chamador segura a trava da pasta."""
+    """Reserva números consecutivos por tipo e código; o chamador segura a trava da pasta.
+
+    Versão 2.1: uma decisão nova com o mesmo texto de uma decisão vigente reaproveita o identificador da existente."""
     mapa = dict(mapa or {})
     proximos = {}
+    existentes = None
     for item in resposta["itens_novos"]:
         if item["ref"] in mapa:
             continue
         tipo = item["tipo"]
+        if tipo == "D" and not item.get("conversa"):
+            if existentes is None:
+                existentes = decisoes_vigentes_por_texto(pasta_doc)
+            chave_texto = texto_normalizado(item["texto"])
+            if chave_texto in existentes:
+                mapa[item["ref"]] = existentes[chave_texto]
+                continue
         cod = codigo_do_identificador(item["conversa"], pasta_doc) if item.get("conversa") else codigo
         chave = (tipo, cod)
         if chave not in proximos:
@@ -1209,6 +1318,8 @@ def reservar_itens(pasta_doc, codigo, resposta, mapa=None):
         n = proximos[chave]
         mapa[item["ref"]] = f"{tipo}{n}-{cod}"
         proximos[chave] = n + 1
+        if tipo == "D" and existentes is not None and not item.get("conversa"):
+            existentes.setdefault(texto_normalizado(item["texto"]), mapa[item["ref"]])
     return mapa
 
 
@@ -1244,6 +1355,8 @@ def aplicar_mudancas(pasta_doc, resposta, mapa):
     docs = documentos_da_pasta(pasta_doc)
     for mudanca in resposta["mudancas"]:
         alvo = substituir_refs(mudanca["id"].strip(), mapa)
+        if re.search(rf"\b{re.escape(alvo)}\b", substituir_refs(mudanca["situacao"], mapa)):
+            continue
         aplicado = False
         for tipo, caminho in docs.items():
             texto = ler(caminho)
@@ -1284,13 +1397,14 @@ def gravar_documento_7(pasta, codigo, sessao, projeto, ultima, handoff, mapa, mo
 
 def gravar_documento_1(pasta_doc, projeto):
     """Reescreve o documento 1 (R18) com a ordem de leitura e a tabela das conversas."""
-    d = {"d4": T["d4"], "d5": T["d5"], "d6": T["d6"]}
+    base = pasta_doc / T["conversas"]
+    pastas = sorted((p for p in base.iterdir() if p.is_dir()), key=lambda p: p.name, reverse=True) if base.is_dir() else []
+    exemplo = "-".join(pastas[0].name.split("-")[3:]) if pastas else "e4bad083"
+    d = {"d4": T["d4"], "d5": T["d5"], "d6": T["d6"], "exemplo": exemplo}
     linhas = [f"# {T['titulo_d1']}", "", f"{T['pasta_do_projeto']}: {projeto}", "", f"## {T['ordem']}", ""]
     linhas += [f"{i}. {item.format(**d)}" for i, item in enumerate(T["ordem_itens"], 1)]
     linhas += ["", f"## {T['secao_conversas']}", "", "| " + " | ".join(T["colunas"]) + " |", "| --- | --- | --- | --- | --- | --- |"]
     rodadas = registros_de_rodadas()
-    base = pasta_doc / T["conversas"]
-    pastas = sorted((p for p in base.iterdir() if p.is_dir()), key=lambda p: p.name, reverse=True) if base.is_dir() else []
     for pasta in pastas:
         data, _, codigo = pasta.name.partition("-")
         partes = pasta.name.split("-")
@@ -1424,10 +1538,12 @@ def escrever(sessao, projeto, pasta_doc, pasta, codigo, acionamento):
         if inexistentes:
             registrar(sessao, projeto, acionamento, "escrita", "em andamento", "mudança não aplicada: " + ", ".join(inexistentes), intervalo)
     intervalo = intervalo_de(codigo, novas[0]["n"], novas[-1]["n"])
-    registrar_escrita(sessao, projeto, acionamento, "concluída", intervalo=intervalo, modelos=modelos_total, resumo=resumo)
+    aviso = aviso_de_modelos(modelos_total)
+    registrar_escrita(sessao, projeto, acionamento, "concluída", motivo=aviso, intervalo=intervalo, modelos=modelos_total, resumo=resumo)
     with Trava(f"pasta-{nome_curto(pasta_doc)}", 60):
         gravar_documento_1(pasta_doc, projeto)
-    return T["linha_concluida"].format(intervalo=intervalo)
+    linha = T["linha_concluida"].format(intervalo=intervalo)
+    return f"{linha} {aviso}" if aviso else linha
 
 
 def bloco_de_mensagem_gravada(m):
@@ -1608,6 +1724,8 @@ def rodada(sessao, acionamento="pedido", caminho_historico=None, pasta_do_projet
     projeto = Path(pasta_do_projeto) if pasta_do_projeto else None
     falha_migracao = ""
     try:
+        if not caminho_historico:
+            sessao = resolver_sessao(sessao)
         with Trava(f"rodada-{sessao}", 15 * 60):
             caminho = Path(caminho_historico) if caminho_historico else localizar_historico(sessao)
             if projeto is None:
